@@ -55,6 +55,10 @@ function hsh(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.
 function draw(now) {
   const c = CTX;
   if (!c || !G) return;
+  const view=getMapProjection();
+  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,c.canvas.width,c.canvas.height);
+  c.fillStyle='#0c1a18';c.fillRect(0,0,c.canvas.width,c.canvas.height);
+  c.save();c.setTransform(view.scale*view.dpr,0,0,view.scale*view.dpr,view.tx*view.dpr,view.ty*view.dpr);
   const t = now / 1000;
   // 背景
   const bg = c.createLinearGradient(0, 0, 0, CFG.H);
@@ -113,6 +117,7 @@ function draw(now) {
     c.globalAlpha = 1;
   }
   c.textAlign = 'left';
+  c.restore();
 }
 
 function drawField(p, t) {
@@ -149,7 +154,7 @@ function drawField(p, t) {
     roundRect(c, p.gx + h.col * CFG.CELL, p.gy + h.row * CFG.CELL, CFG.CELL, CFG.CELL, 4);
     c.fill();
     c.globalAlpha = .75;
-    c.drawImage(SPR[G.selectedShop], x - SPR_N / 2, y - SPR_N / 2 + 6);
+    c.drawImage(SPR[G.selectedShop], x - SPR_N / 2, y - SPR_N / 2 + 6,SPR_N,SPR_N);
     c.globalAlpha = 1;
   }
   // 选中指示

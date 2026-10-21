@@ -27,6 +27,7 @@ const {server}=require('../server/index.cjs');
   assert.equal(await page.locator('[data-upgrade-uid]').count(),2);
   await page.locator('[data-upgrade-uid="zeus"]').click();
   assert.equal(await page.evaluate(()=>localPlayer().fighters[0].uid),'zeus');
+  await page.locator('#tab-shop').click();
   await page.locator('[data-race="ghost"]').click();
   await page.locator('.catalog-toggle').click();
   await page.locator('[data-uid="phantom"] summary').click();

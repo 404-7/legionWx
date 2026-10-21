@@ -2,9 +2,10 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>军团战争 · Legion Arena</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css?v=24">
 </head>
 <body>
 <div id="app">
@@ -19,14 +20,35 @@
     <button id="btnSpeed" class="btn" title="快捷键 1/2/3">▶ 1x</button>
     <button id="btnHelp" class="btn">❓ 克制表</button>
     <button id="btnRestart" class="btn">🔄 重开</button>
+    <button id="btnMore" class="btn" aria-label="更多操作" aria-expanded="false" aria-controls="quickMenu">···</button>
   </header>
   <main>
     <div id="stage">
       <div class="stage-heading"><div><small>THE CONVERGENCE</small><h2>双王交汇之地</h2></div><span>四路防线 / 共享王城</span></div>
-      <canvas id="cv" width="1300" height="800"></canvas>
-      <div id="log"></div>
+      <div id="battleSummary" aria-label="国王状态"><span id="blueKingStatus">苍岚国王</span><span class="battle-status" id="battleStatus">准备布阵</span><span id="redKingStatus">赤焰国王</span></div>
+      <div id="mapViewport">
+        <canvas id="cv" width="1300" height="800" aria-label="战场，点击己方格子放置或选择单位"></canvas>
+        <div class="map-tools" aria-label="地图视角">
+          <button id="btnMapHome" class="btn" aria-label="回到自己的防区">⌖ 我的防区</button>
+          <button id="btnMapOverview" class="btn" aria-label="查看完整战场">全图</button>
+          <button id="btnMapZoomOut" class="btn" aria-label="缩小地图">−</button><button id="btnMapZoomIn" class="btn" aria-label="放大地图">＋</button>
+        </div>
+        <div id="mapHint">点击兵种，开始布阵</div>
+        <div id="placementBar" hidden><canvas id="placementPortrait" width="96" height="96"></canvas><div><b id="placementName"></b><small id="placementHint">点击己方空格放置，可连续建造</small></div><button id="btnCancelPlacement" class="btn">取消</button></div>
+      </div>
+      <details id="battleReport"><summary>战场记录 <span id="latestReport">等待军团集结</span></summary><div id="log"></div></details>
     </div>
-    <aside id="side">
+    <nav id="commandTabs" role="tablist" aria-label="军团操作">
+      <button id="tab-shop" role="tab" aria-selected="true" aria-controls="panel-shop" data-command="shop"><span>⚔</span>军营</button>
+      <button id="tab-economy" role="tab" aria-selected="false" aria-controls="panel-economy" data-command="economy"><span>◆</span>经济</button>
+      <button id="tab-king" role="tab" aria-selected="false" aria-controls="panel-king" data-command="king"><span>♛</span>国王</button>
+      <button id="tab-attack" role="tab" aria-selected="false" aria-controls="panel-attack" data-command="attack"><span>⚑</span>进攻</button>
+    </nav>
+    <aside id="side" aria-label="操作面板">
+      <button id="drawerHandle" aria-label="收起操作面板"><span></span></button>
+      <div class="command-head"><button id="btnPanelBack" class="btn" hidden aria-label="返回军营">‹ 返回</button><div><small>LEGION COMMAND</small><h2 id="commandTitle">种族兵营</h2></div><button id="btnPanelClose" class="btn" aria-label="收起操作面板">⌄ 收起</button></div>
+      <div id="commandBody">
+      <div class="command-panel" id="panel-shop" role="tabpanel" aria-labelledby="tab-shop" data-panel="shop">
       <section class="box" id="waveBox">
         <h3>⏱ 下一波</h3>
         <div id="waveInfo"></div>
@@ -35,16 +57,22 @@
         <h3>⚔ 种族兵营 <span class="hint">切换种族查看兵种 · 可混编 · 选中后点击防区</span></h3>
         <div id="shop"></div>
       </section>
+      </div>
+      <div class="command-panel" id="panel-economy" role="tabpanel" aria-labelledby="tab-economy" data-panel="economy" hidden>
       <section class="box" id="mineBox">
         <h3>◆ 金矿商店 <span class="hint">独立矿区 · 每 5 秒产金 · 每人最多 6 座</span></h3>
         <div id="mineInfo"></div>
         <button id="btnMineBuy" class="btn wide">购买金矿 · 100 金</button>
         <div id="mineList" class="mine-list"></div>
       </section>
+      </div>
+      <div class="command-panel" id="panel-inspect" aria-label="单位详情" data-panel="inspect" hidden>
       <section class="box" id="selBox" style="display:none">
         <h3>🎯 已选单位</h3>
         <div id="selInfo"></div>
       </section>
+      </div>
+      <div class="command-panel" id="panel-king" role="tabpanel" aria-labelledby="tab-king" data-panel="king" hidden>
       <section class="box" id="kingBox">
         <h3>👑 蓝方国王</h3>
         <canvas id="kingPortrait" width="52" height="52"></canvas>
@@ -55,13 +83,21 @@
           <button class="btn wide" data-king-stat="regen">强化生命恢复</button>
         </div>
       </section>
+      </div>
+      <div class="command-panel" id="panel-attack" role="tabpanel" aria-labelledby="tab-attack" data-panel="attack" hidden>
       <section class="box" id="mercBox">
         <h3>💀 雇佣兵 <span class="hint">送给敌方，增加你的收入</span></h3>
         <div id="mercs"></div>
       </section>
+      </div>
+      </div>
     </aside>
   </main>
 </div>
+
+<div id="drawerBackdrop" hidden aria-hidden="true"></div>
+<div id="quickMenu" hidden><b>战场操作</b><button class="btn" data-delegate="btnPause">暂停</button><button class="btn" data-delegate="btnSpeed">倍速</button><button class="btn" data-delegate="btnHelp">克制表</button><button class="btn" data-delegate="btnRestart">重新开始</button></div>
+<dialog id="sellDialog"><h2>出售单位</h2><p id="sellMessage"></p><div class="sell-actions"><button id="btnKeepUnit" class="btn">保留单位</button><button id="btnConfirmSell" class="btn">确认出售</button></div></dialog>
 
 <div id="overlay">
   <div class="panel" id="menuPanel">
@@ -117,6 +153,7 @@
 <script src="js/render.js?v=22"></script>
 <script src="js/ui.js?v=22"></script>
 <script src="js/network.js?v=22"></script>
+<script src="js/layout.js?v=24"></script>
 <script src="js/main.js?v=22"></script>
 </body>
 </html>

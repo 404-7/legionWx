@@ -31,6 +31,7 @@ async function boot() {
   buildShop();
   buildMercs();
   buildAtkTable();
+  bindCommandLayout();
   bindEvents();
   setSpeed(1);
 

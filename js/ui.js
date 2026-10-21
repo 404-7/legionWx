@@ -65,6 +65,7 @@ function buildShop() {
     group.appendChild(grid);
     root.appendChild(group);
   }
+  const active=tabs.querySelector('.active');if(active)tabs.scrollLeft=Math.max(0,active.offsetLeft-tabs.clientWidth/2+active.clientWidth/2);
 }
 
 function isBaseUnit(uid) {
@@ -107,6 +108,7 @@ function selectShop(uid) {
   if (!G) return;
   G.selectedShop = (G.selectedShop === uid) ? null : uid;
   G.selectedFighter = null;
+  if(G.selectedShop&&CommandUI.mobile){closeCommandPanel();setMapView('local');}
   document.getElementById('cv').classList.toggle('placing', !!G.selectedShop);
   updateUI(true);
 }
@@ -176,7 +178,7 @@ function updateUI(force) {
       $('selInfo').innerHTML=`<div class="selHead"><canvas id="selPortrait" width="64" height="64"></canvas><div><div class="sName">${def.name}</div><small>${def.english} · ${RACES[def.race].name}</small><div class="sStats" id="selLiveStats"></div><div>${def.atk} · ${def.armor}（${def.armorPoints}）</div></div></div><div class="sStats">${abilDesc(def)||'无特殊能力'}<br>已投入 ${f.spent} 金 · 阵亡后下波复活</div>${source341Details(def)}<div class="upgrade-options">${def.upgrades.map(id=>`<button class="btn" data-upgrade-uid="${id}">升级 → ${UNITS[id].name} · ${UNITS[id].purchaseCost} 金<small>❤${UNITS[id].hp} · ⚔${UNITS[id].min}–${UNITS[id].max}</small></button>`).join('')}${def.stances.map(id=>`<button class="btn" data-upgrade-uid="${id}">切换 → ${UNITS[id].name} · 免费</button>`).join('')}<button class="btn" id="btnSell">卖出 +${f.spent}金</button></div>`;
       drawPortrait($('selPortrait'),f.uid,64);
       sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>button.addEventListener('click',()=>{performAction({type:'upgrade',col:f.col,row:f.row,uid:button.dataset.upgradeUid});updateUI(true);}));
-      $('btnSell').addEventListener('click',()=>{performAction({type:'sell',col:f.col,row:f.row});updateUI(true);});
+      $('btnSell').addEventListener('click',()=>{requestUnitSale(f);});
     }
     $('selLiveStats').textContent=`❤${Math.max(0,Math.ceil(f.hp))}/${def.hp} · 法力 ${Math.floor(f.mana||0)}/${def.manaMax} · ${f.hp>0?'在场':'等待下波复活'}`;
     sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>{const id=button.dataset.upgradeUid;button.disabled=G.phase==='over'||me.gold<(def.stances.includes(id)?0:UNITS[id].purchaseCost);});
@@ -218,6 +220,7 @@ function updateUI(force) {
     lg.dataset.sig = lines.map(l => l.txt).join('|');
     lg.innerHTML = lines.map(l => `<div class="${l.cls}">${l.txt}</div>`).join('');
   }
+  syncCommandUI();
 }
 
 function updateMines(me) {
@@ -229,7 +232,9 @@ function updateMines(me) {
   const list = $('mineList'), signature = me.mines.map(m=>`${m.id}:${m.level}`).join('|');
   if (list.dataset.signature !== signature) {
     list.dataset.signature = signature;
-    list.innerHTML = me.mines.map(m=>{
+    list.innerHTML = Array.from({length:MINE.LIMIT},(_,index)=>{
+      const m=me.mines[index];
+      if(!m)return `<div class="mine-row empty ${index===me.mines.length?'next':''}" data-mine-slot="${index}"><span class="mine-empty-icon">◇</span><b>${index+1} 号矿位</b>${index===me.mines.length?'<button class="btn" data-mine-build>建造 · 100 金</button>':'<small>空闲矿位</small>'}</div>`;
       const def = MINE.LEVELS[m.level-1], next = MINE.LEVELS[m.level];
       return `<div class="mine-row" data-mine-id="${m.id}"><div><b>◆ ${m.id+1} 号金矿 · Lv.${m.level}</b><small>${def.gold} 金 / 5 秒 <span data-mine-time="${m.id}"></span></small></div><button class="btn" data-mine-upgrade="${m.id}" title="${next ? `升级后 ${next.gold} 金 / 5 秒` : '已达最高等级'}">${next ? `升级 ${def.upgrade} 金` : '已满级'}</button></div>`;
     }).join('');
@@ -240,6 +245,7 @@ function updateMines(me) {
     row.querySelector('[data-mine-time]').textContent = `· ${Math.ceil(MINE.INTERVAL-mine.elapsed)}s`;
     row.querySelector('button').disabled = def.upgrade === null || me.gold < def.upgrade || G.phase === 'over';
   });
+  list.querySelectorAll('[data-mine-build]').forEach(button=>button.disabled=me.gold<MINE.COST||G.phase==='over');
 }
 
 /* ---------- 弹窗 ---------- */
@@ -271,9 +277,7 @@ function showOverlay(mode) {
 
 /* ---------- 画布交互 ---------- */
 function canvasPos(e) {
-  const cv = e.target;
-  const r = cv.getBoundingClientRect();
-  return { x: (e.clientX - r.left) * CFG.W / r.width, y: (e.clientY - r.top) * CFG.H / r.height };
+  return projectCanvasPoint(e.clientX,e.clientY);
 }
 
 function fieldCellAt(p, x, y) {
@@ -299,6 +303,7 @@ function bindEvents() {
   cv.addEventListener('mouseleave', () => { if (G) G.hover = null; });
 
   cv.addEventListener('click', e => {
+    if(consumeMapGesture())return;
     if (!G || G.phase === 'over' || G.phase === 'menu') return;
     const me = localPlayer();
     const pos = canvasPos(e);
@@ -307,7 +312,7 @@ function bindEvents() {
     if (mine) {
       G.selectedMine = mine.id; G.selectedShop = null; G.selectedFighter = null;
       cv.classList.remove('placing');
-      $('mineBox').scrollIntoView({block:'nearest'}); updateUI(true); return;
+      openCommandPanel('economy'); updateUI(true); return;
     }
     if (G.selectedShop) {
       if (cell && performAction({ type:'buy', uid:G.selectedShop, col:cell.col, row:cell.row })) {
@@ -320,6 +325,7 @@ function bindEvents() {
     if (cell) {
       const f = me.fighters.find(f => !f.temporary && f.col === cell.col && f.row === cell.row && f.deadT <= 0);
       G.selectedFighter = f || null;
+      if(f)openCommandPanel('inspect');
       updateUI(true);
     }
   });
@@ -335,6 +341,7 @@ function bindEvents() {
   });
   $('mineList').addEventListener('click', event => {
     if (!G || G.phase === 'over') return;
+    if(event.target.closest('[data-mine-build]')){performAction({type:'mineBuy'});updateUI(true);return;}
     const row = event.target.closest('[data-mine-id]');
     if (!row) return;
     G.selectedMine = +row.dataset.mineId;
