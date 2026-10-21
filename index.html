@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>军团战争 · Legion Arena</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <header id="hud">
+    <div class="brand"><span class="brand-mark">♜</span> 军团战争 <span class="sub">LEGION ARENA</span></div>
+    <div class="stat gold">🪙 <b id="stGold">0</b></div>
+    <div class="stat income">📈 收入 <b id="stIncome">0</b></div>
+    <div class="stat value">🗡 战力 <b id="stValue">0</b></div>
+    <div class="stat wave" id="stWave">第 1 波</div>
+    <div class="spacer"></div><span id="connection">单机 · 本地战斗</span>
+    <button id="btnPause" class="btn" title="空格">⏸ 暂停</button>
+    <button id="btnSpeed" class="btn" title="快捷键 1/2/3">▶ 1x</button>
+    <button id="btnHelp" class="btn">❓ 克制表</button>
+    <button id="btnRestart" class="btn">🔄 重开</button>
+  </header>
+  <main>
+    <div id="stage">
+      <div class="stage-heading"><div><small>THE CONVERGENCE</small><h2>双王交汇之地</h2></div><span>四路防线 / 共享王城</span></div>
+      <canvas id="cv" width="1300" height="800"></canvas>
+      <div id="log"></div>
+    </div>
+    <aside id="side">
+      <section class="box" id="waveBox">
+        <h3>⏱ 下一波</h3>
+        <div id="waveInfo"></div>
+      </section>
+      <section class="box" id="shopBox">
+        <h3>🛒 兵种商店 <span class="hint">选中后点击自己场地放置</span></h3>
+        <div id="shop"></div>
+      </section>
+      <section class="box" id="selBox" style="display:none">
+        <h3>🎯 已选单位</h3>
+        <div id="selInfo"></div>
+      </section>
+      <section class="box" id="kingBox">
+        <h3>👑 蓝方国王</h3>
+        <canvas id="kingPortrait" width="52" height="52"></canvas>
+        <div id="kingInfo"></div>
+        <button id="btnKing" class="btn wide">强化国王</button>
+      </section>
+      <section class="box" id="mercBox">
+        <h3>💀 雇佣兵 <span class="hint">送给敌方，增加你的收入</span></h3>
+        <div id="mercs"></div>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<div id="overlay">
+  <div class="panel" id="menuPanel">
+    <div class="eyebrow">LEGION ARENA / SEASON 01</div>
+    <h1>集结军团<span class="title-accent">守住你的王城。</span></h1>
+    <p class="tagline">布阵、进化、派遣。四路战场汇于双王之间，每一枚金币都能改变战局。</p>
+    <div class="map-preview"><span class="preview-lane">↓<br>→</span><span class="preview-king">♛</span><span class="preview-vs">VS</span><span class="preview-king">♛</span><span class="preview-lane">↓<br>←</span></div>
+    <div class="mode-tabs"><button id="modeSolo" class="btn active">单机征战 <small>SOLO</small></button><button id="modeOnline" class="btn">在线对决 <small>ONLINE PK</small></button></div>
+    <div id="soloOptions">
+      <p class="choose">选择征战难度 <span>你与 AI 队友，对抗敌方军团</span></p>
+      <div class="diffRow">
+        <button class="btn diff" data-diff="easy">初入战场 <small>简单</small></button>
+        <button class="btn diff" data-diff="normal">势均力敌 <small>标准</small></button>
+        <button class="btn diff" data-diff="hard">王者试炼 <small>困难</small></button>
+      </div>
+    </div>
+    <div id="onlineOptions" hidden>
+      <div class="online-fields"><label>指挥官名称<input id="playerName" maxlength="16" placeholder="指挥官" autocomplete="nickname"></label><label>房间码<input id="joinCode" maxlength="6" placeholder="6 位房间码" autocomplete="off"></label></div>
+      <div class="diffRow"><button id="createRoom" class="btn primary">创建房间</button><button id="joinRoom" class="btn">加入对战</button></div>
+      <p class="foot">2–4 名真人 · 两队对抗 · 空位 AI 补齐 · 服务端同步战斗</p>
+    </div>
+    <div id="lobby" hidden>
+      <div class="room-title">战备大厅 <strong id="roomCode"></strong></div>
+      <div id="roomSeats"></div>
+      <div class="diffRow"><button id="startOnline" class="btn primary" disabled>等待玩家</button><button id="copyInvite" class="btn">复制邀请</button><button id="leaveRoom" class="btn">离开</button></div>
+    </div>
+    <p id="netMessage" role="status" aria-live="polite"></p>
+    <div class="menu-guide"><span>01 选择兵种并点击防区布阵</span><span>02 防守每一波，守护国王</span><span>03 派遣雇佣兵压制对手</span></div>
+    <p class="foot">红色箭头为怪物进军路线 · 金色圆环为国王 · 单机支持空格暂停与 1 / 2 / 3 倍速</p>
+  </div>
+</div>
+
+<div id="modal" style="display:none">
+  <div class="panel">
+    <h2>攻击 × 护甲 克制表</h2>
+    <div id="atkTable"></div>
+    <h2>波次特性</h2>
+    <div id="traitList"></div>
+    <button class="btn wide" onclick="document.getElementById('modal').style.display='none'">关闭</button>
+  </div>
+</div>
+
+<script src="js/config.js?v=20"></script>
+<script src="js/data.js?v=20"></script>
+<script src="js/sprites.js?v=20"></script>
+<script src="js/engine.js?v=20"></script>
+<script src="js/ai.js?v=20"></script>
+<script src="js/render.js?v=20"></script>
+<script src="js/ui.js?v=20"></script>
+<script src="js/network.js?v=20"></script>
+<script src="js/main.js?v=20"></script>
+</body>
+</html>
