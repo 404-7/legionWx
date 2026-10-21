@@ -1,5 +1,6 @@
 node_modules/
 /.cache/
+/assets/unit-art/classic/*.gif
 coverage/
 dist/
 *.log

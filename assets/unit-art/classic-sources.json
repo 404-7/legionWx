@@ -1,0 +1,1011 @@
+{
+  "owner": "Blizzard Entertainment",
+  "origin": "https://classic.battle.net",
+  "assets": [
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/archmage.gif",
+      "page": "https://classic.battle.net/war3/human/units/archmage.shtml",
+      "file": "human-units-animations-archmage.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/bloodmage.gif",
+      "page": "https://classic.battle.net/war3/human/units/bloodmage.shtml",
+      "file": "human-units-animations-bloodmage.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/dragonhawk.gif",
+      "page": "https://classic.battle.net/war3/human/units/dragonhawk.shtml",
+      "file": "human-units-animations-dragonhawk.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/flyingmachine.gif",
+      "page": "https://classic.battle.net/war3/human/units/flyingmachine.shtml",
+      "file": "human-units-animations-flyingmachine.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/footman.gif",
+      "page": "https://classic.battle.net/war3/human/units/footman.shtml",
+      "file": "human-units-animations-footman.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/gryphonrider.gif",
+      "page": "https://classic.battle.net/war3/human/units/gryphonrider.shtml",
+      "file": "human-units-animations-gryphonrider.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/knight.gif",
+      "page": "https://classic.battle.net/war3/human/units/knight.shtml",
+      "file": "human-units-animations-knight.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/militia.gif",
+      "page": "https://classic.battle.net/war3/human/units/militia.shtml",
+      "file": "human-units-animations-militia.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/mortarteam.gif",
+      "page": "https://classic.battle.net/war3/human/units/mortarteam.shtml",
+      "file": "human-units-animations-mortarteam.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/mountainking.gif",
+      "page": "https://classic.battle.net/war3/human/units/mountainking.shtml",
+      "file": "human-units-animations-mountainking.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/paladin.gif",
+      "page": "https://classic.battle.net/war3/human/units/paladin.shtml",
+      "file": "human-units-animations-paladin.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/peasant.gif",
+      "page": "https://classic.battle.net/war3/human/units/peasant.shtml",
+      "file": "human-units-animations-peasant.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/phoenix.gif",
+      "page": "https://classic.battle.net/war3/human/units/phoenix.shtml",
+      "file": "human-units-animations-phoenix.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/priest.gif",
+      "page": "https://classic.battle.net/war3/human/units/priest.shtml",
+      "file": "human-units-animations-priest.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/rifleman.gif",
+      "page": "https://classic.battle.net/war3/human/units/rifleman.shtml",
+      "file": "human-units-animations-rifleman.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/siegeengine.gif",
+      "page": "https://classic.battle.net/war3/human/units/siegeengine.shtml",
+      "file": "human-units-animations-siegeengine.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/sorceress.gif",
+      "page": "https://classic.battle.net/war3/human/units/sorceress.shtml",
+      "file": "human-units-animations-sorceress.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/human/units/animations/waterelement.gif",
+      "page": "https://classic.battle.net/war3/neutral/elementals.shtml",
+      "file": "human-units-animations-waterelement.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/arachnathid.gif",
+      "page": "https://classic.battle.net/war3/neutral/arachnathid.shtml",
+      "file": "neutral-creeps-arachnathid.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/azuredragon.gif",
+      "page": "https://classic.battle.net/war3/neutral/lordaeron.shtml",
+      "file": "neutral-creeps-azuredragon.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/bandit.gif",
+      "page": "https://classic.battle.net/war3/neutral/bandits.shtml",
+      "file": "neutral-creeps-bandit.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/banditlord.gif",
+      "page": "https://classic.battle.net/war3/neutral/bandits.shtml",
+      "file": "neutral-creeps-banditlord.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/banditmage.gif",
+      "page": "https://classic.battle.net/war3/neutral/wizards.shtml",
+      "file": "neutral-creeps-banditmage.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/banditspear.gif",
+      "page": "https://classic.battle.net/war3/neutral/bandits.shtml",
+      "file": "neutral-creeps-banditspear.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/bansheeghost.gif",
+      "page": "https://classic.battle.net/war3/neutral/undead.shtml",
+      "file": "neutral-creeps-bansheeghost.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/blackdragon.gif",
+      "page": "https://classic.battle.net/war3/neutral/lordaeron.shtml",
+      "file": "neutral-creeps-blackdragon.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/bluedragonspawn.gif",
+      "page": "https://classic.battle.net/war3/neutral/bluedragonspawn.shtml",
+      "file": "neutral-creeps-bluedragonspawn.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/bristleback.gif",
+      "page": "https://classic.battle.net/war3/neutral/quillboars.shtml",
+      "file": "neutral-creeps-bristleback.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/centuar.gif",
+      "page": "https://classic.battle.net/war3/neutral/centaurs.shtml",
+      "file": "neutral-creeps-centuar.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/centuararcher.gif",
+      "page": "https://classic.battle.net/war3/neutral/centaurs.shtml",
+      "file": "neutral-creeps-centuararcher.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/centuarkhan.gif",
+      "page": "https://classic.battle.net/war3/neutral/centaurs.shtml",
+      "file": "neutral-creeps-centuarkhan.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/corruptedent.gif",
+      "page": "https://classic.battle.net/war3/neutral/corruptedents.shtml",
+      "file": "neutral-creeps-corruptedent.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/crab.gif",
+      "page": "https://classic.battle.net/war3/neutral/spidercrabs.shtml",
+      "file": "neutral-creeps-crab.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/darktrapper.gif",
+      "page": "https://classic.battle.net/war3/neutral/darktrolls.shtml",
+      "file": "neutral-creeps-darktrapper.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/darktroll.gif",
+      "page": "https://classic.battle.net/war3/neutral/darktrolls.shtml",
+      "file": "neutral-creeps-darktroll.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/darktrollpriest.gif",
+      "page": "https://classic.battle.net/war3/neutral/darktrolls.shtml",
+      "file": "neutral-creeps-darktrollpriest.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/deceiver.gif",
+      "page": "https://classic.battle.net/war3/neutral/heretics.shtml",
+      "file": "neutral-creeps-deceiver.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/direwolf.gif",
+      "page": "https://classic.battle.net/war3/neutral/wolves.shtml",
+      "file": "neutral-creeps-direwolf.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/doomguard.gif",
+      "page": "https://classic.battle.net/war3/neutral/demons.shtml",
+      "file": "neutral-creeps-doomguard.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/dragondevour.gif",
+      "page": "https://classic.battle.net/war3/neutral/seaturtles.shtml",
+      "file": "neutral-creeps-dragondevour.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/dreanei.gif",
+      "page": "https://classic.battle.net/war3/neutral/Draenei.shtml",
+      "file": "neutral-creeps-dreanei.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/eredar.gif",
+      "page": "https://classic.battle.net/war3/neutral/eredarwarlock.shtml",
+      "file": "neutral-creeps-eredar.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/facelessone.gif",
+      "page": "https://classic.battle.net/war3/neutral/facelessones.shtml",
+      "file": "neutral-creeps-facelessone.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/feldemon.gif",
+      "page": "https://classic.battle.net/war3/neutral/feldemons.shtml",
+      "file": "neutral-creeps-feldemon.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/felguard.gif",
+      "page": "https://classic.battle.net/war3/neutral/felguards.shtml",
+      "file": "neutral-creeps-felguard.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/foresttroll.gif",
+      "page": "https://classic.battle.net/war3/neutral/foresttrolls.shtml",
+      "file": "neutral-creeps-foresttroll.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/foresttrollpriest.gif",
+      "page": "https://classic.battle.net/war3/neutral/foresttrolls.shtml",
+      "file": "neutral-creeps-foresttrollpriest.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/foresttrolltrapper.gif",
+      "page": "https://classic.battle.net/war3/neutral/foresttrolls.shtml",
+      "file": "neutral-creeps-foresttrolltrapper.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/furbolg.gif",
+      "page": "https://classic.battle.net/war3/neutral/furbolgs.shtml",
+      "file": "neutral-creeps-furbolg.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/furbolgelder.gif",
+      "page": "https://classic.battle.net/war3/neutral/polarfurbolgs.shtml",
+      "file": "neutral-creeps-furbolgelder.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/furbolgpanda.gif",
+      "page": "https://classic.battle.net/war3/neutral/pandaren.shtml",
+      "file": "neutral-creeps-furbolgpanda.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/furbolgshaman.gif",
+      "page": "https://classic.battle.net/war3/neutral/polarfurbolgs.shtml",
+      "file": "neutral-creeps-furbolgshaman.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/furbolgtrapper.gif",
+      "page": "https://classic.battle.net/war3/neutral/polarfurbolgs.shtml",
+      "file": "neutral-creeps-furbolgtrapper.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/gnoll.gif",
+      "page": "https://classic.battle.net/war3/neutral/gnolls.shtml",
+      "file": "neutral-creeps-gnoll.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/gnollarcher.gif",
+      "page": "https://classic.battle.net/war3/neutral/gnolls.shtml",
+      "file": "neutral-creeps-gnollarcher.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/gnolloverseer.gif",
+      "page": "https://classic.battle.net/war3/neutral/gnolls.shtml",
+      "file": "neutral-creeps-gnolloverseer.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/gnollwarden.gif",
+      "page": "https://classic.battle.net/war3/neutral/gnolls.shtml",
+      "file": "neutral-creeps-gnollwarden.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/goblinshredder.gif",
+      "page": "https://classic.battle.net/war3/neutral/goblins.shtml",
+      "file": "neutral-creeps-goblinshredder.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/harpy.gif",
+      "page": "https://classic.battle.net/war3/neutral/harpies.shtml",
+      "file": "neutral-creeps-harpy.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/harpyqueen.gif",
+      "page": "https://classic.battle.net/war3/neutral/harpies.shtml",
+      "file": "neutral-creeps-harpyqueen.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/harpywitch.gif",
+      "page": "https://classic.battle.net/war3/neutral/harpies.shtml",
+      "file": "neutral-creeps-harpywitch.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/hurlboulder.gif",
+      "page": "https://classic.battle.net/war3/neutral/seagiants.shtml",
+      "file": "neutral-creeps-hurlboulder.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/hydra.gif",
+      "page": "https://classic.battle.net/war3/neutral/hydras.shtml",
+      "file": "neutral-creeps-hydra.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/icetroll.gif",
+      "page": "https://classic.battle.net/war3/neutral/icetrolls.shtml",
+      "file": "neutral-creeps-icetroll.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/icetrollpriest.gif",
+      "page": "https://classic.battle.net/war3/neutral/icetrolls.shtml",
+      "file": "neutral-creeps-icetrollpriest.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/infernalmachine.gif",
+      "page": "https://classic.battle.net/war3/neutral/infernalmachines.shtml",
+      "file": "neutral-creeps-infernalmachine.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/junglebeast.gif",
+      "page": "https://classic.battle.net/war3/neutral/junglestalkers.shtml",
+      "file": "neutral-creeps-junglebeast.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/kobald.gif",
+      "page": "https://classic.battle.net/war3/neutral/kobolds.shtml",
+      "file": "neutral-creeps-kobald.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/koboldgeomancer.gif",
+      "page": "https://classic.battle.net/war3/neutral/kobolds.shtml",
+      "file": "neutral-creeps-koboldgeomancer.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/lobstrocity.gif",
+      "page": "https://classic.battle.net/war3/neutral/makrura.shtml",
+      "file": "neutral-creeps-lobstrocity.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/magnataur.gif",
+      "page": "https://classic.battle.net/war3/neutral/magnataurs.shtml",
+      "file": "neutral-creeps-magnataur.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/mammoth.gif",
+      "page": "https://classic.battle.net/war3/neutral/mammoths.shtml",
+      "file": "neutral-creeps-mammoth.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/murgul.gif",
+      "page": "https://classic.battle.net/war3/neutral/murgul.shtml",
+      "file": "neutral-creeps-murgul.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/murlock.gif",
+      "page": "https://classic.battle.net/war3/neutral/murloc.shtml",
+      "file": "neutral-creeps-murlock.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/murlockflesheater.gif",
+      "page": "https://classic.battle.net/war3/neutral/murloc.shtml",
+      "file": "neutral-creeps-murlockflesheater.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/murlockmutant.gif",
+      "page": "https://classic.battle.net/war3/neutral/murloc.shtml",
+      "file": "neutral-creeps-murlockmutant.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/murlocknightcrawler.gif",
+      "page": "https://classic.battle.net/war3/neutral/murloc.shtml",
+      "file": "neutral-creeps-murlocknightcrawler.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/murlockwarrior.gif",
+      "page": "https://classic.battle.net/war3/neutral/murloc.shtml",
+      "file": "neutral-creeps-murlockwarrior.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/netherdragon.gif",
+      "page": "https://classic.battle.net/war3/neutral/netherdragons.shtml",
+      "file": "neutral-creeps-netherdragon.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/nurobian.gif",
+      "page": "https://classic.battle.net/war3/neutral/nerubians.shtml",
+      "file": "neutral-creeps-nurobian.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/nurobianlord.gif",
+      "page": "https://classic.battle.net/war3/neutral/nerubians.shtml",
+      "file": "neutral-creeps-nurobianlord.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/nurobianqueen.gif",
+      "page": "https://classic.battle.net/war3/neutral/nerubians.shtml",
+      "file": "neutral-creeps-nurobianqueen.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/ogre.gif",
+      "page": "https://classic.battle.net/war3/neutral/ogres.shtml",
+      "file": "neutral-creeps-ogre.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/ogrelord.gif",
+      "page": "https://classic.battle.net/war3/neutral/ogres.shtml",
+      "file": "neutral-creeps-ogrelord.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/ogremagi.gif",
+      "page": "https://classic.battle.net/war3/neutral/ogres.shtml",
+      "file": "neutral-creeps-ogremagi.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/owlbear.gif",
+      "page": "https://classic.battle.net/war3/neutral/wildkin.shtml",
+      "file": "neutral-creeps-owlbear.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/polarbear.gif",
+      "page": "https://classic.battle.net/war3/neutral/polarbears.shtml",
+      "file": "neutral-creeps-polarbear.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/polarfurbolg.gif",
+      "page": "https://classic.battle.net/war3/neutral/polarfurbolgs.shtml",
+      "file": "neutral-creeps-polarfurbolg.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/razormane.gif",
+      "page": "https://classic.battle.net/war3/neutral/razormanes.shtml",
+      "file": "neutral-creeps-razormane.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/razormanechief.gif",
+      "page": "https://classic.battle.net/war3/neutral/razormanes.shtml",
+      "file": "neutral-creeps-razormanechief.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/reddragon.gif",
+      "page": "https://classic.battle.net/war3/neutral/dragons.shtml",
+      "file": "neutral-creeps-reddragon.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/reignoffire.gif",
+      "page": "https://classic.battle.net/war3/neutral/pitlord.shtml",
+      "file": "neutral-creeps-reignoffire.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/revenant.gif",
+      "page": "https://classic.battle.net/war3/neutral/revenants.shtml",
+      "file": "neutral-creeps-revenant.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/reverant.gif",
+      "page": "https://classic.battle.net/war3/neutral/undead.shtml",
+      "file": "neutral-creeps-reverant.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/rockgolem.gif",
+      "page": "https://classic.battle.net/war3/neutral/golems.shtml",
+      "file": "neutral-creeps-rockgolem.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/salamander.gif",
+      "page": "https://classic.battle.net/war3/neutral/salamanders.shtml",
+      "file": "neutral-creeps-salamander.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/sapper.gif",
+      "page": "https://classic.battle.net/war3/neutral/goblins.shtml",
+      "file": "neutral-creeps-sapper.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/sasquatch.gif",
+      "page": "https://classic.battle.net/war3/neutral/sasquatch.shtml",
+      "file": "neutral-creeps-sasquatch.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/satre.gif",
+      "page": "https://classic.battle.net/war3/neutral/satyrs.shtml",
+      "file": "neutral-creeps-satre.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/satretrickster.gif",
+      "page": "https://classic.battle.net/war3/neutral/satyrs.shtml",
+      "file": "neutral-creeps-satretrickster.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/seaelement.gif",
+      "page": "https://classic.battle.net/war3/neutral/elementals.shtml",
+      "file": "neutral-creeps-seaelement.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/seagiant.gif",
+      "page": "https://classic.battle.net/war3/neutral/seagiants.shtml",
+      "file": "neutral-creeps-seagiant.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/seaturtle.gif",
+      "page": "https://classic.battle.net/war3/neutral/seaturtles.shtml",
+      "file": "neutral-creeps-seaturtle.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/skeletalorc.gif",
+      "page": "https://classic.battle.net/war3/neutral/skeletalorcs.shtml",
+      "file": "neutral-creeps-skeletalorc.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/skeletonarcher.gif",
+      "page": "https://classic.battle.net/war3/neutral/undead.shtml",
+      "file": "neutral-creeps-skeletonarcher.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/sludgebeast.gif",
+      "page": "https://classic.battle.net/war3/neutral/sludgemonsters.shtml",
+      "file": "neutral-creeps-sludgebeast.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/spider.gif",
+      "page": "https://classic.battle.net/war3/neutral/spiders.shtml",
+      "file": "neutral-creeps-spider.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/spiderblue.gif",
+      "page": "https://classic.battle.net/war3/neutral/spiders.shtml",
+      "file": "neutral-creeps-spiderblue.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/spidergreen.gif",
+      "page": "https://classic.battle.net/war3/neutral/spiders.shtml",
+      "file": "neutral-creeps-spidergreen.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/spiritpig.gif",
+      "page": "https://classic.battle.net/war3/neutral/razormanes.shtml",
+      "file": "neutral-creeps-spiritpig.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/spiritpigani.gif",
+      "page": "https://classic.battle.net/war3/neutral/razormanes.shtml",
+      "file": "neutral-creeps-spiritpigani.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/stormreaver.gif",
+      "page": "https://classic.battle.net/war3/neutral/stormreavers.shtml",
+      "file": "neutral-creeps-stormreaver.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/succubus.gif",
+      "page": "https://classic.battle.net/war3/neutral/succubi.shtml",
+      "file": "neutral-creeps-succubus.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/thunderlizard.gif",
+      "page": "https://classic.battle.net/war3/neutral/lightninglizards.shtml",
+      "file": "neutral-creeps-thunderlizard.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/timberwolf.gif",
+      "page": "https://classic.battle.net/war3/neutral/wolves.shtml",
+      "file": "neutral-creeps-timberwolf.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/tuskarr.gif",
+      "page": "https://classic.battle.net/war3/neutral/tuskarr.shtml",
+      "file": "neutral-creeps-tuskarr.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/unbroken.gif",
+      "page": "https://classic.battle.net/war3/neutral/unbroken.shtml",
+      "file": "neutral-creeps-unbroken.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/voidwalker.gif",
+      "page": "https://classic.battle.net/war3/neutral/voidwalkers.shtml",
+      "file": "neutral-creeps-voidwalker.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/wargolem.gif",
+      "page": "https://classic.battle.net/war3/neutral/wargolems.shtml",
+      "file": "neutral-creeps-wargolem.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/wendigo.gif",
+      "page": "https://classic.battle.net/war3/neutral/wendigo.shtml",
+      "file": "neutral-creeps-wendigo.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/wendigoshaman.gif",
+      "page": "https://classic.battle.net/war3/neutral/wendigo.shtml",
+      "file": "neutral-creeps-wendigoshaman.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/whitewolf.gif",
+      "page": "https://classic.battle.net/war3/neutral/wolves.shtml",
+      "file": "neutral-creeps-whitewolf.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/creeps/zeppelin.gif",
+      "page": "https://classic.battle.net/war3/neutral/goblins.shtml",
+      "file": "neutral-creeps-zeppelin.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/bear.gif",
+      "page": "https://classic.battle.net/war3/neutral/bear.shtml",
+      "file": "neutral-units-animations-bear.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/beastmaster.gif",
+      "page": "https://classic.battle.net/war3/neutral/beastmaster.shtml",
+      "file": "neutral-units-animations-beastmaster.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/clockwork.gif",
+      "page": "https://classic.battle.net/war3/neutral/clockwerkgoblin.shtml",
+      "file": "neutral-units-animations-clockwork.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/darkranger.gif",
+      "page": "https://classic.battle.net/war3/neutral/darkranger.shtml",
+      "file": "neutral-units-animations-darkranger.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/earthpanda.gif",
+      "page": "https://classic.battle.net/war3/neutral/earth.shtml",
+      "file": "neutral-units-animations-earthpanda.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/firelord.gif",
+      "page": "https://classic.battle.net/war3/neutral/firelord.shtml",
+      "file": "neutral-units-animations-firelord.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/firepanda.gif",
+      "page": "https://classic.battle.net/war3/neutral/fire.shtml",
+      "file": "neutral-units-animations-firepanda.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/hawk.gif",
+      "page": "https://classic.battle.net/war3/neutral/hawk.shtml",
+      "file": "neutral-units-animations-hawk.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/pandarenbrewmaster.gif",
+      "page": "https://classic.battle.net/war3/neutral/pandarenbrewmaster.shtml",
+      "file": "neutral-units-animations-pandarenbrewmaster.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/pitlord.gif",
+      "page": "https://classic.battle.net/war3/neutral/pitlord.shtml",
+      "file": "neutral-units-animations-pitlord.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/quilbeast.gif",
+      "page": "https://classic.battle.net/war3/neutral/quilbeast.shtml",
+      "file": "neutral-units-animations-quilbeast.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/seawitch.gif",
+      "page": "https://classic.battle.net/war3/neutral/nagaseawitch.shtml",
+      "file": "neutral-units-animations-seawitch.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/neutral/units/animations/stormpanda.gif",
+      "page": "https://classic.battle.net/war3/neutral/storm.shtml",
+      "file": "neutral-units-animations-stormpanda.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/buildings/entangledgoldmine.gif",
+      "page": "https://classic.battle.net/war3/nightelf/buildings/entangledgoldmine.shtml",
+      "file": "nightelf-buildings-entangledgoldmine.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/buildings/line.gif",
+      "page": "https://classic.battle.net/war3/nightelf/buildings/treeofages.shtml",
+      "file": "nightelf-buildings-line.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/buildings/treeofages.gif",
+      "page": "https://classic.battle.net/war3/nightelf/buildings/treeofages.shtml",
+      "file": "nightelf-buildings-treeofages.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/buildings/treeoflife.gif",
+      "page": "https://classic.battle.net/war3/nightelf/buildings/treeoflife.shtml",
+      "file": "nightelf-buildings-treeoflife.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/archer.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/archer.shtml",
+      "file": "nightelf-units-animations-archer.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/avatarofvengeance.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/avatarofvengeance.shtml",
+      "file": "nightelf-units-animations-avatarofvengeance.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/chimaera.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/chimaera.shtml",
+      "file": "nightelf-units-animations-chimaera.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/demonhunter.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/demonhunter.shtml",
+      "file": "nightelf-units-animations-demonhunter.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/driad.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/dryad.shtml",
+      "file": "nightelf-units-animations-driad.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/druidclaw.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/druidoftheclaw.shtml",
+      "file": "nightelf-units-animations-druidclaw.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/druidtalon.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/druidofthetalon.shtml",
+      "file": "nightelf-units-animations-druidtalon.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/ent.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/treant.shtml",
+      "file": "nightelf-units-animations-ent.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/faeriedragon.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/faeriedragon.shtml",
+      "file": "nightelf-units-animations-faeriedragon.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/glaivethrower.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/glaivethrower.shtml",
+      "file": "nightelf-units-animations-glaivethrower.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/hippogryph.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/hippogryph.shtml",
+      "file": "nightelf-units-animations-hippogryph.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/hippogryphrider.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/hippogryphrider.shtml",
+      "file": "nightelf-units-animations-hippogryphrider.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/huntress.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/huntress.shtml",
+      "file": "nightelf-units-animations-huntress.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/keeper.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/keepergrove.shtml",
+      "file": "nightelf-units-animations-keeper.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/mountaingiant.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/mountaingiant.shtml",
+      "file": "nightelf-units-animations-mountaingiant.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/owlscout.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/owl.shtml",
+      "file": "nightelf-units-animations-owlscout.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/priestess.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/priestessmoon.shtml",
+      "file": "nightelf-units-animations-priestess.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/spiritofvengeance.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/spiritofvengeance.shtml",
+      "file": "nightelf-units-animations-spiritofvengeance.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/warden.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/warden.shtml",
+      "file": "nightelf-units-animations-warden.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/nightelf/units/animations/wisp.gif",
+      "page": "https://classic.battle.net/war3/nightelf/units/wisp.shtml",
+      "file": "nightelf-units-animations-wisp.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/batrider.gif",
+      "page": "https://classic.battle.net/war3/orc/units/trollbatrider.shtml",
+      "file": "orc-units-animations-batrider.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/berserker.gif",
+      "page": "https://classic.battle.net/war3/orc/units/trollberserker.shtml",
+      "file": "orc-units-animations-berserker.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/blademaster.gif",
+      "page": "https://classic.battle.net/war3/orc/units/blademaster.shtml",
+      "file": "orc-units-animations-blademaster.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/chieftain.gif",
+      "page": "https://classic.battle.net/war3/orc/units/taurenchieftain.shtml",
+      "file": "orc-units-animations-chieftain.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/demolisher.gif",
+      "page": "https://classic.battle.net/war3/orc/units/demolisher.shtml",
+      "file": "orc-units-animations-demolisher.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/direwolf.gif",
+      "page": "https://classic.battle.net/war3/orc/units/direwolf.shtml",
+      "file": "orc-units-animations-direwolf.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/farseer.gif",
+      "page": "https://classic.battle.net/war3/orc/units/farseer.shtml",
+      "file": "orc-units-animations-farseer.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/grunt.gif",
+      "page": "https://classic.battle.net/war3/orc/units/grunt.shtml",
+      "file": "orc-units-animations-grunt.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/headhunter.gif",
+      "page": "https://classic.battle.net/war3/orc/units/trollheadhunter.shtml",
+      "file": "orc-units-animations-headhunter.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/kodo.gif",
+      "page": "https://classic.battle.net/war3/orc/units/kodobeast.shtml",
+      "file": "orc-units-animations-kodo.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/peon.gif",
+      "page": "https://classic.battle.net/war3/orc/units/peon.shtml",
+      "file": "orc-units-animations-peon.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/serpentward.gif",
+      "page": "https://classic.battle.net/war3/orc/units/serpentward.shtml",
+      "file": "orc-units-animations-serpentward.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/shadowhunter.gif",
+      "page": "https://classic.battle.net/war3/orc/units/shadowhunter.shtml",
+      "file": "orc-units-animations-shadowhunter.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/shadowwolf.gif",
+      "page": "https://classic.battle.net/war3/orc/units/shadowwolf.shtml",
+      "file": "orc-units-animations-shadowwolf.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/shaman.gif",
+      "page": "https://classic.battle.net/war3/orc/units/shaman.shtml",
+      "file": "orc-units-animations-shaman.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/spiritwalker.gif",
+      "page": "https://classic.battle.net/war3/orc/units/spiritwalker.shtml",
+      "file": "orc-units-animations-spiritwalker.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/spiritwolf.gif",
+      "page": "https://classic.battle.net/war3/orc/units/spiritwolf.shtml",
+      "file": "orc-units-animations-spiritwolf.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/tauren.gif",
+      "page": "https://classic.battle.net/war3/orc/units/tauren.shtml",
+      "file": "orc-units-animations-tauren.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/witchdoctor.gif",
+      "page": "https://classic.battle.net/war3/orc/units/witchdoctor.shtml",
+      "file": "orc-units-animations-witchdoctor.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/wolfrider.gif",
+      "page": "https://classic.battle.net/war3/orc/units/raider.shtml",
+      "file": "orc-units-animations-wolfrider.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/orc/units/animations/wyvernrider.gif",
+      "page": "https://classic.battle.net/war3/orc/units/windrider.shtml",
+      "file": "orc-units-animations-wyvernrider.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/abomination.gif",
+      "page": "https://classic.battle.net/war3/undead/units/abomination.shtml",
+      "file": "undead-units-animations-abomination.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/acolyte.gif",
+      "page": "https://classic.battle.net/war3/undead/units/acolyte.shtml",
+      "file": "undead-units-animations-acolyte.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/banshee.gif",
+      "page": "https://classic.battle.net/war3/undead/units/banshee.shtml",
+      "file": "undead-units-animations-banshee.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/cryptfiend.gif",
+      "page": "https://classic.battle.net/war3/undead/units/cryptfiend.shtml",
+      "file": "undead-units-animations-cryptfiend.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/cryptlord.gif",
+      "page": "https://classic.battle.net/war3/undead/units/cryptlord.shtml",
+      "file": "undead-units-animations-cryptlord.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/deathknight.gif",
+      "page": "https://classic.battle.net/war3/undead/units/deathknight.shtml",
+      "file": "undead-units-animations-deathknight.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/destroyer.gif",
+      "page": "https://classic.battle.net/war3/undead/units/destroyer.shtml",
+      "file": "undead-units-animations-destroyer.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/dreadlord.gif",
+      "page": "https://classic.battle.net/war3/undead/units/dreadlord.shtml",
+      "file": "undead-units-animations-dreadlord.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/frostwyrm.gif",
+      "page": "https://classic.battle.net/war3/undead/units/frostwyrm.shtml",
+      "file": "undead-units-animations-frostwyrm.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/gargoyle.gif",
+      "page": "https://classic.battle.net/war3/undead/units/gargoyle.shtml",
+      "file": "undead-units-animations-gargoyle.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/ghoul.gif",
+      "page": "https://classic.battle.net/war3/undead/units/ghoul.shtml",
+      "file": "undead-units-animations-ghoul.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/infernal.gif",
+      "page": "https://classic.battle.net/war3/undead/units/infernal.shtml",
+      "file": "undead-units-animations-infernal.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/lich.gif",
+      "page": "https://classic.battle.net/war3/undead/units/lich.shtml",
+      "file": "undead-units-animations-lich.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/meatwagon.gif",
+      "page": "https://classic.battle.net/war3/undead/units/meatwagon.shtml",
+      "file": "undead-units-animations-meatwagon.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/necromancer.gif",
+      "page": "https://classic.battle.net/war3/undead/units/necromancer.shtml",
+      "file": "undead-units-animations-necromancer.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/obsidianstatue.gif",
+      "page": "https://classic.battle.net/war3/undead/units/obsidianstatue.shtml",
+      "file": "undead-units-animations-obsidianstatue.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/scarab.gif",
+      "page": "https://classic.battle.net/war3/undead/units/carrionbeetle.shtml",
+      "file": "undead-units-animations-scarab.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/shade.gif",
+      "page": "https://classic.battle.net/war3/undead/units/shade.shtml",
+      "file": "undead-units-animations-shade.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/skeletalmage.gif",
+      "page": "https://classic.battle.net/war3/undead/units/skeletalmage.shtml",
+      "file": "undead-units-animations-skeletalmage.gif"
+    },
+    {
+      "url": "https://classic.battle.net/war3/images/undead/units/animations/skeleton.gif",
+      "page": "https://classic.battle.net/war3/neutral/darkminion.shtml",
+      "file": "undead-units-animations-skeleton.gif"
+    }
+  ]
+}

@@ -97,11 +97,11 @@ const server = http.createServer(async (req, res) => {
     if (!['GET', 'HEAD'].includes(req.method)) throw fail('方法不支持', 405);
     const relative = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
     // Only public game assets are served; server code and credentials remain private.
-    if (!/^\/(index\.html|(?:js|css)\/[\w.-]+\.(?:js|css))$/.test(relative)) throw fail('文件不存在', 404);
+    if (!/^\/(index\.html|(?:js|css)\/[\w.-]+\.(?:js|css)|assets\/unit-art\/classic\/[a-z0-9-]+\.(?:png|gif))$/.test(relative)) throw fail('文件不存在', 404);
     const file = path.join(root, relative.slice(1));
     const data = await fs.promises.readFile(file).catch(() => { throw fail('文件不存在', 404); });
-    const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' };
-    res.writeHead(200, { 'Content-Type': types[path.extname(file)] + '; charset=utf-8', 'Cache-Control': 'no-cache' });
+    const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.png':'image/png', '.gif':'image/gif' };
+    res.writeHead(200, { 'Content-Type': types[path.extname(file)], 'Cache-Control': 'no-cache' });
     res.end(req.method === 'HEAD' ? undefined : data);
   } catch (e) { if (!res.headersSent) json(res, { error: e.status ? e.message : '服务器内部错误' }, e.status || 500); else res.end(); }
 });

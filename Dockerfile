@@ -5,6 +5,7 @@ COPY --chown=node:node package.json ./
 COPY --chown=node:node server ./server
 COPY --chown=node:node js ./js
 COPY --chown=node:node css ./css
+COPY --chown=node:node assets ./assets
 COPY --chown=node:node index.html ./
 USER node
 EXPOSE 3000

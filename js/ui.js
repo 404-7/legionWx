@@ -32,7 +32,7 @@ function buildShop() {
     group.innerHTML = `<div class="race-title" style="color:${RACES[race].color}">${RACES[race].icon} ${RACES[race].name}军团</div><p class="race-desc">${RACES[race].desc}</p><p class="race-tip">${RACES[race].tip}</p>`;
     const grid = document.createElement('div');
     grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = '1fr 1fr';
+    grid.style.gridTemplateColumns = '1fr';
     grid.style.gap = '6px';
     for (const [uid, def] of Object.entries(UNITS)) {
       if (def.race !== race || (!shopCatalog && !isBaseUnit(uid)) || !def.sourceRow) continue;
@@ -45,12 +45,13 @@ function buildShop() {
       card.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();if(isBaseUnit(uid))selectShop(uid);else card.querySelector('details').open=!card.querySelector('details').open;}});
       const portrait = document.createElement('canvas');
       portrait.className = 'portrait';
-      portrait.width = 46; portrait.height = 46;
-      drawPortrait(portrait, uid, 46);
+      portrait.width = 168; portrait.height = 168;
+      drawPortrait(portrait, uid, 168);
       const body = document.createElement('div');
       body.className = 'uBody';
       body.innerHTML = `
         <div class="uName"><span>${def.name}</span><span class="cost">${def.cost}</span></div>
+        <div class="uEnglish">${def.english}</div>
         <div class="uRole">${def.role} · T${def.tier}${def.summonOnly?' · 召唤物':def.elite?' · 进阶':''}</div><div class="uStats">❤${def.hp} ⚔${def.min}–${def.max} ${def.range > 50 ? '远程' : '近战'}</div>
         <div class="uTags">
           <span class="chip atk">${def.atk}</span><span class="chip armor">${def.armor}</span>

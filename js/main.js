@@ -21,8 +21,12 @@ setInterval(() => {
   if (now - lastFrameAt > 400) frame(now, true);
 }, 300);
 
-function boot() {
+async function boot() {
   setupCanvas();
+  const readyButtons=[...document.querySelectorAll('#overlay button')].filter(button=>!button.disabled);
+  readyButtons.forEach(button=>button.disabled=true);
+  await loadUnitArt();
+  readyButtons.forEach(button=>button.disabled=false);
   buildSprites();
   buildShop();
   buildMercs();

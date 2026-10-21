@@ -490,6 +490,7 @@ function buildSprites() {
   /* 国王 */
   mk('king_0', c => kingSpr(c, 0));
   mk('king_1', c => kingSpr(c, 1));
+  if(typeof UNIT_ART!=='undefined')applyUnitArt();
 }
 
 /* 把贴图按尺寸画到目标画布（头像用） */

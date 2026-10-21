@@ -10,6 +10,8 @@ const {server}=require('../server/index.cjs');
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:'+server.address().port);
   await page.locator('.race-tab').first().waitFor();
+  assert.equal(await page.evaluate(()=>UNIT_ART.status),'ready');
+  assert.equal(await page.evaluate(()=>SOURCE341.units.every(row=>CLASSIC_ART_FRAMES[row.id])),true);
   assert.equal(await page.locator('.race-tab').count(),14);
   await page.locator('.diff[data-diff="normal"]').click();
   await page.locator('#btnPause').click();
@@ -28,7 +30,20 @@ const {server}=require('../server/index.cjs');
   await page.locator('[data-race="ghost"]').click();
   await page.locator('.catalog-toggle').click();
   await page.locator('[data-uid="phantom"] summary').click();
-  if(process.argv[3])await page.screenshot({path:path.resolve(process.argv[3]),fullPage:true});
+  if(process.argv[3]){
+   await page.screenshot({path:path.resolve(process.argv[3]),fullPage:true});
+   const gallery=await page.evaluate(()=>{
+    const canvas=document.createElement('canvas');canvas.width=1400;canvas.height=1000;const c=canvas.getContext('2d');
+    c.fillStyle='#0e1918';c.fillRect(0,0,1400,1000);c.fillStyle='#dfc581';c.font='bold 32px Microsoft YaHei';c.fillText('军团战争 · 经典兵种外观',36,55);
+    const ids=['gnoll_warrior','ogre_pulverizer','harpy','spawn_of_dragon','infantry','neotank','krogoth','ent','ranger','meliai','thunderbird','yggdrasil','bone_warrior','nightcrawler','gateguard','infernal','aqua_spirit','fenix','phantom','soul_of_hero_atk','medicine_man','minotaur','hydra','tuskarr','magnataur','pandaren','orc_warrior','death_dragon'];
+    ids.forEach((id,i)=>{const x=24+(i%7)*195,y=88+Math.floor(i/7)*224;
+     c.fillStyle='#152623';c.strokeStyle='#3c5144';c.fillRect(x,y,182,208);c.strokeRect(x,y,182,208);
+     c.drawImage(SPR[id],x+11,y+5,160,160);c.fillStyle='#e5ddc9';c.font='bold 16px Microsoft YaHei';c.textAlign='center';c.fillText(UNITS[id].name,x+91,y+180);
+     c.fillStyle='#94aaa0';c.font='11px Segoe UI';c.fillText(UNITS[id].english,x+91,y+198);
+    });return canvas.toDataURL('image/png').split(',')[1];
+   });
+   require('node:fs').writeFileSync(path.resolve(process.argv[3]).replace(/\.png$/, '-gallery.png'),Buffer.from(gallery,'base64'));
+  }
   assert.deepEqual(errors,[]);
   console.log('UI smoke passed: 14 race tabs, 84 base cards, 187 encyclopedia records, branch upgrade; no page errors.');
  }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

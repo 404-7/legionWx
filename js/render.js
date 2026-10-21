@@ -201,7 +201,7 @@ function drawFighter(c, f, p, t) {
   if(f.hp<=0&&f.deadT<=0)return;
   if (f.deadT > 0) {   // 复活倒计时幽灵
     c.globalAlpha = 0.35;
-    c.drawImage(SPR[f.uid], f.x - SPR_N / 2, f.y - SPR_N / 2 + 6);
+    c.drawImage(SPR[f.uid], f.x - SPR_N / 2, f.y - SPR_N / 2 + 6,SPR_N,SPR_N);
     c.globalAlpha = 1;
     c.strokeStyle = '#7ee08a';
     c.lineWidth = 1.2;
@@ -239,7 +239,7 @@ function drawFighter(c, f, p, t) {
 
   // 本体贴图（受击时抖动）
   const dx = f.flash > 0 ? Math.sin(t * 60) * 1.5 : 0;
-  c.drawImage(SPR[f.uid], f.x - SPR_N / 2 + dx, f.y - SPR_N / 2 + 8 + bob);
+  c.drawImage(SPR[f.uid], f.x - SPR_N / 2 + dx, f.y - SPR_N / 2 + 8 + bob,SPR_N,SPR_N);
 
   // 受击白闪
   if (f.flash > 0) {
