@@ -5,8 +5,8 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
 (async()=>{
  await require('./test-server.cjs')(server);const browser=await chromium.launch({headless:true});
  try{
-  for(const viewport of [{width:1560,height:1050},{width:390,height:844}]){
-   const mobile=viewport.width<900,context=await browser.newContext({viewport,hasTouch:mobile,isMobile:mobile,deviceScaleFactor:1}),page=await context.newPage(),errors=[];
+  for(const viewport of [{width:1560,height:1050},{width:390,height:844},{width:933,height:430}]){
+   const mobile=viewport.width<900||viewport.height<=600,context=await browser.newContext({viewport,hasTouch:mobile,isMobile:mobile,deviceScaleFactor:1}),page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push(e.message));
    await page.goto('http://127.0.0.1:'+server.address().port);await page.locator('.diff[data-diff="normal"]').click();
    await page.evaluate(()=>{G.paused=true;G.players.forEach(p=>{p.ai=null;p.gold=100000;const ids=['ent','infantry','gateguard','ranger','gnoll_warrior','bone_warrior'];for(let i=0;i<ids.length;i++)buyFighter(p,ids[i],4+i%3,6+Math.floor(i/3)*2);for(let i=0;i<6;i++)buyMine(p);});setMapView('overview');updateUI(true);});

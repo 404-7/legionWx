@@ -42,10 +42,12 @@ function roundedRoad(c,points,radius=52){
   }
   const end=points.at(-1);c.lineTo(end[0],end[1]);
 }
-function drawStoneRoad(c,points){
+function drawStoneRoads(c,roads){
   c.lineJoin='round';c.lineCap='round';
   for(const [width,color] of [[102,'#08141088'],[90,'#384337'],[80,'#8a8b70'],[74,'#29372f'],[68,stonePattern(c)]]){
-    c.lineWidth=width;c.strokeStyle=color;roundedRoad(c,points);c.stroke();
+    c.lineWidth=width;c.strokeStyle=color;
+    // Each material layer covers the entire connected road network before the next layer.
+    for(const points of roads){roundedRoad(c,points);c.stroke();}
   }
 }
 function drawRiver(c,t){
@@ -67,8 +69,9 @@ function drawBridge(c,t){
   const x=CFG.W/2,y=CFG.ROAD_Y,open=G.battleMode==='arena'&&G.phase==='combat';
   const dt=ROAD_SKIN.lastTime===null?0:Math.min(.1,Math.max(0,t-ROAD_SKIN.lastTime));ROAD_SKIN.lastTime=t;
   ROAD_SKIN.gateAmount+=(Number(open)-ROAD_SKIN.gateAmount)*Math.min(1,dt*7);
-  c.fillStyle='#07110e99';roundRect(c,x-123,y-68,250,146,12);c.fill();
-  c.fillStyle=stonePattern(c);c.strokeStyle='#9b9c82';c.lineWidth=3;roundRect(c,x-120,y-60,240,120,10);c.fill();c.stroke();
+  c.fillStyle='#07110e99';c.fillRect(x-120,y-68,240,8);c.fillRect(x-120,y+60,240,12);
+  // The bridge's east/west approaches stay open: no border or shadow across the pavement.
+  c.fillStyle=stonePattern(c);roundRect(c,x-120,y-60,240,120,10);c.fill();
   for(const side of [-1,1]){
     c.fillStyle='#303f35';c.fillRect(x-114,y+side*59-5,228,10);
     c.fillStyle='#a5a58b';c.fillRect(x-113,y+side*59-5,226,3);
@@ -101,10 +104,12 @@ function drawMap(c, t) {
   }
   drawRiver(c,t);
   c.lineCap='round'; c.lineJoin='round';
+  const roads=G.kings.flatMap(k=>{const x=G.players.find(p=>p.team===k.team).exitX;return [
+    [[x,20],[x,CFG.H-20]],[[x,CFG.ROAD_Y],[k.x,CFG.ROAD_Y],[k.x,k.y]]
+  ];});
+  drawStoneRoads(c,roads);
   for (const k of G.kings) {
     const x=G.players.find(p=>p.team===k.team).exitX,color=TEAM_COLORS[k.team];
-    drawStoneRoad(c,[[x,20],[x,CFG.H-20]]);
-    drawStoneRoad(c,[[x,CFG.ROAD_Y],[k.x,CFG.ROAD_Y],[k.x,k.y]]);
     for(const [y,angle] of [[34,Math.PI/2],[640,Math.PI/2],[CFG.H-34,-Math.PI/2],[800,-Math.PI/2]])mapArrow(c,x,y,angle,color);
     mapArrow(c,(x+k.x)/2,CFG.ROAD_Y,x<k.x?0:Math.PI,color);
     mapArrow(c,k.x,(CFG.ROAD_Y+k.y)/2,k.y<CFG.ROAD_Y?-Math.PI/2:Math.PI/2,color);

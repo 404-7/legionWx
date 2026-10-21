@@ -22,6 +22,7 @@ function closeCommandPanel() {
   if(restoreFocus)document.querySelector('[data-command][aria-selected="true"]')?.focus({preventScroll:true});
 }
 function syncCommandPanels() {
+  $('commandTabs').setAttribute('aria-orientation',CommandUI.mobile&&innerWidth>innerHeight?'vertical':'horizontal');
   $('commandTitle').textContent=COMMAND_TITLES[CommandUI.panel];
   $('side').classList.toggle('drawer-open',CommandUI.open);
   $('side').inert=CommandUI.mobile&&!CommandUI.open;
@@ -141,15 +142,19 @@ function requestUnitSale(f) {
   $('btnConfirmSell').textContent=`确认出售 · +${refund} 金`;$('sellDialog').showModal();
 }
 function bindCommandLayout() {
-  const media=window.matchMedia('(max-width: 900px)');
-  const responsive=()=>{CommandUI.mobile=media.matches;CommandUI.open=!media.matches;MapCamera.mode=null;MapCamera.cx=MapCamera.cy=null;MapCamera.zoom=1;syncCommandPanels();syncMapButtons();};
-  media.addEventListener('change',responsive);responsive();
+  const media=window.matchMedia('(max-width: 900px), (pointer: coarse) and (max-height: 600px)');
+  const landscape=window.matchMedia('(orientation: landscape)'),touch=window.matchMedia('(pointer: coarse)');
+  let rotationDismissed=sessionStorage.getItem('legion-rotation-dismissed')==='1';
+  const orientationHint=()=>{$('orientationHint').hidden=rotationDismissed||!media.matches||landscape.matches||!touch.matches;};
+  const responsive=()=>{CommandUI.mobile=media.matches;CommandUI.open=!media.matches;MapCamera.mode=null;MapCamera.cx=MapCamera.cy=null;MapCamera.zoom=1;syncCommandPanels();syncMapButtons();orientationHint();};
+  media.addEventListener('change',responsive);landscape.addEventListener('change',responsive);touch.addEventListener('change',orientationHint);responsive();
+  $('btnDismissRotation').addEventListener('click',()=>{rotationDismissed=true;sessionStorage.setItem('legion-rotation-dismissed','1');orientationHint();});
   document.querySelectorAll('[data-command]').forEach(button=>{
     button.addEventListener('click',()=>{openCommandPanel(button.dataset.command,{toggle:true});if(G)updateUI(true);});
     button.addEventListener('keydown',event=>{
-      if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();
+      if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))return;event.preventDefault();
       const buttons=[...document.querySelectorAll('[data-command]')],index=buttons.indexOf(button);
-      const next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(index+(event.key==='ArrowRight'?1:buttons.length-1))%buttons.length;
+      const next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(index+(['ArrowRight','ArrowDown'].includes(event.key)?1:buttons.length-1))%buttons.length;
       buttons[next].click();buttons[next].focus();
     });
   });
