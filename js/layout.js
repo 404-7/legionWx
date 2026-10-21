@@ -124,7 +124,7 @@ function syncCommandUI() {
   if(def)$('placementHint').textContent=me.gold>=def.purchaseCost?'点击己方空格放置 · 可连续建造':'金币不足，可取消或等待金矿产出';
   $('mapHint').hidden=!!def;
   const mode=MapCamera.mode||(CommandUI.mobile?'local':'overview'),focused=mode==='local';
-  $('mapHint').textContent=mode==='arena'?'PK 战场 · 一方军团全灭即结算回合':mode==='field'?`${CFG.COLS}×${CFG.ROWS} 格完整防区 · 放大后精确布阵`:focused?CommandUI.mobile?'大防区 · 单指拖动，双指缩放':'你的防区 · 拖动查看战场，滚轮缩放':'全图视角 · 红蓝阵营路线 / 粉色王城 / 绿色 PK 路口';
+  $('mapHint').textContent=mode==='arena'?'王庭石桥 · 一方军团全灭即结算回合':mode==='field'?`${CFG.COLS}×${CFG.ROWS} 格完整防区 · 放大后精确布阵`:focused?CommandUI.mobile?'大防区 · 单指拖动，双指缩放':'你的防区 · 拖动查看战场，滚轮缩放':'全图视角 · 红蓝阵营路标 / 粉色王城 / 中央石桥关隘';
   const pk=G.battleMode==='arena';
   $('btnMapHome').textContent=pk&&G.phase==='combat'?'⚔ PK 战场':'⌖ 我的防区';
   $('blueKingStatus').textContent='♛ 苍岚 '+Math.max(0,Math.ceil(G.kings[0].hp))+'/'+G.kings[0].max;

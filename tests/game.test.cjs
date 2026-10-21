@@ -27,7 +27,7 @@ test('king stats upgrade independently, share within the team and reject invalid
 test('king regeneration scales with elapsed time in prep and combat and clamps to max HP', () => {
   const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
   const ctx=vm.createContext({});
-  vm.runInContext(['source341','config','skills341','data','engine','combat341','ai'].map(name=>fs.readFileSync(path.join(__dirname,'../js',name+'.js'),'utf8')).join('\n'),ctx);
+  vm.runInContext(['source341','config','skills341','data','behavior','engine','combat341','ai'].map(name=>fs.readFileSync(path.join(__dirname,'../js',name+'.js'),'utf8')).join('\n'),ctx);
   const run=code=>vm.runInContext(code,ctx);
   run("newGame('normal'); G.kings[0].hp -= 100; kingUpgrade(G.players[0], 'regen'); simStep(1)");
   assert.equal(run('G.kings[0].hp'),4103);

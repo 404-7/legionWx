@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 function engine(extra={}) {
  const ctx=vm.createContext(extra),run=code=>vm.runInContext(code,ctx);
- run(['source341','config','skills341','data','engine','combat341','ai'].map(n=>fs.readFileSync(path.join(__dirname,'../js',n+'.js'),'utf8')).join('\n'));
+ run(['source341','config','skills341','data','behavior','engine','combat341','ai'].map(n=>fs.readFileSync(path.join(__dirname,'../js',n+'.js'),'utf8')).join('\n'));
  run("newGame('normal');G.players.forEach(p=>p.ai=null)");return {run,ctx};
 }
 test('187 spreadsheet records retain source stats; 14 races have 84 legal base units',()=>{
@@ -41,7 +41,7 @@ test('source lifesteal, healing and numeric armor work; built units revive next 
  const {run}=engine();assert.equal(run('UNITS.ghoul.abil.lifesteal'),undefined);
  assert.ok(Math.abs(run('UNITS.frenzy_ghoul.abil.lifesteal')-.15)<1e-6);assert.ok(Math.abs(run('UNITS.captain.abil.aura.p')-.07)<1e-6);
  run(`const p=G.players[0];p.gold=5000;buyFighter(p,'ghoul',2,2);upgradeFighter(p,p.fighters[0]);const f=p.fighters[0];f.hp=200;f.cd=0;
- p.enemies=[{hp:10,x:f.x,y:f.y+10,r:10,armor:'无甲',armorPoints:20,magicImmune:false}];fighterAct(p,f,.05)`);
+ p.enemies=[{hp:10,x:f.x,y:f.y+10,r:10,armor:'无甲',armorPoints:20,magicImmune:false}];fighterAct(p,f,.05);fighterAct(p,f,1)`);
  assert.ok(Math.abs(run('f.hp')-201.5)<1e-5);assert.equal(run('armorFactor(10)'),.625);
  run('p.enemies=[];buyFighter(p,"young_witch_doctor",2,3);buyFighter(p,"young_witch_doctor",3,2);upgradeFighter(p,p.fighters[2]);f.hp=200;tick341(p,1)');
  assert.ok(Math.abs(run('f.hp')-210-run('f.def.regenFlat'))<1e-5);

@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const source = ['source341', 'config', 'skills341', 'data', 'engine','combat341','ai'].map(name =>
+const source = ['source341', 'config', 'skills341', 'data', 'behavior','engine','combat341','ai'].map(name =>
   fs.readFileSync(path.join(__dirname, '..', 'js', name + '.js'), 'utf8')).join('\n');
 
 module.exports = function createGame(humans) {

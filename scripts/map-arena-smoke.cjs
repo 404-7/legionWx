@@ -20,6 +20,7 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
    await page.evaluate(()=>{for(let i=0;i<1500&&G.arena.stage!=='result';i++){simStep(.1);if([0,1].every(team=>G.players.some(p=>p.team===team&&p.fighters.some(f=>f.arenaReady&&f.hp>0))))break;}simStep(.5);updateUI(true);});
    assert.equal(await page.evaluate(()=>G.arena.stage==='fight'||G.arena.stage==='march'),true);
    if(mobile){await page.locator('#btnMapHome').tap();await page.waitForFunction(()=>MapCamera.mode==='arena');}
+   await page.waitForFunction(()=>ROAD_SKIN.gateAmount>.98);
    await page.evaluate(()=>{updateUI(true);draw(performance.now());});
    if(output)await page.screenshot({path:path.join(output,`new-map-pk-${viewport.width}.png`)});
    assert.equal(await page.evaluate(()=>G.result),null);

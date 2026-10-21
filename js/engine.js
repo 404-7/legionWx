@@ -18,7 +18,7 @@ function newGame(diffKey) {
     players: [], kings: [], projectiles: [], floaters: [], fx: [],
     selectedShop: null, selectedFighter: null,
     hover: null, logLines: [],
-    waveDef: null, result: null, battleMode:'defense', arena:null, arenaHistory:[],
+    waveDef: null, result: null, battleMode:'defense', arena:null, arenaHistory:[],entitySerial:0,
   };
   for (let i = 0; i < 4; i++) {
     const L = layoutFor(i);
@@ -182,7 +182,8 @@ function fieldStep(p, dt) {
       p.spawnT += p.spawnIv;
     }
   }
-  tick341(p, dt);
+  const combat={...p,enemies:defenseTargets(p)};
+  tick341(combat, dt);
   // 战士（含复活倒计时）
   for (const f of p.fighters) {
     if (f.hp <= 0 && f.deadT <= 0) continue;
@@ -191,31 +192,23 @@ function fieldStep(p, dt) {
       if (f.deadT <= 0) { f.hp = f.max * 0.5; addFloater(f.x, f.y, '复活!', '#7ee08a'); recalcAuras(p); }
       continue;
     }
-    fighterAct(p, f, dt);
+    fighterAct(combat, f, dt);
   }
   // 灼烧光环
   for (const f of p.fighters) {
     const b = f.def.abil && f.def.abil.burn;
     if (!b || f.hp <= 0 || f.deadT > 0) continue;
-    for (const e of p.enemies) {
-      if (e.hp > 0 && Math.hypot(e.x - f.x, e.y - f.y) <= b.r) { e.hp -= b.dps * dt; e.flash = 0.08; }
+    for (const e of combat.enemies) {
+      if (e.hp > 0 && Math.hypot(e.x - f.x, e.y - f.y) <= b.r) dmgEnemy(e,b.dps*dt,'法术',f);
     }
   }
   // 敌人
   for (const e of [...p.enemies]) enemyAct(p, e, dt);
   // 简单分离，防止重叠
-  const es = p.enemies;
-  for (let i = 0; i < es.length; i++) for (let j = i + 1; j < es.length; j++) {
-    const a = es[i], b = es[j];
-    const dx = b.x - a.x, dy = b.y - a.y, dd = Math.hypot(dx, dy), min = a.r + b.r;
-    if (dd > 0.01 && dd < min) {
-      const push = (min - dd) / 2, nx = dx / dd, ny = dy / dd;
-      a.x -= nx * push; a.y -= ny * push; b.x += nx * push; b.y += ny * push;
-    }
-  }
+  separateDefenseUnits(p,dt);
   // 清理死亡
   for (const e of p.enemies) if (e.hp <= 0) {
-    if(!e.rewarded){p.gold += Math.round((e.bounty||0)*gainMult(p));e.rewarded=true;}
+    rewardEnemy(p,e);
     addPuff(e.x,e.y,'#ff8a80',6+e.r);
   }
   p.enemies = p.enemies.filter(e => e.hp > 0);
@@ -241,6 +234,7 @@ function spawnEnemy(p, item) {
     e.trait = d.trait; e.bounty=d.bounty; e.armorPoints=d.armorPoints; e.regenFlat=d.regenFlat; e.air=d.air;
   }
   e.laneX = p.gx + 16 + Math.random() * (CFG.GRID_W - 32);
+  e.ownerId=p.id;combatAgent(e);
   e.x = e.laneX;
   e.y = p.spawnY;
   e.cd = 0.6 + Math.random() * 0.5;
@@ -248,8 +242,8 @@ function spawnEnemy(p, item) {
   p.enemies.push(e);
 }
 
-function enemyAct(p, e, dt) {
-  if (e.hp <= 0 || e.stunT>0) return;
+function enemyAct(p, e, dt,engageOnly=false) {
+  if (e.hp <= 0 || e.stunT>0) return engageOnly;
   e.cd -= dt;
   if (e.flash > 0) e.flash -= dt;
   if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowF = 1; }
@@ -257,21 +251,21 @@ function enemyAct(p, e, dt) {
   if(e.regenFlat)e.hp=Math.min(e.max,e.hp+e.regenFlat*dt);
   const sp = e.speed * e.slowF;
 
-  let tgt = null, td = 1e9;
-  for (const f of p.fighters) {
-    if (f.deadT > 0 || f.hp <= 0) continue;
-    const d = Math.hypot(f.x - e.x, f.y - e.y);
-    if (d < td) { td = d; tgt = f; }
-  }
-  if (tgt && td < CFG.AGGRO) {
-    const reach = e.range + e.r;
+  const b=combatAgent(e),reach=e.range+e.r;
+  const tgt=chooseCombatTarget(e,p.fighters,{sense:Math.max(CFG.AGGRO,reach+20),reach,
+    x:b.targetId?(b.anchorX??e.x):e.x,y:b.targetId?(b.anchorY??e.y):e.y,leash:COMBAT_AI.ENEMY_LEASH},dt);
+  if (tgt) {
+    const td=Math.hypot(tgt.x-e.x,tgt.y-e.y);
     if (td <= reach) {
+      b.state='attack';b.chase=0;
       if (e.cd <= 0) { e.cd = e.aspd/Math.max(.05,1-(e.attackSlow||0)); hitFighter(p, tgt, e.dmg*(1-(e.damageWeak||0)), e.atk, e); e.flash = 0.12; }
     } else {
-      const nx = (tgt.x - e.x) / td, ny = (tgt.y - e.y) / td;
-      e.x += nx * sp * dt; e.y += ny * sp * dt;
+      b.state='chase';if(moveCombatUnit(p,e,tgt,sp,dt,reach))b.chase+=dt;
     }
+    return true;
   } else {
+    b.state='advance';
+    if(engageOnly)return false;
     e.y += p.direction * sp * dt;
     e.x += (e.laneX - e.x) * 0.5 * dt;
     if ((e.y - p.exitY) * p.direction >= 0) leak(p, e);
@@ -289,25 +283,42 @@ function hitFighter(p,f,dmg,atk,attacker) {
   if(a.block&&Math.random()<a.block.chance)amount=Math.max(a.block.minimum,amount-a.block.amount);
   if(a.manaShield&&f.mana>0){const absorb=Math.min(amount*a.manaShield.ratio,f.mana*a.manaShield.perMana);amount-=absorb;f.mana-=absorb/a.manaShield.perMana;}
   f.hp-=amount;f.flash=.15;
+  recordCombatThreat(f,attacker,amount);
+  if(f.hp<=0)resetCombatAgent(f);
   if(attacker&&a.reflect&&attacker.range<=45)dmgEnemy(attacker,amount*a.reflect.p,'法术');
   if(f.hp<=0&&a.reinc&&!f.reincUsed){f.reincUsed=true;f.deadT=2.2;}
 }
 
 function fighterAct(p, f, dt) {
-  if (f.hp <= 0 || f.deadT>0 || f.stunT>0) return;
+  f.moving=false;
+  if (f.hp <= 0 || f.deadT>0) return;
   if (f.flash > 0) f.flash -= dt;
   f.cd -= dt;
-  if (f.cd > 0) return;
-  const R = effRange(f.def);
-  let tgt = null, bx = -Infinity;
-  for (const e of p.enemies) {
-    if (e.hp <= 0) continue;
-    const d = Math.hypot(e.x - f.x, e.y - f.y);
-    const progress = e.y * p.direction;
-    if (d - e.r - 12 <= R && progress > bx) { bx = progress; tgt = e; }
+  if(f.stunT>0){if(f.brain)f.brain.windup=null;return;}
+  const R = f.def.max===0?Math.max(effRange(f.def),...(f.def.abil.casts||[]).map(c=>c.range||0)):effRange(f.def);
+  const home=guardHome(p,f),tgt=chooseCombatTarget(f,p.enemies,{sense:Math.max(f.def.acquireRange||125,R+28,p.arenaView?260:0),
+    reach:R+24,x:home.x,y:home.y,leash:p.arenaView?Infinity:COMBAT_AI.LEASH,returnHome:!p.arenaView},dt);
+  const b=combatAgent(f);
+  if(!tgt){idleGuard(p,f,dt);return;}
+  const reach=R+(tgt.r||10)+12,d=Math.hypot(tgt.x-f.x,tgt.y-f.y);
+  if(d>reach){
+    b.windup=null;b.state='chase';
+    if(moveCombatUnit(p,f,tgt,f.def.speed*(f.slowF??1),dt,reach))b.chase+=dt;
+    return;
   }
-  if (!tgt) return;
-  f.cd=f.def.aspd/(1+(f.effHaste||0));
+  b.state='attack';b.chase=0;
+  if(f.def.max===0){b.state='cast';return;}
+  if(b.windup){
+    b.windup.time-=dt;
+    if(b.windup.time>0)return;
+    b.windup=null;executeFighterAttack(p,f,tgt,R);return;
+  }
+  if(f.cd>0)return;
+  const rate=(1+(f.effHaste||0))*Math.max(.05,1-(f.attackSlow||0));
+  f.cd=f.def.aspd/rate;
+  b.windup={targetId:tgt.entityId,time:Math.min(f.def.attackPoint??.3,f.def.aspd*.6)/rate};
+}
+function executeFighterAttack(p,f,tgt,R){
   f.attacks=(f.attacks||0)+1;
   const ab=f.def.abil||{};
   let dmg=(f.def.min+Math.random()*(f.def.max-f.def.min))*(f.def.dmg ? f.effDmg/f.def.dmg : 1)+(ab.flatDamage||0);
@@ -318,6 +329,7 @@ function fighterAct(p, f, dt) {
   if(f.steroids)dmg*=1.25;
   if(ab.focusManaDivisor)dmg+=Math.floor(f.mana/ab.focusManaDivisor);
   if(f.illusionFactor)dmg*=f.illusionFactor;
+  dmg*=1-(f.damageWeak||0);
   const targets=[tgt,...p.enemies.filter(e=>e!==tgt&&e.hp>0&&Math.hypot(e.x-f.x,e.y-f.y)-e.r-12<=R).slice(0,(ab.multishot||1)-1)];
   for(const target of targets){
     if(f.def.melee){const dealt=dmgEnemy(target,dmg,f.def.atk,f);hit341(p,f,target,dealt);afterHits(p,target,dmg,f.def.atk,ab);f.flash=.12;}
@@ -327,13 +339,14 @@ function fighterAct(p, f, dt) {
 
 function dmgEnemy(e, dmg, atk, attacker=null) {
   if (e.hp <= 0) return 0;
-  if(G.battleMode==='arena'&&e.def){const before=e.hp;hitFighter(G.players[e.ownerId],e,dmg,atk,attacker);return Math.max(0,before-Math.max(0,e.hp));}
+  if(e.def){const before=e.hp;hitFighter(G.players[e.ownerId],e,dmg,atk,attacker);return Math.max(0,before-Math.max(0,e.hp));}
   let m = (ATK_ARMOR[atk] && ATK_ARMOR[atk][e.armor]) || 1;
   if(e.magicImmune && (atk==='魔法'||atk==='法术'))m=0;
   if(atk!=='法术')m*=armorFactor((e.armorPoints||0)-(e.armorLoss||0));
   if(e.mark)m*=1+e.mark;
   const dealt = Math.min(e.hp, dmg * m);
   e.hp -= dmg * m;
+  recordCombatThreat(e,attacker,dealt);
   e.flash = 0.12;
   return dealt;
 }
@@ -356,7 +369,7 @@ function afterHits(p, tgt, dmg, atk, ab) {
   if (ab.slow && tgt.hp > 0) {
     tgt.slowT = Math.max(tgt.slowT, ab.slow.d);
     tgt.slowF = Math.min(tgt.slowF, 1 - ab.slow.p);
-    if(p.arenaView)add341Status(tgt,'attackSlow',{time:ab.slow.d,move:ab.slow.p});
+    add341Status(tgt,'attackSlow',{time:ab.slow.d,move:ab.slow.p});
   }
 }
 
@@ -383,7 +396,7 @@ function leak(p, e) {
   if (i >= 0) p.enemies.splice(i, 1);
   p.leakCount = (p.leakCount || 0) + 1;
   const k = G.kings[p.team];
-  e.toKing = true; e.routeX = p.exitX; e.turning = true;
+  e.toKing = true;e.ownerId=p.id; e.routeX = p.exitX; e.turning = true;forgetCombatTarget(e);
   e.route=[{x:p.exitX,y:CFG.ROAD_Y},{x:k.x,y:CFG.ROAD_Y},{x:k.x,y:k.y}];e.routeIndex=0;
   k.leaks.push(e);
   addFloater(p.exitX - 20, e.y, '漏怪!', '#ff6a5e');
@@ -395,14 +408,13 @@ function kingStep(k, dt) {
   k.cd -= dt;
   if (k.flash > 0) k.flash -= dt;
   for (const e of k.leaks) {
+    if(e.hp<=0)continue;
+    const owner=G.players[e.ownerId],defenders=G.players.filter(p=>p.team===k.team).flatMap(p=>p.fighters);
+    if(owner&&enemyAct({...owner,fighters:defenders},e,dt,true))continue;
     if(e.routeIndex<e.route.length-1){
       walkRoute(e,e.speed*e.slowF*dt);
       e.turning=e.routeIndex===0;continue;
     }
-    e.cd -= dt;
-    if (e.flash > 0) e.flash -= dt;
-    if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowF = 1; }
-    if (e.regen) e.hp = Math.min(e.max, e.hp + e.max * e.regen * dt);
     const dx = k.x - e.x, dy = k.y - e.y, d = Math.hypot(dx, dy);
     const reach = e.range + e.r + 26;
     if (d <= reach) {
@@ -434,7 +446,7 @@ function kingStep(k, dt) {
       k.flash = 0.2;
     }
   }
-  for (const e of k.leaks) if (e.hp <= 0) addPuff(e.x, e.y, '#ff8a80', 6 + e.r);
+  for (const e of k.leaks) if (e.hp <= 0) {rewardEnemy(G.players[e.ownerId],e);addPuff(e.x, e.y, '#ff8a80', 6 + e.r);}
   k.leaks = k.leaks.filter(e => e.hp > 0);
 }
 
@@ -481,6 +493,7 @@ function payClear(p) {
   p.paid=true;
   if(p.isHuman)addLog(p.leakCount ? `第 ${G.wave} 波漏怪 ${p.leakCount} 个` : `第 ${G.wave} 波防守成功`,p.leakCount?'l-red':'l-gold');
 }
+function rewardEnemy(p,e){if(p&&!e.rewarded){p.gold+=Math.round((e.bounty||0)*gainMult(p));e.rewarded=true;}}
 
 function cellFree(p, col, row) {
   return !p.fighters.some(f => !f.temporary && f.col === col && f.row === row);
@@ -492,7 +505,7 @@ function buyFighter(p, uid, col, row) {
   if (!Object.hasOwn(UNITS,uid) || !def || def.elite || def.summonOnly || !Number.isInteger(col) || !Number.isInteger(row) || p.gold < def.purchaseCost || col < 0 || col >= CFG.COLS || row < 0 || row >= CFG.ROWS || !cellFree(p, col, row)) return false;
   p.gold -= def.purchaseCost;
   p.fighters.push({
-    def, uid, col, row,
+    def, uid, col, row,ownerId:p.id,r:10,
     x: p.gx + (col + 0.5) * CFG.CELL, y: p.gy + (row + 0.5) * CFG.CELL,
     hp: def.hp, max: def.hp, cd: 0.3, spent: def.purchaseCost,
     effDmg: def.dmg, flash: 0, deadT: 0, reincUsed: false,
@@ -593,6 +606,7 @@ function restoreFighter(p,f){
   delete f.route;delete f.routeIndex;delete f.statuses;delete f.arenaReady;
   f.slowF=1;f.slowT=0;f.stunT=0;f.mark=0;f.armorLoss=0;f.attackSlow=0;f.damageWeak=0;f.miss=0;
   init341Fighter(f);
+  resetCombatAgent(f);
 }
 function startArenaPrep(){
   G.battleMode='arena';G.phase='prep';G.timerMax=CFG.ARENA_PREP;G.timer=G.timerMax;
@@ -620,15 +634,17 @@ function startArenaCombat(){
 }
 function prepareArenaFighter(p,f){
   f.ownerId=p.id;f.team=p.team;f.r=12;f.armor=f.def.armor;f.armorPoints=f.def.armorPoints;
-  f.range=f.def.range;f.air=!!(f.def.abil.air);f.boss=false;f.magicImmune=!!f.def.abil.magicImmune;
+  f.range=f.def.range;f.air=!!f.def.air;f.boss=false;f.magicImmune=!!f.def.abil.magicImmune;
   f.slowF=1;f.slowT=0;f.arenaReady=false;
 }
 function walkRoute(unit,distance){
+  const startX=unit.x,startY=unit.y;
   while(unit.routeIndex<unit.route.length&&distance>0){
     const point=unit.route[unit.routeIndex],dx=point.x-unit.x,dy=point.y-unit.y,d=Math.hypot(dx,dy);
     if(d<=distance){unit.x=point.x;unit.y=point.y;unit.routeIndex++;distance-=d;}
     else{unit.x+=dx/d*distance;unit.y+=dy/d*distance;distance=0;}
   }
+  unit.moving=Math.hypot(unit.x-startX,unit.y-startY)>.01;
   return unit.routeIndex>=unit.route.length;
 }
 function arenaCounts(){return [0,1].map(team=>G.players.filter(p=>p.team===team).reduce((n,p)=>n+p.fighters.filter(f=>f.hp>0||f.deadT>0).length,0));}
@@ -653,13 +669,8 @@ function arenaStep(dt){
         f.cd=Math.max(0,f.cd-dt);continue;
       }
       const targets=view.enemies.filter(e=>e.hp>0&&e.deadT<=0&&e.arenaReady);
-      const target=targets.sort((a,b)=>Math.hypot(a.x-f.x,a.y-f.y)-Math.hypot(b.x-f.x,b.y-f.y))[0];
-      if(target){
-        const dx=target.x-f.x,dy=target.y-f.y,d=Math.hypot(dx,dy),reach=effRange(f.def)+target.r+12;
-        if(d>reach){const step=Math.min(d-reach,(f.def.speed||75)*f.slowF*dt);f.x+=dx/d*step;f.y+=dy/d*step;}
-        fighterAct({...view,enemies:targets},f,dt);
-        if(f.def.abil.burn)for(const e of targets)if(Math.hypot(e.x-f.x,e.y-f.y)<=f.def.abil.burn.r)dmgEnemy(e,f.def.abil.burn.dps*dt,'法术',f);
-      }else{f.cd=Math.max(0,f.cd-dt);}
+      fighterAct({...view,enemies:targets},f,dt);
+      if(f.def.abil.burn)for(const e of targets)if(Math.hypot(e.x-f.x,e.y-f.y)<=f.def.abil.burn.r)dmgEnemy(e,f.def.abil.burn.dps*dt,'法术',f);
     }
   }
   spreadArenaUnits(dt);

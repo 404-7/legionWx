@@ -181,11 +181,12 @@ function updateUI(force) {
       sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>button.addEventListener('click',()=>{performAction({type:'upgrade',col:f.col,row:f.row,uid:button.dataset.upgradeUid});updateUI(true);}));
       $('btnSell').addEventListener('click',()=>{requestUnitSale(f);});
     }
-    $('selLiveStats').textContent=`❤${Math.max(0,Math.ceil(f.hp))}/${def.hp} · 法力 ${Math.floor(f.mana||0)}/${def.manaMax} · ${f.hp>0?'在场':'等待下波复活'}`;
+    const behavior={guard:'待命',advance:'前移接敌',chase:'追击',attack:'交战',cast:'施法支援',return:'回阵'};
+    $('selLiveStats').textContent=`❤${Math.max(0,Math.ceil(f.hp))}/${def.hp} · 法力 ${Math.floor(f.mana||0)}/${def.manaMax} · ${f.hp>0?behavior[f.brain?.state]||'在场':'等待下波复活'} · 移速 ${Math.round(def.speed*(f.slowF??1))}`;
     sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>{const id=button.dataset.upgradeUid;button.disabled=!canManageArmy()||me.gold<(def.stances.includes(id)?0:UNITS[id].purchaseCost);});
     $('btnSell').disabled=!canManageArmy();
     const refund=Math.floor(f.spent*(def.abil.refund||1));$('btnSell').textContent=`卖出 +${refund}金`;
-    $('btnSell').disabled=G.phase==='over';
+    $('btnSell').disabled=!canManageArmy();
     let steroid=$('btnSteroids');
     if(def.abil.steroids&&!steroid){steroid=document.createElement('button');steroid.id='btnSteroids';steroid.className='btn';sb.querySelector('.upgrade-options').prepend(steroid);
       steroid.addEventListener('click',()=>{performAction({type:'steroids',col:f.col,row:f.row});updateUI(true);});}
@@ -324,8 +325,9 @@ function bindEvents() {
       return;
     }
     // 选中己方战士
-    if (cell) {
-      const f = me.fighters.find(f => !f.temporary && f.col === cell.col && f.row === cell.row && f.deadT <= 0);
+    const moving=G.phase==='combat';
+    if (cell||moving) {
+      const f = moving?me.fighters.filter(f=>!f.temporary&&f.deadT<=0&&f.hp>0&&Math.hypot(f.x-pos.x,f.y-pos.y)<=32).sort((a,b)=>Math.hypot(a.x-pos.x,a.y-pos.y)-Math.hypot(b.x-pos.x,b.y-pos.y))[0]:me.fighters.find(f => !f.temporary && f.col === cell.col && f.row === cell.row && f.deadT <= 0);
       G.selectedFighter = f || null;
       if(f)openCommandPanel('inspect');
       updateUI(true);

@@ -18,6 +18,78 @@ function roundRect(c, x, y, w, h, r) {
 }
 
 const PROJ_COLORS = { '普通': '#ffd27e', '穿刺': '#ffab91', '魔法': '#b388ff', '攻城': '#ffb74d' };
+const ROAD_SKIN={pattern:null,gateAmount:0,lastTime:null};
+
+function stonePattern(c){
+  if(ROAD_SKIN.pattern)return ROAD_SKIN.pattern;
+  const tile=document.createElement('canvas');tile.width=64;tile.height=64;const g=tile.getContext('2d');
+  g.fillStyle='#343d38';g.fillRect(0,0,64,64);
+  for(let row=0;row<4;row++)for(let col=-1;col<3;col++){
+    const x=col*32+(row%2)*16,y=row*16;
+    g.fillStyle=['#687063','#73796b','#5e695e','#7a7e6d'][(row*3+col+5)%4];
+    roundRect(g,x+1,y+1,30,14,3);g.fill();
+    g.strokeStyle='#b7b79a42';g.lineWidth=1;g.beginPath();g.moveTo(x+4,y+2);g.lineTo(x+27,y+2);g.stroke();
+    g.strokeStyle='#202d2966';g.beginPath();g.moveTo(x+7,y+8);g.lineTo(x+11,y+10);g.stroke();
+  }
+  ROAD_SKIN.pattern=c.createPattern(tile,'repeat');return ROAD_SKIN.pattern;
+}
+function roundedRoad(c,points,radius=52){
+  c.beginPath();c.moveTo(points[0][0],points[0][1]);
+  for(let i=1;i<points.length-1;i++){
+    const [x,y]=points[i],[ax,ay]=points[i-1],[bx,by]=points[i+1];
+    const d1=Math.hypot(x-ax,y-ay),d2=Math.hypot(bx-x,by-y),r=Math.min(radius,d1/2,d2/2);
+    c.lineTo(x+(ax-x)/d1*r,y+(ay-y)/d1*r);c.quadraticCurveTo(x,y,x+(bx-x)/d2*r,y+(by-y)/d2*r);
+  }
+  const end=points.at(-1);c.lineTo(end[0],end[1]);
+}
+function drawStoneRoad(c,points){
+  c.lineJoin='round';c.lineCap='round';
+  for(const [width,color] of [[102,'#08141088'],[90,'#384337'],[80,'#8a8b70'],[74,'#29372f'],[68,stonePattern(c)]]){
+    c.lineWidth=width;c.strokeStyle=color;roundedRoad(c,points);c.stroke();
+  }
+}
+function drawRiver(c,t){
+  const river=()=>{c.beginPath();c.moveTo(CFG.W/2,0);for(let y=0;y<=CFG.H+80;y+=80)c.lineTo(CFG.W/2+Math.sin(y/160)*12,y);};
+  c.lineJoin='round';c.lineCap='round';
+  for(const [w,color] of [[77,'#0a1716'],[64,'#283d32'],[49,'#102e32'],[32,'#194149']]){c.strokeStyle=color;c.lineWidth=w;river();c.stroke();}
+  c.strokeStyle='#90c5b326';c.lineWidth=1;
+  for(let y=12;y<CFG.H;y+=44){const flow=(y+t*9)%CFG.H,x=CFG.W/2+Math.sin(flow/160)*12;c.beginPath();c.moveTo(x-10,flow);c.quadraticCurveTo(x,flow+4,x+9,flow);c.stroke();}
+}
+function gateTower(c,x,y,color){
+  c.fillStyle='#050f0bb3';c.beginPath();c.ellipse(x+5,y+8,30,24,0,0,7);c.fill();
+  c.fillStyle='#6b7569';c.strokeStyle='#b2b29a';c.lineWidth=2;c.beginPath();c.arc(x,y,23,0,7);c.fill();c.stroke();
+  c.fillStyle='#303f38';c.beginPath();c.arc(x,y,15,0,7);c.fill();
+  for(let i=0;i<8;i++){c.save();c.translate(x,y);c.rotate(i*Math.PI/4);c.fillStyle=i%2?'#92967f':'#7d8777';c.fillRect(-5,-26,10,10);c.restore();}
+  c.strokeStyle='#b7aa78';c.lineWidth=2;c.beginPath();c.moveTo(x,y-5);c.lineTo(x,y-39);c.stroke();
+  c.fillStyle=color;c.beginPath();c.moveTo(x+1,y-39);c.lineTo(x+19,y-33);c.lineTo(x+1,y-27);c.closePath();c.fill();
+}
+function drawBridge(c,t){
+  const x=CFG.W/2,y=CFG.ROAD_Y,open=G.battleMode==='arena'&&G.phase==='combat';
+  const dt=ROAD_SKIN.lastTime===null?0:Math.min(.1,Math.max(0,t-ROAD_SKIN.lastTime));ROAD_SKIN.lastTime=t;
+  ROAD_SKIN.gateAmount+=(Number(open)-ROAD_SKIN.gateAmount)*Math.min(1,dt*7);
+  c.fillStyle='#07110e99';roundRect(c,x-123,y-68,250,146,12);c.fill();
+  c.fillStyle=stonePattern(c);c.strokeStyle='#9b9c82';c.lineWidth=3;roundRect(c,x-120,y-60,240,120,10);c.fill();c.stroke();
+  for(const side of [-1,1]){
+    c.fillStyle='#303f35';c.fillRect(x-114,y+side*59-5,228,10);
+    c.fillStyle='#a5a58b';c.fillRect(x-113,y+side*59-5,226,3);
+    for(let i=-100;i<=100;i+=40){c.fillStyle='#75806e';c.fillRect(x+i-5,y+side*59-9,10,18);}
+  }
+  // Twin portcullis leaves retract into the two stone towers; the center stays walkable during PK.
+  const slide=ROAD_SKIN.gateAmount*48;
+  for(const side of [-1,1]){
+    c.save();c.translate(x,y+side*(22+slide));
+    c.fillStyle='#131e1c99';c.fillRect(-5,-22,15,47);
+    c.fillStyle='#5a4832';c.strokeStyle='#b3a579';c.lineWidth=2;roundRect(c,-7,-22,14,44,2);c.fill();c.stroke();
+    c.fillStyle='#24362e';c.fillRect(-9,-14,18,4);c.fillRect(-9,10,18,4);c.restore();
+  }
+  gateTower(c,x,y-76,TEAM_COLORS[1]);gateTower(c,x,y+76,TEAM_COLORS[0]);
+  c.fillStyle=open?'#91c9a2':'#adab87';c.beginPath();c.moveTo(x-5,y);c.lineTo(x,y-6);c.lineTo(x+5,y);c.lineTo(x,y+6);c.closePath();c.fill();
+  c.textAlign='center';c.font='bold 14px "Microsoft YaHei"';c.fillStyle='#e0d2ad';c.fillText('王 庭 石 桥',x,y-122);
+  c.fillStyle='#0b1c17d9';roundRect(c,x-123,y+111,246,31,9);c.fill();c.font='12px "Microsoft YaHei"';
+  c.fillStyle=open?'#a4d7ad':'#bebc9b';
+  const label=G.battleMode==='arena'?G.phase==='prep'?`${Math.ceil(G.timer)} 秒后开门 · 准备 PK`:G.arena.stage==='result'?'PK 已结算 · 即将继续守关':`苍岚 ${G.arena.counts[0]}   ⚔   赤焰 ${G.arena.counts[1]}`:'关隘封闭 · 第 10 / 20 波后开启';
+  c.fillText(label,x,y+131);c.textAlign='left';
+}
 
 function drawMap(c, t) {
   const bg = c.createRadialGradient(CFG.W/2,CFG.H/2,50,CFG.W/2,CFG.H/2,CFG.H);
@@ -27,31 +99,21 @@ function drawMap(c, t) {
     c.fillStyle=i%3?'#233b32':'#2d4638';
     c.beginPath(); c.arc(x,y,3+i%7,0,7); c.fill();
   }
+  drawRiver(c,t);
   c.lineCap='round'; c.lineJoin='round';
   for (const k of G.kings) {
     const x=G.players.find(p=>p.team===k.team).exitX,color=TEAM_COLORS[k.team];
-    c.strokeStyle='#34493d'; c.lineWidth=72;
-    c.beginPath(); c.moveTo(x,20); c.lineTo(x,CFG.H-20); c.moveTo(x,CFG.ROAD_Y);c.lineTo(k.x,CFG.ROAD_Y);c.lineTo(k.x,k.y);c.stroke();
-    c.strokeStyle=color;c.lineWidth=4;c.globalAlpha=.7;
-    c.beginPath();c.moveTo(x,20);c.lineTo(x,CFG.H-20);c.moveTo(x,CFG.ROAD_Y);c.lineTo(k.x,CFG.ROAD_Y);c.lineTo(k.x,k.y);c.stroke();c.globalAlpha=1;
+    drawStoneRoad(c,[[x,20],[x,CFG.H-20]]);
+    drawStoneRoad(c,[[x,CFG.ROAD_Y],[k.x,CFG.ROAD_Y],[k.x,k.y]]);
     for(const [y,angle] of [[34,Math.PI/2],[640,Math.PI/2],[CFG.H-34,-Math.PI/2],[800,-Math.PI/2]])mapArrow(c,x,y,angle,color);
     mapArrow(c,(x+k.x)/2,CFG.ROAD_Y,x<k.x?0:Math.PI,color);
     mapArrow(c,k.x,(CFG.ROAD_Y+k.y)/2,k.y<CFG.ROAD_Y?-Math.PI/2:Math.PI/2,color);
   }
-  const open=G.battleMode==='arena'&&G.phase==='combat',gateW=CFG.GATE_RIGHT-CFG.GATE_LEFT;
-  c.fillStyle=open?'#2a633ec9':'#152e23';c.strokeStyle='#55d576';c.lineWidth=4;
-  roundRect(c,CFG.GATE_LEFT,CFG.ROAD_Y-60,gateW,120,10);c.fill();c.stroke();
-  if(!open){c.strokeStyle='#71836b';c.lineWidth=5;for(let y=CFG.ROAD_Y-43;y<CFG.ROAD_Y+48;y+=18){c.beginPath();c.moveTo(CFG.W/2-35,y);c.lineTo(CFG.W/2+35,y);c.stroke();}}
-  c.fillStyle='#b9cfc2'; c.textAlign='center'; c.font='bold 15px "Microsoft YaHei"';
-  c.fillText(open?'PK 路口 · 已开放':'PK 路口 · 已关闭',CFG.W/2,CFG.ROAD_Y-83);
-  if(G.battleMode==='arena'){c.fillStyle='#e9d392';c.fillText(G.phase==='prep'?`${Math.ceil(G.timer)} 秒后开放`:G.arena.stage==='result'?'PK 已结算':`苍岚 ${G.arena.counts[0]}  VS  赤焰 ${G.arena.counts[1]}`,CFG.W/2,CFG.ROAD_Y+92);}
-  c.fillStyle='#7f9c8e'; c.font='11px "Microsoft YaHei"';
-  c.textAlign='left';
+  drawBridge(c,t);
 }
 function mapArrow(c,x,y,angle,color='#ff665d') {
-  c.save(); c.translate(x,y); c.rotate(angle); c.strokeStyle=color; c.fillStyle=color; c.lineWidth=3;
-  c.beginPath(); c.moveTo(-22,0); c.lineTo(17,0); c.stroke();
-  c.beginPath(); c.moveTo(22,0); c.lineTo(8,-6); c.lineTo(8,6); c.closePath(); c.fill(); c.restore();
+  c.save(); c.translate(x,y); c.rotate(angle); c.strokeStyle=color; c.lineWidth=3;c.globalAlpha=.65;
+  for(const offset of [-8,3]){c.beginPath();c.moveTo(offset-5,-7);c.lineTo(offset+3,0);c.lineTo(offset-5,7);c.stroke();}c.restore();
 }
 
 /* 单位哈希（用于动画相位错开） */
@@ -220,7 +282,8 @@ function drawFighter(c, f, p, t) {
     c.beginPath(); c.arc(f.x, f.y + 6, 14, -Math.PI / 2, -Math.PI / 2 + (1 - f.deadT / 2.2) * Math.PI * 2); c.stroke();
     return;
   }
-  const bob = Math.sin(t * 3 + hsh(f.uid + f.col + f.row) ) * 1.4;
+  const bob = Math.sin(t * (f.moving?9:3) + hsh(f.uid + f.col + f.row) ) * (f.moving?2.5:1.4);
+  c.fillStyle='#06100d66';c.beginPath();c.ellipse(f.x,f.y+19,14,6,0,0,7);c.fill();
   const ab = f.def.abil || {};
 
   // 光环底圈

@@ -4,7 +4,7 @@ const fs = require('node:fs'), path = require('node:path'), vm = require('node:v
 const createGame = require('../server/game.cjs');
 function engine() {
   const context=vm.createContext({});
-  vm.runInContext(['source341','config','skills341','data','engine','combat341','ai'].map(n=>fs.readFileSync(path.join(__dirname,'../js',n+'.js'),'utf8')).join('\n'),context);
+  vm.runInContext(['source341','config','skills341','data','behavior','engine','combat341','ai'].map(n=>fs.readFileSync(path.join(__dirname,'../js',n+'.js'),'utf8')).join('\n'),context);
   const run=code=>vm.runInContext(code,context);
   run("newGame('normal'); G.players.forEach(p=>p.ai=null)");
   return run;

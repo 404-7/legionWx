@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-function engine(){const ctx=vm.createContext({}),run=code=>vm.runInContext(code,ctx);run(['source341','config','skills341','data','engine','combat341','ai'].map(n=>fs.readFileSync(path.join(__dirname,'../js',n+'.js'),'utf8')).join('\n'));run("newGame('normal');G.players.forEach(p=>{p.ai=null;p.gold=100000;})");return run;}
+function engine(){const ctx=vm.createContext({}),run=code=>vm.runInContext(code,ctx);run(['source341','config','skills341','data','behavior','engine','combat341','ai'].map(n=>fs.readFileSync(path.join(__dirname,'../js',n+'.js'),'utf8')).join('\n'));run("newGame('normal');G.players.forEach(p=>{p.ai=null;p.gold=100000;})");return run;}
 
 test('expanded grid accepts its far corner and server allows more than 36 permanent fighters',()=>{
  const run=engine();assert.equal(run('CFG.COLS*CFG.ROWS'),192);
