@@ -25,7 +25,7 @@ function performAction(a) {
     case 'buy': return buyFighter(p,a.uid,a.col,a.row);
     case 'upgrade': return !!f && upgradeFighter(p,f);
     case 'sell': return !!f && sellFighter(p,f);
-    case 'king': return kingUpgrade(p);
+    case 'king': return kingUpgrade(p, a.stat);
     case 'merc': return sendMerc(p,G.players[a.target],a.mid);
   }
 }

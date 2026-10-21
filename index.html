@@ -43,7 +43,11 @@
         <h3>👑 蓝方国王</h3>
         <canvas id="kingPortrait" width="52" height="52"></canvas>
         <div id="kingInfo"></div>
-        <button id="btnKing" class="btn wide">强化国王</button>
+        <div id="kingUpgrades" class="king-upgrades">
+          <button class="btn wide" data-king-stat="health">强化生命</button>
+          <button class="btn wide" data-king-stat="attack">强化攻击</button>
+          <button class="btn wide" data-king-stat="regen">强化生命恢复</button>
+        </div>
       </section>
       <section class="box" id="mercBox">
         <h3>💀 雇佣兵 <span class="hint">送给敌方，增加你的收入</span></h3>

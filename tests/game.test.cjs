@@ -2,6 +2,41 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const createGame = require('../server/game.cjs');
 const humans = [{ slot:0,name:'蓝方真人' }, { slot:2,name:'红方真人' }];
+test('king stats upgrade independently, share within the team and reject invalid choices', () => {
+  const game=createGame([{slot:0,name:'A'},{slot:1,name:'B'},{slot:2,name:'C'}]);
+  assert.equal(game.action(0,{type:'king',stat:'health'}),true);
+  let king=game.snapshot().kings[0];
+  assert.equal(king.max,4350); assert.equal(king.hp,4350);
+  assert.equal(king.dmg,60); assert.equal(king.regen,2);
+  assert.equal(game.action(1,{type:'king',stat:'attack'}),true);
+  king=game.snapshot().kings[0];
+  assert.deepEqual({...king.upgrades},{health:1,attack:1,regen:0});
+  assert.equal(king.dmg,69); assert.equal(king.max,4350); assert.equal(king.regen,2);
+  assert.equal(game.snapshot().players[1].gold,76);
+  assert.equal(game.action(1,{type:'king',stat:'attack'}),false);
+  assert.equal(game.action(2,{type:'king',stat:'regen'}),true);
+  assert.equal(game.snapshot().kings[1].regen,3);
+  assert.equal(game.snapshot().kings[1].max,4200);
+  assert.equal(game.snapshot().kings[1].dmg,60);
+  const before=game.snapshot();
+  for(const stat of ['invalid','__proto__','constructor',null,{}])
+    assert.equal(game.action(0,{type:'king',stat}),false);
+  assert.deepEqual(game.snapshot(),before);
+});
+test('king regeneration scales with elapsed time in prep and combat and clamps to max HP', () => {
+  const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+  const ctx=vm.createContext({});
+  vm.runInContext(['config','data','engine','ai'].map(name=>fs.readFileSync(path.join(__dirname,'../js',name+'.js'),'utf8')).join('\n'),ctx);
+  const run=code=>vm.runInContext(code,ctx);
+  run("newGame('normal'); G.kings[0].hp -= 100; kingUpgrade(G.players[0], 'regen'); simStep(1)");
+  assert.equal(run('G.kings[0].hp'),4103);
+  run('startCombat(); simStep(2)');
+  assert.equal(run('G.kings[0].hp'),4109);
+  run('G.kings[0].hp=G.kings[0].max-1; simStep(1)');
+  assert.equal(run('G.kings[0].hp'),4200);
+  run("G.phase='over'; G.kings[0].hp=4000; simStep(1)");
+  assert.equal(run('G.kings[0].hp'),4000);
+});
 test('server owns economy, rejects malformed commands and isolates rooms', () => {
   const a = createGame(humans), b = createGame(humans);
   assert.equal(a.action(0,{type:'buy',uid:'golem',col:2,row:2}),true);

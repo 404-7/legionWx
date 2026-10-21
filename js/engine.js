@@ -37,7 +37,8 @@ function newGame(diffKey) {
   G.kings = [0, 1].map(t => ({
     team: t, x: t === 0 ? 550 : 750, y: 400,
     hp: CFG.KING_HP, max: CFG.KING_HP, lvl: 0, cd: 0, flash: 0, leaks: [],
-    dmg: CFG.KING_DMG, aspd: CFG.KING_ASPD,
+    dmg: CFG.KING_DMG, aspd: CFG.KING_ASPD, regen: CFG.KING_REGEN,
+    upgrades: { health: 0, attack: 0, regen: 0 },
   }));
   aiSetupAll();
   addLog('战斗开始！守护本队国王。', 'l-blue');
@@ -85,7 +86,6 @@ function startCombat() {
 
 function endWave() {
   for (const k of G.kings) {
-    k.hp = Math.min(k.max, k.hp + CFG.KING_REGEN + k.lvl * 8);
     k.leaks = [];
   }
   // 每波结束战士满血复活（阵亡的不回来）
@@ -130,6 +130,9 @@ function waveDefFor(w) {
 
 /* ---------- 模拟主循环 ---------- */
 function simStep(dt) {
+  if (G.phase === 'prep' || G.phase === 'combat') {
+    for (const k of G.kings) if (k.hp > 0) k.hp = Math.min(k.max, k.hp + k.regen * dt);
+  }
   if (G.phase === 'prep') {
     G.timer -= dt;
     for (const p of G.players) {
@@ -468,20 +471,26 @@ function recalcAuras(p) {
   }
 }
 
-function kingUpgradeCost(k) { return CFG.KING_UP_BASE + CFG.KING_UP_GROW * k.lvl; }
+function kingUpgradeCost(k, stat = 'health') {
+  if (!Object.hasOwn(KING_UPGRADES, stat)) return Infinity;
+  return CFG.KING_UP_BASE + CFG.KING_UP_GROW * k.upgrades[stat];
+}
 
-function kingUpgrade(p) {
+function kingUpgrade(p, stat = 'health') {
+  if (!Object.hasOwn(KING_UPGRADES, stat) || !['prep', 'combat'].includes(G.phase)) return false;
   const k = G.kings[p.team];
-  const cost = kingUpgradeCost(k);
+  const cost = kingUpgradeCost(k, stat);
   if (p.gold < cost) return false;
   p.gold -= cost;
   k.lvl++;
-  k.dmg = Math.round(CFG.KING_DMG * (1 + 0.15 * k.lvl));
-  k.aspd = CFG.KING_ASPD * Math.pow(0.965, k.lvl);
-  k.max += 150; k.hp = Math.min(k.max, k.hp + 150);
+  k.upgrades[stat]++;
+  const amount = KING_UPGRADES[stat].amount;
+  if (stat === 'health') { k.max += amount; k.hp = Math.min(k.max, k.hp + amount); }
+  if (stat === 'attack') k.dmg += amount;
+  if (stat === 'regen') k.regen += amount;
   p.income += 2;
-  addFloater(k.x, k.y - 30, '国王强化!', '#f5c542');
-  addLog(`${p.name} 强化国王（Lv.${k.lvl}），收入 +2`, 'l-blue');
+  addFloater(k.x, k.y - 30, `${KING_UPGRADES[stat].name}强化!`, '#f5c542');
+  addLog(`${p.name} 强化国王${KING_UPGRADES[stat].name}（Lv.${k.upgrades[stat]}），收入 +2`, 'l-blue');
   return true;
 }
 

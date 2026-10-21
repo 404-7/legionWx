@@ -182,16 +182,19 @@ function updateUI(force) {
   // 国王
   const k = G.kings[me.team];
   $('kingBox').querySelector('h3').textContent = me.team === 0 ? '♛ 苍岚国王' : '♛ 赤焰国王';
-  const cost = kingUpgradeCost(k);
   const kPort = document.getElementById('kingPortrait');
-  if (kPort) drawPortrait(kPort, 'king_0', 52);
+  if (kPort) drawPortrait(kPort, 'king_' + me.team, 52);
   $('kingInfo').innerHTML = `
     <div class="hpbarWrap"><div class="hpbarFill ${k.hp / k.max < 0.35 ? 'low' : ''}" style="width:${Math.max(0, k.hp / k.max * 100)}%"></div></div>
-    HP ${Math.ceil(k.hp)}/${k.max} · Lv.${k.lvl} · 攻击 ${k.dmg}<br>
-    下次强化：${cost}金 → 国王更强 + 收入+2`;
-  const bk = $('btnKing');
-  bk.textContent = `强化国王（${cost} 金）`;
-  bk.disabled = me.gold < cost || G.phase === 'over';
+    HP ${Math.ceil(k.hp)}/${k.max} · 攻击 ${k.dmg} · 恢复 ${k.regen}/秒<br>
+    三项独立升级，队友共享；每次强化个人收入 +2`;
+  document.querySelectorAll('[data-king-stat]').forEach(button => {
+    const stat = button.dataset.kingStat, def = KING_UPGRADES[stat];
+    const cost = kingUpgradeCost(k, stat);
+    button.innerHTML = `${def.name} Lv.${k.upgrades[stat]} → ${k.upgrades[stat] + 1} · ${cost} 金<small>${def.effect}</small>`;
+    button.title = def.effect + '；个人收入 +2';
+    button.disabled = me.gold < cost || G.phase === 'over';
+  });
 
   // 雇佣兵可用性
   document.querySelectorAll('.mrow').forEach(row => {
@@ -289,10 +292,12 @@ function bindEvents() {
     if (G && G.selectedShop) selectShop(null);
   });
 
-  $('btnKing').addEventListener('click', () => {
-    if (!G || G.phase === 'over') return;
-    performAction({ type:'king' });
-    updateUI(true);
+  document.querySelectorAll('[data-king-stat]').forEach(button => {
+    button.addEventListener('click', () => {
+      if (!G || G.phase === 'over') return;
+      performAction({ type:'king', stat:button.dataset.kingStat });
+      updateUI(true);
+    });
   });
   $('btnPause').addEventListener('click', togglePause);
   $('btnSpeed').addEventListener('click', cycleSpeed);

@@ -18,7 +18,7 @@ const CFG = {
   WAVE_DMG0: 9, WAVE_DMG_G: 1.085,
   OVERTIME_GROW: 1.33,      // 30 波后加时赛每波递增
 
-  KING_HP: 4200, KING_REGEN: 55, KING_DMG: 60,
+  KING_HP: 4200, KING_REGEN: 2, KING_DMG: 60,
   KING_ASPD: 1.15, KING_RANGE: 125, KING_SPLASH: 90,
   KING_UP_BASE: 80, KING_UP_GROW: 40,   // 升级费用 = BASE + GROW*lvl
 
@@ -31,6 +31,12 @@ const CFG = {
     normal: { label: '标准', emult: 1.00, aiMult: 1.00, allyMult: 1.12 },
     hard:   { label: '困难', emult: 1.16, aiMult: 1.15, allyMult: 1.00 },
   },
+};
+
+const KING_UPGRADES = {
+  health: { name: '生命', effect: '生命上限 +150，恢复 150 生命', amount: 150 },
+  attack: { name: '攻击', effect: '攻击力 +9', amount: 9 },
+  regen: { name: '生命恢复', effect: '每秒恢复 +1 生命', amount: 1 },
 };
 
 const ATK_TYPES  = ['普通', '穿刺', '魔法', '攻城'];

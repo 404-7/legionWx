@@ -37,9 +37,11 @@ function aiAct(p) {
 
   // 1) 强化国王（关键节点，留足买兵钱）
   const king = G.kings[p.team];
-  const kCost = kingUpgradeCost(king);
-  if ([5, 11, 18, 24].includes(w) && p.gold >= kCost + 150) kingUpgrade(p);
-  if (w > 24 && p.gold >= kCost + 220) kingUpgrade(p);
+  const stat = king.hp < king.max * .5 ? 'health'
+    : ['health', 'attack', 'regen'].reduce((best, key) => king.upgrades[key] < king.upgrades[best] ? key : best, 'health');
+  const kCost = kingUpgradeCost(king, stat);
+  if ([5, 11, 18, 24].includes(w) && p.gold >= kCost + 150) kingUpgrade(p, stat);
+  if (w > 24 && p.gold >= kCost + 220) kingUpgrade(p, stat);
 
   // 2) 补墙 / 买输出
   let walls = p.fighters.filter(f => isWall(f.def)).length;

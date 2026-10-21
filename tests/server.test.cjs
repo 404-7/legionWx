@@ -48,7 +48,11 @@ test('two independent clients join, share authoritative purchases, reconnect and
   assert.equal(rooms.get(a.code).game.snapshot().timer,paused);
   const reconnected=await stream(b);
   await reconnected.next(v=>!v.room.waiting);
-  assert.equal((await post('action',{type:'king'},b)).status,200);
+  assert.equal((await post('action',{type:'king',stat:'regen'},b)).status,200);
+  const upgraded = await sa.next(v=>v.state?.kings[1].upgrades.regen===1);
+  assert.equal(upgraded.state.kings[1].regen,3);
+  assert.equal(upgraded.state.kings[0].regen,2);
+  assert.equal((await post('action',{type:'king',stat:'invalid'},b)).status,400);
   assert.equal((await fetch(base+'/server/index.cjs')).status,404);
   assert.equal((await fetch(base+'/healthz')).status,200);
   assert.equal((await post('leave',{},b)).status,200);

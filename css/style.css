@@ -215,3 +215,5 @@ main{padding:8px 14px 14px;gap:16px}
 @media(prefers-reduced-motion:reduce){.btn,.ucard{transition:none}}
 #cv{width:auto;height:auto;max-width:100%;object-fit:fill;flex:0 1 auto}
 #menuPanel::-webkit-scrollbar{width:5px}#menuPanel::-webkit-scrollbar-thumb{background:#4c634b;border-radius:5px}
+.king-upgrades .btn{white-space:normal;text-align:left;line-height:1.5}
+.king-upgrades small{display:block;font-size:10px;color:var(--dim);font-weight:400;margin-top:3px}

@@ -30,7 +30,7 @@ module.exports = function createGame(humans) {
           case 'buy': return Object.hasOwn(UNITS, a.uid) && Number.isInteger(a.col) && Number.isInteger(a.row) && p.fighters.length < 36 && buyFighter(p, a.uid, a.col, a.row);
           case 'upgrade': return !!f && upgradeFighter(p, f);
           case 'sell': return !!f && sellFighter(p, f);
-          case 'king': return kingUpgrade(p);
+          case 'king': return kingUpgrade(p, a.stat);
           case 'merc': { const target = Number.isInteger(a.target) && G.players[a.target]; return Object.hasOwn(MERCS, a.mid) && !!target && target.mercQueue.length < 40 && sendMerc(p, target, a.mid); }
           default: return false;
         }
