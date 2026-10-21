@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { server, rooms } = require('../server/index.cjs');
 test('two independent clients join, share authoritative purchases, reconnect and forfeit', async t => {
-  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  await require('../scripts/test-server.cjs')(server);
   const base='http://127.0.0.1:'+server.address().port;
   const controllers=[];
   t.after(async()=>{ controllers.forEach(c=>c.abort()); server.closeAllConnections(); await new Promise(r=>server.close(r)); });

@@ -3,7 +3,7 @@ const assert=require('node:assert/strict'),path=require('node:path');
 const {chromium}=require(process.argv[2]||'playwright');
 const {server}=require('../server/index.cjs');
 (async()=>{
- await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ await require('./test-server.cjs')(server);
  const browser=await chromium.launch({headless:true});
  try{
   const page=await browser.newPage({viewport:{width:1560,height:1080}}),errors=[];
