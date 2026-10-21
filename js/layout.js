@@ -2,7 +2,7 @@
 // Local presentation state never enters the authoritative game snapshot.
 const CommandUI={panel:'shop',open:false,mobile:false,selection:null,placement:null,pendingSell:null,scroll:{}};
 const COMMAND_TITLES={shop:'种族兵营',economy:'金矿经营',king:'国王强化',attack:'派遣进攻',inspect:'单位详情'};
-const MapCamera={mode:null,zoom:1,cx:null,cy:null,player:null,projection:null,suppressClick:false};
+const MapCamera={mode:null,zoom:1,cx:null,cy:null,player:null,projection:null,suppressClick:false,battleKey:null};
 
 function openCommandPanel(panel,{toggle=false,focus=false}={}) {
   if(!Object.hasOwn(COMMAND_TITLES,panel))return;
@@ -42,7 +42,8 @@ function setMapView(mode) {
 }
 function syncMapButtons() {
   const mode=MapCamera.mode||(CommandUI.mobile?'local':'overview');
-  $('btnMapHome').classList.toggle('active',mode==='local');
+  $('btnMapHome').classList.toggle('active',mode==='local'||mode==='arena');
+  $('btnMapField').classList.toggle('active',mode==='field');
   $('btnMapOverview').classList.toggle('active',mode==='overview');
   $('btnMapZoomOut').disabled=MapCamera.zoom<=.65;
   $('btnMapZoomIn').disabled=MapCamera.zoom>=4;
@@ -60,13 +61,15 @@ function getMapProjection() {
   cv.style.width=w+'px';cv.style.height=h+'px';
   const me=G?localPlayer():null,mode=MapCamera.mode||(CommandUI.mobile?'local':'overview');
   if(me&&MapCamera.player!==me.id){MapCamera.player=me.id;MapCamera.cx=MapCamera.cy=null;}
-  const localScale=w>h*1.6?Math.min(w/276,Math.max(120,h-64)/252):w/276;
-  const base=mode==='local'&&me?localScale:Math.min(w/CFG.W,h/CFG.H);
+  const fieldScale=Math.min(w/(CFG.FIELD_W+24),Math.max(100,h-116)/(CFG.FIELD_H+24));
+  const localScale=CommandUI.mobile?Math.max(44/CFG.CELL,fieldScale):fieldScale;
+  const own=(mode==='local'||mode==='field')&&me;
+  const base=own?(mode==='field'?fieldScale:localScale):mode==='arena'?Math.min(w/430,h/440):Math.min(w/CFG.W,h/CFG.H);
   const scale=base*MapCamera.zoom;
-  let cx=MapCamera.cx??(mode==='local'&&me?me.fx+CFG.FIELD_W/2:CFG.W/2);
-  let cy=MapCamera.cy??(mode==='local'&&me?me.fy+CFG.FIELD_H/2+(CommandUI.mobile&&w<h?12:0):CFG.H/2);
+  let cx=MapCamera.cx??(own?me.fx+CFG.FIELD_W/2:CFG.W/2);
+  let cy=MapCamera.cy??(own?me.fy+CFG.FIELD_H/2+12:CFG.H/2);
   const clamp=(value,span,max)=>span>=max?max/2:Math.max(span/2,Math.min(max-span/2,value));
-  cx=clamp(cx,w/scale,CFG.W);cy=clamp(cy,h/scale,CFG.H);
+  if(mode!=='field'){cx=clamp(cx,w/scale,CFG.W);cy=clamp(cy,h/scale,CFG.H);}
   return MapCamera.projection={w,h,dpr,scale,cx,cy,tx:w/2-cx*scale,ty:h/2-cy*scale};
 }
 function projectCanvasPoint(clientX,clientY) {
@@ -106,6 +109,12 @@ function bindMapGestures() {
 
 function syncCommandUI() {
   if(!G)return;
+  const battleKey=G.battleMode+':'+G.phase;
+  if(battleKey!==MapCamera.battleKey){
+    const previous=MapCamera.battleKey;MapCamera.battleKey=battleKey;
+    if(G.battleMode==='arena'&&G.phase==='combat'){closeCommandPanel();setMapView('overview');}
+    else if(previous?.startsWith('arena:')&&G.battleMode==='defense')setMapView(CommandUI.mobile?'local':'overview');
+  }
   const me=localPlayer(),f=G.selectedFighter,key=f?`${f.col}:${f.row}:${f.uid}`:null;
   if(key&&key!==CommandUI.selection)openCommandPanel('inspect');
   else if(!key&&CommandUI.panel==='inspect'){CommandUI.panel='shop';if(CommandUI.mobile)CommandUI.open=false;syncCommandPanels();}
@@ -114,11 +123,13 @@ function syncCommandUI() {
   if(uid!==CommandUI.placement){CommandUI.placement=uid;if(def){drawPortrait($('placementPortrait'),uid,96);$('placementName').textContent=def.name+' · '+def.purchaseCost+' 金';}}
   if(def)$('placementHint').textContent=me.gold>=def.purchaseCost?'点击己方空格放置 · 可连续建造':'金币不足，可取消或等待金矿产出';
   $('mapHint').hidden=!!def;
-  const focused=(MapCamera.mode||(CommandUI.mobile?'local':'overview'))==='local';
-  $('mapHint').textContent=focused?CommandUI.mobile?'你的防区 · 拖动查看战场，双指缩放':'你的防区 · 拖动查看战场，滚轮缩放':'全图视角 · 点击「我的防区」精确布阵';
+  const mode=MapCamera.mode||(CommandUI.mobile?'local':'overview'),focused=mode==='local';
+  $('mapHint').textContent=mode==='arena'?'PK 战场 · 一方军团全灭即结算回合':mode==='field'?`${CFG.COLS}×${CFG.ROWS} 格完整防区 · 放大后精确布阵`:focused?CommandUI.mobile?'大防区 · 单指拖动，双指缩放':'你的防区 · 拖动查看战场，滚轮缩放':'全图视角 · 红蓝阵营路线 / 粉色王城 / 绿色 PK 路口';
+  const pk=G.battleMode==='arena';
+  $('btnMapHome').textContent=pk&&G.phase==='combat'?'⚔ PK 战场':'⌖ 我的防区';
   $('blueKingStatus').textContent='♛ 苍岚 '+Math.max(0,Math.ceil(G.kings[0].hp))+'/'+G.kings[0].max;
   $('redKingStatus').textContent='♛ 赤焰 '+Math.max(0,Math.ceil(G.kings[1].hp))+'/'+G.kings[1].max;
-  $('battleStatus').textContent=G.paused?'已暂停':G.phase==='prep'?`第 ${G.wave} 波 · ${Math.ceil(G.timer)}s 准备`:G.phase==='combat'?`第 ${G.wave} 波 · 交战中`:'对战结束';
+  $('battleStatus').textContent=G.paused?'已暂停':pk?G.phase==='prep'?`阵营 PK · ${Math.ceil(G.timer)}s 后开放`:`阵营 PK · 苍岚 ${G.arena.counts[0]} : 赤焰 ${G.arena.counts[1]}`:G.phase==='prep'?`第 ${G.wave} 波 · ${Math.ceil(G.timer)}s 准备`:G.phase==='combat'?`第 ${G.wave} 波 · 交战中`:'对战结束';
   $('latestReport').textContent=G.logLines.at(-1)?.txt||'等待军团集结';
   document.querySelectorAll('[data-delegate]').forEach(button=>{const target=$(button.dataset.delegate);button.textContent=target.textContent;button.disabled=target.disabled;});
 }
@@ -147,7 +158,8 @@ function bindCommandLayout() {
   $('btnCancelPlacement').addEventListener('click',()=>{selectShop(null);});
   // A canvas pan can suppress the browser's next synthesized click on touch devices.
   $('btnCancelPlacement').addEventListener('pointerup',event=>{if(event.pointerType==='touch')selectShop(null);});
-  $('btnMapHome').addEventListener('click',()=>setMapView('local'));
+  $('btnMapHome').addEventListener('click',()=>setMapView(G?.battleMode==='arena'&&G.phase==='combat'?'arena':'local'));
+  $('btnMapField').addEventListener('click',()=>setMapView('field'));
   $('btnMapOverview').addEventListener('click',()=>setMapView('overview'));
   $('btnMapZoomOut').addEventListener('click',()=>zoomMap(1/1.25));$('btnMapZoomIn').addEventListener('click',()=>zoomMap(1.25));
   $('btnMore').addEventListener('click',()=>{const open=$('quickMenu').hidden;$('quickMenu').hidden=!open;$('btnMore').setAttribute('aria-expanded',String(open));});

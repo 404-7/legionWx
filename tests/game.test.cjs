@@ -46,7 +46,7 @@ test('server owns economy, rejects malformed commands and isolates rooms', () =>
   for (const action of [
     {type:'buy',uid:'ent',col:2,row:2},
     {type:'buy',uid:'ent',col:NaN,row:1},
-    {type:'buy',uid:'ent',col:6,row:0},
+    {type:'buy',uid:'ent',col:12,row:0},
     {type:'buy',uid:'__proto__',col:0,row:0},
     {type:'merc',mid:'constructor',target:2},
     {type:'merc',mid:'imp',target:0},
@@ -68,8 +68,8 @@ test('four routes move toward the middle and leaked monsters turn toward their k
     if(i%10) continue;
     const s=game.snapshot();
     for(const p of s.players) for(const e of p.enemies) {
-      if(p.direction===1 && e.y>40) sawTop=true;
-      if(p.direction===-1 && e.y<760) sawBottom=true;
+      if(p.direction===1 && e.y>p.spawnY+5) sawTop=true;
+      if(p.direction===-1 && e.y<p.spawnY-5) sawBottom=true;
       assert.ok(Number.isFinite(e.x)&&Number.isFinite(e.y));
     }
     for(const k of s.kings) for(const e of k.leaks) {

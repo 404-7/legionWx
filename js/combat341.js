@@ -52,6 +52,7 @@ function tick341(p,dt) {
     f.mana=Math.min(f.def.manaMax||0,f.mana+manaRegen*dt);
     f.effArmor=(f.def.armorPoints||0)+armor;f.effHaste=haste;f.effVamp=vamp;
     f.damageTaken=(f.illusionTaken||1)*(f.guardianFactor||1);
+    if(p.arenaView&&(!f.arenaReady||f.stunT>0||f.deadT>0))continue;
     for(const c of f.def.abil.casts||[])cast341(p,f,c);
     if(f.def.abil.slowAura)for(const e of spell341Targets(p,f,f.def.abil.slowAura.r))add341Status(e,'slowAura',{move:f.def.abil.slowAura.p,time:.15});
     if(f.def.abil.weakenAura)for(const e of spell341Targets(p,f,f.def.abil.weakenAura.r))add341Status(e,'weakenAura',{damage:f.def.abil.weakenAura.p,time:.15});
@@ -110,7 +111,9 @@ function spawn341Ally(p,parent,def,life=60) {
   if(p.fighters.filter(f=>f.temporary&&f.hp>0).length>=128)return;
   const f={def,uid:def.id,col:parent.col,row:parent.row,x:parent.x+(Math.random()-.5)*24,y:parent.y+(Math.random()-.5)*24,
     hp:def.hp,max:def.hp,cd:.3,spent:0,effDmg:def.dmg,flash:0,deadT:0,reincUsed:false,temporary:true,life};
-  init341Fighter(f);p.fighters.push(f);return f;
+  init341Fighter(f);
+  if(p.arenaView){const owner=G.players[parent.ownerId];prepareArenaFighter(owner,f);f.arenaReady=true;owner.fighters.push(f);}
+  p.fighters.push(f);return f;
 }
 function death341(p,f) {
   if(f.deathHandled)return;f.deathHandled=true;

@@ -1,12 +1,13 @@
 'use strict';
 /* ===== 全局配置：地图布局、经济、国王、平衡常数 ===== */
 const CFG = {
-  W: 1300, H: 800,
+  W: 1800, H: 1440,
 
-  COLS: 6, ROWS: 6, CELL: 38,
-  GRID_W: 6 * 38,
-  GRID_H: 6 * 38,           // 228
-  FIELD_W: 300, FIELD_H: 296,
+  COLS: 12, ROWS: 16, CELL: 32,
+  GRID_W: 12 * 32, GRID_H: 16 * 32,
+  FIELD_W: 432, FIELD_H: 576,
+  ROAD_Y: 720, GATE_LEFT: 820, GATE_RIGHT: 980,
+  ARENA_WAVES: [10, 20], ARENA_PREP: 30, ARENA_LIMIT: 180,
 
   START_GOLD: 300,
   START_INCOME: 6,

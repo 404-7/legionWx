@@ -24,19 +24,21 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
    await press('[data-uid="infantry"] .uName');
    if(mobile)assert.equal(await page.evaluate(()=>CommandUI.open),false,'selecting a unit collapses drawer');
    assert.equal(await page.locator('#placementBar').isVisible(),true);
-   if(mobile&&viewport.width<viewport.height)assert.equal(await page.evaluate(()=>{
-    const p=localPlayer(),v=getMapProjection(),r=$('cv').getBoundingClientRect();
-    return [0,5].every(col=>[0,5].every(row=>document.elementFromPoint(r.left+v.tx+(p.gx+(col+.5)*CFG.CELL)*v.scale,r.top+v.ty+(p.gy+(row+.5)*CFG.CELL)*v.scale)===$('cv')));
-   }),true,'all four build-grid corners are reachable');
-   const cellPoint=()=>page.evaluate(()=>{const p=localPlayer(),v=getMapProjection(),r=$('cv').getBoundingClientRect();return {x:r.left+v.tx+(p.gx+1.5*CFG.CELL)*v.scale,y:r.top+v.ty+(p.gy+2.5*CFG.CELL)*v.scale};});
+   if(mobile){
+    await press('#btnMapField');
+    await page.waitForFunction(()=>MapCamera.mode==='field');
+    assert.equal(await page.evaluate(()=>{const p=localPlayer(),v=getMapProjection(),r=$('cv').getBoundingClientRect();return [0,CFG.COLS-1].every(col=>[0,CFG.ROWS-1].every(row=>document.elementFromPoint(r.left+v.tx+(p.gx+(col+.5)*CFG.CELL)*v.scale,r.top+v.ty+(p.gy+(row+.5)*CFG.CELL)*v.scale)===$('cv')));}),true,'full-field view exposes every grid corner');
+    await press('#btnMapHome');
+   }
+   const cellPoint=()=>page.evaluate(()=>{const p=localPlayer(),v=getMapProjection(),r=$('cv').getBoundingClientRect();return {x:r.left+v.tx+(p.gx+5.5*CFG.CELL)*v.scale,y:r.top+v.ty+(p.gy+7.5*CFG.CELL)*v.scale};});
    let point=await cellPoint();
    if(mobile)await page.touchscreen.tap(point.x,point.y);else await page.mouse.click(point.x,point.y);
    assert.equal(await page.evaluate(()=>localPlayer().fighters[0]?.uid),'infantry','transformed canvas placement');
-   assert.deepEqual(await page.evaluate(()=>({col:localPlayer().fighters[0].col,row:localPlayer().fighters[0].row})),{col:1,row:2});
+   assert.deepEqual(await page.evaluate(()=>({col:localPlayer().fighters[0].col,row:localPlayer().fighters[0].row})),{col:5,row:7});
    await press('#btnCancelPlacement');
    await page.waitForFunction(()=>G.selectedShop===null);
    point=await cellPoint();if(mobile)await page.touchscreen.tap(point.x,point.y);else await page.mouse.click(point.x,point.y);
-   assert.equal(await page.locator('#panel-inspect').isVisible(),true,'unit detail panel');
+   await page.locator('#panel-inspect').waitFor({state:'visible'});
    await press('[data-upgrade-uid="zeus"]');
    assert.equal(await page.evaluate(()=>localPlayer().fighters[0].uid),'zeus');
    if(mobile){await press('#btnSell');assert.equal(await page.locator('#sellDialog').isVisible(),true);await press('#btnKeepUnit');assert.equal(await page.evaluate(()=>localPlayer().fighters.length),1);}

@@ -27,9 +27,10 @@
       <div class="stage-heading"><div><small>THE CONVERGENCE</small><h2>双王交汇之地</h2></div><span>四路防线 / 共享王城</span></div>
       <div id="battleSummary" aria-label="国王状态"><span id="blueKingStatus">苍岚国王</span><span class="battle-status" id="battleStatus">准备布阵</span><span id="redKingStatus">赤焰国王</span></div>
       <div id="mapViewport">
-        <canvas id="cv" width="1300" height="800" aria-label="战场，点击己方格子放置或选择单位"></canvas>
+        <canvas id="cv" width="1800" height="1440" aria-label="战场，点击己方格子放置或选择单位"></canvas>
         <div class="map-tools" aria-label="地图视角">
           <button id="btnMapHome" class="btn" aria-label="回到自己的防区">⌖ 我的防区</button>
+          <button id="btnMapField" class="btn" aria-label="查看自己的完整布阵区域">防区全览</button>
           <button id="btnMapOverview" class="btn" aria-label="查看完整战场">全图</button>
           <button id="btnMapZoomOut" class="btn" aria-label="缩小地图">−</button><button id="btnMapZoomIn" class="btn" aria-label="放大地图">＋</button>
         </div>
@@ -126,7 +127,7 @@
     </div>
     <p id="netMessage" role="status" aria-live="polite"></p>
     <div class="menu-guide"><span>01 选择兵种并点击防区布阵</span><span>02 防守每一波，守护国王</span><span>03 派遣雇佣兵压制对手</span></div>
-    <p class="foot">红色箭头为怪物进军路线 · 金色圆环为国王 · 单机支持空格暂停与 1 / 2 / 3 倍速</p>
+    <p class="foot">红蓝阵营路线 · 粉色圆环为国王 · 每人 192 格布阵 · 第 10 / 20 波后开放中央 PK</p>
   </div>
 </div>
 

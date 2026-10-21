@@ -3,9 +3,9 @@
 let G = null;
 
 function layoutFor(playerIndex) {
-  const right = playerIndex >= 2, bottom = playerIndex % 2 === 1;
-  const fx = right ? 870 : 130, fy = bottom ? 460 : 44;
-  return { fx, fy, gx: fx + 36, gy: fy + 40 };
+  const right = playerIndex < 2, bottom = playerIndex % 2 === 1;
+  const fx = right ? 1284 : 84, fy = bottom ? 824 : 40;
+  return { fx, fy, gx: fx + 24, gy: fy + 40, laneX:right?1500:300 };
 }
 
 function newGame(diffKey) {
@@ -18,7 +18,7 @@ function newGame(diffKey) {
     players: [], kings: [], projectiles: [], floaters: [], fx: [],
     selectedShop: null, selectedFighter: null,
     hover: null, logLines: [],
-    waveDef: null, result: null,
+    waveDef: null, result: null, battleMode:'defense', arena:null, arenaHistory:[],
   };
   for (let i = 0; i < 4; i++) {
     const L = layoutFor(i);
@@ -26,8 +26,8 @@ function newGame(diffKey) {
       id: i, team: i < 2 ? 0 : 1, name: names[i], isHuman: i === 0,
       gold: CFG.START_GOLD, income: CFG.START_INCOME, kingLvl: 0,
       fx: L.fx, fy: L.fy, gx: L.gx, gy: L.gy,
-      exitX: L.fx + 150, exitY: i % 2 ? 444 : 356,
-      spawnX: L.fx + 150, spawnY: i % 2 ? 764 : 36,
+      exitX: L.laneX, exitY: i % 2 ? 776 : 664,
+      spawnX: L.laneX, spawnY: i % 2 ? CFG.H-20 : 20,
       direction: i % 2 ? -1 : 1,
       fighters: [], enemies: [], mercQueue: [], mines: [],
       spawnList: [], spawnT: 0, spawnIv: 1, paid: true,
@@ -35,7 +35,7 @@ function newGame(diffKey) {
     });
   }
   G.kings = [0, 1].map(t => ({
-    team: t, x: t === 0 ? 550 : 750, y: 400,
+    team: t, x: t === 0 ? CFG.GATE_RIGHT : CFG.GATE_LEFT, y: t===0?1260:180,
     hp: CFG.KING_HP, max: CFG.KING_HP, lvl: 0, cd: 0, flash: 0, leaks: [],
     dmg: CFG.KING_DMG, aspd: CFG.KING_ASPD, regen: CFG.KING_REGEN,
     upgrades: { health: 0, attack: 0, regen: 0 },
@@ -53,6 +53,7 @@ function gainMult(p) {
 }
 
 function startPrep() {
+  G.battleMode='defense';G.arena=null;
   G.wave++;
   G.waveDef = waveDefFor(G.wave);
   for (const p of G.players) {
@@ -69,6 +70,7 @@ function startPrep() {
 }
 
 function startCombat() {
+  if(G.battleMode==='arena'){startArenaCombat();return;}
   G.phase = 'combat';
   G.combatT = 0;
   const iv = Math.max(0.5, 1.15 - G.wave * 0.012);
@@ -95,17 +97,15 @@ function endWave() {
     const survivors=p.fighters.filter(f=>f.hp>0&&!f.temporary);
     if(survivors.some(f=>f.def.abil.slaveTrade))p.gold+=survivors.reduce((sum,f)=>sum+(f.uid==='slavemaster'?3:f.uid==='servant'?2:0),0);
     p.fighters = p.fighters.filter(f => !f.temporary);
-    for (const f of p.fighters) {
-      f.max=f.def.hp;f.hp=f.max; f.deadT=0; f.reincUsed=false; f.cd=.3;f.steroids=false;
-      init341Fighter(f);
-    }
+    for (const f of p.fighters) restoreFighter(p,f);
     recalcAuras(p);
   }
   if (G.wave >= CFG.TOTAL_WAVES && !G.result) {
     const a=G.kings[0].hp/G.kings[0].max,b=G.kings[1].hp/G.kings[1].max;
     gameOver(Math.abs(a-b)<.00001 ? null : a>b ? 0 : 1); return;
   }
-  startPrep();
+  if(CFG.ARENA_WAVES.includes(G.wave)&&!G.arenaHistory.some(a=>a.wave===G.wave))startArenaPrep();
+  else startPrep();
 }
 
 function gameOver(winner) {
@@ -153,6 +153,7 @@ function simStep(dt) {
     }
     if (G.timer <= 0) startCombat();
   } else if (G.phase === 'combat') {
+    if(G.battleMode==='arena'){arenaStep(dt);return;}
     G.combatT += dt;
     for (const p of G.players) fieldStep(p, dt);
     for (const k of G.kings) { kingStep(k, dt); if (G.phase === 'over') return; }
@@ -283,7 +284,7 @@ function hitFighter(p,f,dmg,atk,attacker) {
   if(a.evasion&&Math.random()<a.evasion)return;
   if(attacker&&Math.random()<(attacker.miss||0))return;
   if(a.magicImmune&&(atk==='魔法'||atk==='法术'))return;
-  let amount=dmg*(ATK_ARMOR[atk]?.[f.def.armor]??1)*armorFactor(f.effArmor??f.def.armorPoints)*(f.damageTaken||1);
+  let amount=dmg*(ATK_ARMOR[atk]?.[f.def.armor]??1)*armorFactor((f.effArmor??f.def.armorPoints)-(f.armorLoss||0))*(f.damageTaken||1)*(1+(f.mark||0));
   if(atk==='穿刺'&&a.defend)amount*=a.defend;
   if(a.block&&Math.random()<a.block.chance)amount=Math.max(a.block.minimum,amount-a.block.amount);
   if(a.manaShield&&f.mana>0){const absorb=Math.min(amount*a.manaShield.ratio,f.mana*a.manaShield.perMana);amount-=absorb;f.mana-=absorb/a.manaShield.perMana;}
@@ -293,7 +294,7 @@ function hitFighter(p,f,dmg,atk,attacker) {
 }
 
 function fighterAct(p, f, dt) {
-  if (f.hp <= 0) return;
+  if (f.hp <= 0 || f.deadT>0 || f.stunT>0) return;
   if (f.flash > 0) f.flash -= dt;
   f.cd -= dt;
   if (f.cd > 0) return;
@@ -319,13 +320,14 @@ function fighterAct(p, f, dt) {
   if(f.illusionFactor)dmg*=f.illusionFactor;
   const targets=[tgt,...p.enemies.filter(e=>e!==tgt&&e.hp>0&&Math.hypot(e.x-f.x,e.y-f.y)-e.r-12<=R).slice(0,(ab.multishot||1)-1)];
   for(const target of targets){
-    if(f.def.melee){const dealt=dmgEnemy(target,dmg,f.def.atk);hit341(p,f,target,dealt);afterHits(p,target,dmg,f.def.atk,ab);f.flash=.12;}
+    if(f.def.melee){const dealt=dmgEnemy(target,dmg,f.def.atk,f);hit341(p,f,target,dealt);afterHits(p,target,dmg,f.def.atk,ab);f.flash=.12;}
     else G.projectiles.push({p,source:f,x:f.x,y:f.y,px:f.x,py:f.y,tgt:target,sp:CFG.PROJ_SPEED,dmg,atk:f.def.atk,ab,t:3});
   }
 }
 
-function dmgEnemy(e, dmg, atk) {
+function dmgEnemy(e, dmg, atk, attacker=null) {
   if (e.hp <= 0) return 0;
+  if(G.battleMode==='arena'&&e.def){const before=e.hp;hitFighter(G.players[e.ownerId],e,dmg,atk,attacker);return Math.max(0,before-Math.max(0,e.hp));}
   let m = (ATK_ARMOR[atk] && ATK_ARMOR[atk][e.armor]) || 1;
   if(e.magicImmune && (atk==='魔法'||atk==='法术'))m=0;
   if(atk!=='法术')m*=armorFactor((e.armorPoints||0)-(e.armorLoss||0));
@@ -354,6 +356,7 @@ function afterHits(p, tgt, dmg, atk, ab) {
   if (ab.slow && tgt.hp > 0) {
     tgt.slowT = Math.max(tgt.slowT, ab.slow.d);
     tgt.slowF = Math.min(tgt.slowF, 1 - ab.slow.p);
+    if(p.arenaView)add341Status(tgt,'attackSlow',{time:ab.slow.d,move:ab.slow.p});
   }
 }
 
@@ -365,7 +368,7 @@ function projStep(pr, dt) {
   const dx = t.x - pr.x, dy = t.y - pr.y, d = Math.hypot(dx, dy);
   const step = pr.sp * dt;
   if (d <= step + t.r) {
-    const dealt=dmgEnemy(t,pr.dmg,pr.atk);
+    const dealt=dmgEnemy(t,pr.dmg,pr.atk,pr.source);
     if(pr.source)hit341(pr.p,pr.source,t,dealt);
     afterHits(pr.p, t, pr.dmg, pr.atk, pr.ab);
     return false;
@@ -381,6 +384,7 @@ function leak(p, e) {
   p.leakCount = (p.leakCount || 0) + 1;
   const k = G.kings[p.team];
   e.toKing = true; e.routeX = p.exitX; e.turning = true;
+  e.route=[{x:p.exitX,y:CFG.ROAD_Y},{x:k.x,y:CFG.ROAD_Y},{x:k.x,y:k.y}];e.routeIndex=0;
   k.leaks.push(e);
   addFloater(p.exitX - 20, e.y, '漏怪!', '#ff6a5e');
   if (p.isHuman) addLog(`${p.name} 第 ${G.wave} 波漏怪！国王受到威胁`, 'l-red');
@@ -391,10 +395,9 @@ function kingStep(k, dt) {
   k.cd -= dt;
   if (k.flash > 0) k.flash -= dt;
   for (const e of k.leaks) {
-    if (e.turning) {
-      const dx = e.routeX - e.x, dy = 400 - e.y, d = Math.hypot(dx, dy);
-      if (d < 4) { e.x = e.routeX; e.y = 400; e.turning = false; }
-      else { const step = Math.min(d, e.speed * e.slowF * dt); e.x += dx / d * step; e.y += dy / d * step; continue; }
+    if(e.routeIndex<e.route.length-1){
+      walkRoute(e,e.speed*e.slowF*dt);
+      e.turning=e.routeIndex===0;continue;
     }
     e.cd -= dt;
     if (e.flash > 0) e.flash -= dt;
@@ -437,9 +440,10 @@ function kingStep(k, dt) {
 
 /* ---------- 经济 / 操作 ---------- */
 function minePosition(p, index) {
-  return { x: (p.team === 0 ? 470 : 775) + (index % 2) * 55,
-    y: (p.id % 2 ? 530 : 100) + Math.floor(index / 2) * 62 };
+  const zone=mineZone(p);
+  return { x:zone.x+44+(index%2)*72,y:zone.y+100+Math.floor(index/2)*150 };
 }
+function mineZone(p){return {x:p.team===0?1060:580,y:p.id%2?870:70,w:160,h:500};}
 
 function buyMine(p) {
   if (!['prep', 'combat'].includes(G.phase) || p.mines.length >= MINE.LIMIT || p.gold < MINE.COST) return false;
@@ -483,6 +487,7 @@ function cellFree(p, col, row) {
 }
 
 function buyFighter(p, uid, col, row) {
+  if(!canManageArmy())return false;
   const def = UNITS[uid];
   if (!Object.hasOwn(UNITS,uid) || !def || def.elite || def.summonOnly || !Number.isInteger(col) || !Number.isInteger(row) || p.gold < def.purchaseCost || col < 0 || col >= CFG.COLS || row < 0 || row >= CFG.ROWS || !cellFree(p, col, row)) return false;
   p.gold -= def.purchaseCost;
@@ -498,6 +503,7 @@ function buyFighter(p, uid, col, row) {
 }
 
 function upgradeFighter(p,f,targetId) {
+  if(!canManageArmy())return false;
   if(!p.fighters.includes(f)||f.temporary)return false;
   const nextId=targetId??f.def.up;
   const stance=f.def.stances.includes(nextId);
@@ -513,6 +519,7 @@ function upgradeFighter(p,f,targetId) {
 }
 
 function sellFighter(p, f) {
+  if(!canManageArmy())return false;
   const i = p.fighters.indexOf(f);
   if (i < 0 || f.temporary) return false;
   p.fighters.splice(i, 1);
@@ -577,3 +584,116 @@ function addLog(txt, cls) {
   if (G.logLines.length > 60) G.logLines.shift();
 }
 function playerValue(p) { return p.fighters.reduce((s, f) => s + f.spent, 0); }
+
+/* ---------- 3.41 阵营竞技场：第 10 / 20 波后的独立奖励回合 ---------- */
+function canManageArmy(){return ['prep','combat'].includes(G.phase)&&!(G.battleMode==='arena'&&G.phase==='combat');}
+function restoreFighter(p,f){
+  f.x=p.gx+(f.col+.5)*CFG.CELL;f.y=p.gy+(f.row+.5)*CFG.CELL;
+  f.max=f.def.hp;f.hp=f.max;f.deadT=0;f.reincUsed=false;f.cd=.3;f.steroids=false;
+  delete f.route;delete f.routeIndex;delete f.statuses;delete f.arenaReady;
+  f.slowF=1;f.slowT=0;f.stunT=0;f.mark=0;f.armorLoss=0;f.attackSlow=0;f.damageWeak=0;f.miss=0;
+  init341Fighter(f);
+}
+function startArenaPrep(){
+  G.battleMode='arena';G.phase='prep';G.timerMax=CFG.ARENA_PREP;G.timer=G.timerMax;
+  G.arena={stage:'prepare',elapsed:0,counts:[0,0],winner:null};
+  G.projectiles=[];G.selectedShop=null;G.selectedFighter=null;
+  for(const p of G.players){p.paid=true;p.aiT=.5;p.spawnList=[];p.enemies=[];}
+  addLog(`第 ${G.wave} 波已守住！${CFG.ARENA_PREP} 秒后开放中央路口，开始阵营 PK。`,'l-gold');
+}
+function startArenaCombat(){
+  G.phase='combat';G.combatT=0;G.arena.stage='march';G.arena.elapsed=0;
+  G.projectiles=[];G.selectedShop=null;G.selectedFighter=null;
+  for(const p of G.players){
+    p.fighters=p.fighters.filter(f=>!f.temporary);
+    for(const f of p.fighters){
+      const steroids=f.steroids;restoreFighter(p,f);f.steroids=steroids;
+      if(steroids){f.max=f.def.hp*1.2;f.hp=f.max;}
+      prepareArenaFighter(p,f);
+      f.cd=.2+Math.random()*.2;
+      f.route=[{x:p.exitX,y:f.y},{x:p.exitX,y:CFG.ROAD_Y},{x:p.team===0?CFG.GATE_RIGHT:CFG.GATE_LEFT,y:CFG.ROAD_Y}];f.routeIndex=0;
+    }
+    start341Round(p);
+  }
+  G.arena.counts=arenaCounts();
+  addLog('中央路口已开放！双方军团沿本阵营路线进场，国王和金矿不参战。','l-red');
+}
+function prepareArenaFighter(p,f){
+  f.ownerId=p.id;f.team=p.team;f.r=12;f.armor=f.def.armor;f.armorPoints=f.def.armorPoints;
+  f.range=f.def.range;f.air=!!(f.def.abil.air);f.boss=false;f.magicImmune=!!f.def.abil.magicImmune;
+  f.slowF=1;f.slowT=0;f.arenaReady=false;
+}
+function walkRoute(unit,distance){
+  while(unit.routeIndex<unit.route.length&&distance>0){
+    const point=unit.route[unit.routeIndex],dx=point.x-unit.x,dy=point.y-unit.y,d=Math.hypot(dx,dy);
+    if(d<=distance){unit.x=point.x;unit.y=point.y;unit.routeIndex++;distance-=d;}
+    else{unit.x+=dx/d*distance;unit.y+=dy/d*distance;distance=0;}
+  }
+  return unit.routeIndex>=unit.route.length;
+}
+function arenaCounts(){return [0,1].map(team=>G.players.filter(p=>p.team===team).reduce((n,p)=>n+p.fighters.filter(f=>f.hp>0||f.deadT>0).length,0));}
+function arenaViews(){
+  const sides=[0,1].map(team=>G.players.filter(p=>p.team===team).flatMap(p=>p.fighters));
+  return sides.map((fighters,team)=>({arenaView:true,team,fighters,enemies:sides[1-team],direction:team===0?-1:1}));
+}
+function arenaStep(dt){
+  const arena=G.arena;arena.elapsed+=dt;G.combatT+=dt;
+  if(arena.stage==='result'){if(arena.elapsed>=5){restoreArenaArmies();startPrep();}return;}
+  let views=arenaViews();
+  // Status effects and ally auras run once per side. Views are transient and never serialized.
+  for(const view of views)tick341(view,dt);
+  views=arenaViews();
+  for(const view of views){
+    for(const f of [...view.fighters]){
+      if(f.deadT>0){f.deadT-=dt;if(f.deadT<=0){f.hp=f.max*.5;addFloater(f.x,f.y,'复活!','#7ee08a');}continue;}
+      if(f.hp<=0)continue;
+      if(f.stunT>0){f.cd-=dt;continue;}
+      if(f.route&&!f.arenaReady){
+        f.arenaReady=walkRoute(f,(f.def.speed||75)*f.slowF*dt);
+        f.cd=Math.max(0,f.cd-dt);continue;
+      }
+      const targets=view.enemies.filter(e=>e.hp>0&&e.deadT<=0&&e.arenaReady);
+      const target=targets.sort((a,b)=>Math.hypot(a.x-f.x,a.y-f.y)-Math.hypot(b.x-f.x,b.y-f.y))[0];
+      if(target){
+        const dx=target.x-f.x,dy=target.y-f.y,d=Math.hypot(dx,dy),reach=effRange(f.def)+target.r+12;
+        if(d>reach){const step=Math.min(d-reach,(f.def.speed||75)*f.slowF*dt);f.x+=dx/d*step;f.y+=dy/d*step;}
+        fighterAct({...view,enemies:targets},f,dt);
+        if(f.def.abil.burn)for(const e of targets)if(Math.hypot(e.x-f.x,e.y-f.y)<=f.def.abil.burn.r)dmgEnemy(e,f.def.abil.burn.dps*dt,'法术',f);
+      }else{f.cd=Math.max(0,f.cd-dt);}
+    }
+  }
+  spreadArenaUnits(dt);
+  G.projectiles=G.projectiles.filter(pr=>projStep(pr,dt));
+  // Death summons and reincarnation must resolve before testing for an empty team.
+  for(let pass=0;pass<4;pass++)for(const view of arenaViews())for(const f of [...view.fighters]){
+    if(f.hp<=0&&f.deadT<=0&&!f.deathHandled)death341(view,f);
+  }
+  for(const p of G.players)p.fighters=p.fighters.filter(f=>!f.temporary||f.hp>0||f.deadT>0);
+  arena.counts=arenaCounts();
+  const [blue,red]=arena.counts;
+  if(!blue||!red){finishArena(blue?0:red?1:null);return;}
+  arena.stage=G.players.some(p=>p.fighters.some(f=>f.arenaReady))?'fight':'march';
+  if(arena.elapsed>=CFG.ARENA_LIMIT){finishArena(null,true);}
+}
+function finishArena(winner,timeout=false){
+  if(G.arena.stage==='result')return;
+  const bonus=G.wave*(winner===null?5:10);
+  for(const p of G.players)if(winner===null||p.team===winner)p.gold+=bonus;
+  G.arena.stage='result';G.arena.winner=winner;G.arena.elapsed=0;G.projectiles=[];
+  G.arenaHistory.push({wave:G.wave,winner,bonus,timeout});
+  addLog(`${timeout?'PK 超时，判为平局':winner===null?'双方军团全灭，PK 平局':(winner===0?'苍岚':'赤焰')+'军团赢得 PK'}！${winner===null?'双方':'胜方'}每人 +${bonus} 金，5 秒后继续守关。`,'l-gold');
+}
+function spreadArenaUnits(dt){
+  const units=G.players.flatMap(p=>p.fighters).filter(f=>f.hp>0&&f.deadT<=0&&f.arenaReady);
+  for(let i=0;i<units.length;i++)for(let j=i+1;j<units.length;j++){
+    const a=units[i],b=units[j];let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);
+    if(d>=24)continue;
+    if(d<.01){const angle=(i*37+j*17)*2.39996;dx=Math.cos(angle);dy=Math.sin(angle);d=1;}
+    const push=Math.min((24-d)/2,36*dt);
+    a.x-=dx/d*push;a.y-=dy/d*push;b.x+=dx/d*push;b.y+=dy/d*push;
+  }
+  for(const f of units){f.x=Math.max(CFG.GATE_LEFT-80,Math.min(CFG.GATE_RIGHT+80,f.x));f.y=Math.max(CFG.ROAD_Y-55,Math.min(CFG.ROAD_Y+55,f.y));}
+}
+function restoreArenaArmies(){
+  for(const p of G.players){p.fighters=p.fighters.filter(f=>!f.temporary);for(const f of p.fighters)restoreFighter(p,f);recalcAuras(p);}
+}

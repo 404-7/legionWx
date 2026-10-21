@@ -27,7 +27,7 @@ module.exports = function createGame(humans) {
         if (!p || !p.isHuman) return false;
         const f = p.fighters.find(f => !f.temporary && f.col === a.col && f.row === a.row);
         switch (a.type) {
-          case 'buy': return Object.hasOwn(UNITS, a.uid) && Number.isInteger(a.col) && Number.isInteger(a.row) && p.fighters.filter(f=>!f.temporary).length < 36 && buyFighter(p, a.uid, a.col, a.row);
+          case 'buy': return Object.hasOwn(UNITS, a.uid) && Number.isInteger(a.col) && Number.isInteger(a.row) && p.fighters.filter(f=>!f.temporary).length < CFG.COLS*CFG.ROWS && buyFighter(p, a.uid, a.col, a.row);
           case 'upgrade': return !!f && upgradeFighter(p, f, a.uid);
           case 'sell': return !!f && sellFighter(p, f);
           case 'steroids': return !!f && inject341Steroids(p,f);

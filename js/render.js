@@ -20,31 +20,36 @@ function roundRect(c, x, y, w, h, r) {
 const PROJ_COLORS = { '普通': '#ffd27e', '穿刺': '#ffab91', '魔法': '#b388ff', '攻城': '#ffb74d' };
 
 function drawMap(c, t) {
-  const bg = c.createRadialGradient(650,400,50,650,400,750);
-  bg.addColorStop(0,'#21342f'); bg.addColorStop(1,'#0b181b'); c.fillStyle=bg; c.fillRect(0,0,1300,800);
-  // A single continuous landscape with four approaches and two central castles.
-  for (let i=0;i<95;i++) {
-    const x=(i*173+17)%1300,y=(i*97+51)%800;
+  const bg = c.createRadialGradient(CFG.W/2,CFG.H/2,50,CFG.W/2,CFG.H/2,CFG.H);
+  bg.addColorStop(0,'#21342f'); bg.addColorStop(1,'#0b181b'); c.fillStyle=bg; c.fillRect(0,0,CFG.W,CFG.H);
+  for (let i=0;i<170;i++) {
+    const x=(i*173+17)%CFG.W,y=(i*97+51)%CFG.H;
     c.fillStyle=i%3?'#233b32':'#2d4638';
     c.beginPath(); c.arc(x,y,3+i%7,0,7); c.fill();
   }
   c.lineCap='round'; c.lineJoin='round';
-  for (const [x, kingX] of [[280,550],[1020,750]]) {
-    c.strokeStyle='#34493d'; c.lineWidth=66;
-    c.beginPath(); c.moveTo(x,20); c.lineTo(x,780); c.moveTo(x,400); c.lineTo(kingX,400); c.stroke();
-    c.strokeStyle='#66705a'; c.lineWidth=1; c.setLineDash([3,13]);
-    c.beginPath(); c.moveTo(x,20); c.lineTo(x,780); c.stroke(); c.setLineDash([]);
-    for (const [y,angle] of [[28,Math.PI/2],[350,Math.PI/2],[772,-Math.PI/2],[450,-Math.PI/2]]) mapArrow(c,x,y,angle);
-    mapArrow(c,(x+kingX)/2,400,x<kingX?0:Math.PI);
+  for (const k of G.kings) {
+    const x=G.players.find(p=>p.team===k.team).exitX,color=TEAM_COLORS[k.team];
+    c.strokeStyle='#34493d'; c.lineWidth=72;
+    c.beginPath(); c.moveTo(x,20); c.lineTo(x,CFG.H-20); c.moveTo(x,CFG.ROAD_Y);c.lineTo(k.x,CFG.ROAD_Y);c.lineTo(k.x,k.y);c.stroke();
+    c.strokeStyle=color;c.lineWidth=4;c.globalAlpha=.7;
+    c.beginPath();c.moveTo(x,20);c.lineTo(x,CFG.H-20);c.moveTo(x,CFG.ROAD_Y);c.lineTo(k.x,CFG.ROAD_Y);c.lineTo(k.x,k.y);c.stroke();c.globalAlpha=1;
+    for(const [y,angle] of [[34,Math.PI/2],[640,Math.PI/2],[CFG.H-34,-Math.PI/2],[800,-Math.PI/2]])mapArrow(c,x,y,angle,color);
+    mapArrow(c,(x+k.x)/2,CFG.ROAD_Y,x<k.x?0:Math.PI,color);
+    mapArrow(c,k.x,(CFG.ROAD_Y+k.y)/2,k.y<CFG.ROAD_Y?-Math.PI/2:Math.PI/2,color);
   }
+  const open=G.battleMode==='arena'&&G.phase==='combat',gateW=CFG.GATE_RIGHT-CFG.GATE_LEFT;
+  c.fillStyle=open?'#2a633ec9':'#152e23';c.strokeStyle='#55d576';c.lineWidth=4;
+  roundRect(c,CFG.GATE_LEFT,CFG.ROAD_Y-60,gateW,120,10);c.fill();c.stroke();
+  if(!open){c.strokeStyle='#71836b';c.lineWidth=5;for(let y=CFG.ROAD_Y-43;y<CFG.ROAD_Y+48;y+=18){c.beginPath();c.moveTo(CFG.W/2-35,y);c.lineTo(CFG.W/2+35,y);c.stroke();}}
   c.fillStyle='#b9cfc2'; c.textAlign='center'; c.font='bold 15px "Microsoft YaHei"';
-  c.fillText('苍 岚 军 团',550,308); c.fillText('赤 焰 军 团',750,308);
+  c.fillText(open?'PK 路口 · 已开放':'PK 路口 · 已关闭',CFG.W/2,CFG.ROAD_Y-83);
+  if(G.battleMode==='arena'){c.fillStyle='#e9d392';c.fillText(G.phase==='prep'?`${Math.ceil(G.timer)} 秒后开放`:G.arena.stage==='result'?'PK 已结算':`苍岚 ${G.arena.counts[0]}  VS  赤焰 ${G.arena.counts[1]}`,CFG.W/2,CFG.ROAD_Y+92);}
   c.fillStyle='#7f9c8e'; c.font='11px "Microsoft YaHei"';
-  c.fillText('红色箭头 · 怪物路线     金色圆环 · 国王',650,700);
-  c.fillText('LEGION / THE CONVERGENCE',650,724); c.textAlign='left';
+  c.textAlign='left';
 }
-function mapArrow(c,x,y,angle) {
-  c.save(); c.translate(x,y); c.rotate(angle); c.strokeStyle='#ff665d'; c.fillStyle='#ff665d'; c.lineWidth=3;
+function mapArrow(c,x,y,angle,color='#ff665d') {
+  c.save(); c.translate(x,y); c.rotate(angle); c.strokeStyle=color; c.fillStyle=color; c.lineWidth=3;
   c.beginPath(); c.moveTo(-22,0); c.lineTo(17,0); c.stroke();
   c.beginPath(); c.moveTo(22,0); c.lineTo(8,-6); c.lineTo(8,6); c.closePath(); c.fill(); c.restore();
 }
@@ -172,10 +177,12 @@ function drawField(p, t) {
 }
 
 function drawMines(c, p, t) {
+  const zone=mineZone(p);c.fillStyle='#333b3e88';c.strokeStyle='#929ca0';c.lineWidth=2;
+  roundRect(c,zone.x,zone.y,zone.w,zone.h,9);c.fill();c.stroke();
   const mineTop = minePosition(p, 0);
   c.textAlign = 'center'; c.font = '11px "Microsoft YaHei"';
   c.fillStyle = p.id === localPlayer().id ? '#e4ca87' : '#8b9d86';
-  c.fillText(`${p.name} · 矿区 ${p.mines.length}/${MINE.LIMIT}`, mineTop.x + 27, mineTop.y - 34);
+  c.fillText(`${p.name} · 矿区 ${p.mines.length}/${MINE.LIMIT}`, zone.x+zone.w/2,zone.y+30);
   for (let i = 0; i < MINE.LIMIT; i++) {
     const { x, y } = minePosition(p, i), mine = p.mines[i];
     const selected = p.id === localPlayer().id && G.selectedMine === i;
@@ -302,7 +309,7 @@ function drawEnemy(c, e, t) {
 function drawKing(k, t) {
   const c = CTX;
   const col = TEAM_COLORS[k.team];
-  c.strokeStyle = '#f5d46b'; c.lineWidth = 4;
+  c.strokeStyle = '#f5a1c6'; c.lineWidth = 4;
   c.beginPath(); c.arc(k.x,k.y,43,0,Math.PI*2); c.stroke();
   // 光环底座
   const glow = c.createRadialGradient(k.x, k.y, 5, k.x, k.y, 42);

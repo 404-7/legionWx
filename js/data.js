@@ -13,7 +13,7 @@ for (const row of [...SOURCE341.units,...SOURCE341.summons]) {
     cost:row.cost??0, purchaseCost:row.baseCost, hp:row.hp,
     dmg:(row.min+row.max)/2, min:row.min,max:row.max,aspd:row.interval,range:rawRange*SOURCE341.rangeScale,
     rawRange,melee:rawRange<=180,atk:row.atk,armor:row.armor,food:row.food,
-    armorPoints:row.map.armorPoints,regenFlat:row.map.regen,
+    armorPoints:row.map.armorPoints,regenFlat:row.map.regen,speed:(row.map.moveSpeed||300)*SOURCE341.rangeScale,
     manaMax:row.map.manaMax,manaStart:row.map.manaStart,manaRegen:row.map.manaRegen,
     upgrades:row.upgrades,up:row.upgrades[0],stances:row.stances||[],elite:row.elite,summonOnly:row.summonOnly,
     role:row.rawRange<=180?'前排':row.min===0?'法术':'远程',

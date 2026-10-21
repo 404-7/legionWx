@@ -106,6 +106,7 @@ function buildMercs() {
 
 function selectShop(uid) {
   if (!G) return;
+  if(uid&&!canManageArmy())return;
   G.selectedShop = (G.selectedShop === uid) ? null : uid;
   G.selectedFighter = null;
   if(G.selectedShop&&CommandUI.mobile){closeCommandPanel();setMapView('local');}
@@ -139,7 +140,7 @@ function updateUI(force) {
   $('stGold').textContent = Math.floor(me.gold);
   $('stIncome').textContent = me.income;
   $('stValue').textContent = playerValue(me);
-  $('stWave').textContent = (G.wave > CFG.TOTAL_WAVES ? `加时赛 第${G.wave}波` : `第 ${G.wave} / ${CFG.TOTAL_WAVES} 波`) +
+  $('stWave').textContent = (G.battleMode==='arena'?`第 ${G.wave} 波后 · 阵营 PK`:G.wave > CFG.TOTAL_WAVES ? `加时赛 第${G.wave}波` : `第 ${G.wave} / ${CFG.TOTAL_WAVES} 波`) +
     (G.phase === 'prep' ? ` · 准备 ${Math.ceil(G.timer)}s` : G.phase === 'combat' ? ' · 战斗中' : '');
 
   // 波次预告
@@ -149,7 +150,7 @@ function updateUI(force) {
     const traitTxt = d.trait ? `<span class="chip trait">${TRAIT_INFO[d.trait].n}</span>` : '';
     const incoming = me.mercQueue.length
       ? `<div class="mercWarn">⚠ 敌方已向你雇佣 ${me.mercQueue.length} 个单位（随下一波来袭）</div>` : '';
-    wi.innerHTML = `
+    wi.innerHTML = G.battleMode==='arena'?`<div class="wrow"><span class="wnum">阵营 PK</span><span class="wtime">${G.phase==='prep'?Math.ceil(G.timer)+'s 后开门':G.arena.stage==='result'?'已结算 · 即将继续守关':'中央路口已开放'}</span></div><div class="race-tip">${G.phase==='prep'?'可调整阵容，开战后暂时锁定买兵、升级与出售。':'苍岚 '+G.arena.counts[0]+' 单位 / 赤焰 '+G.arena.counts[1]+' 单位'}<br>胜方每人 +${G.wave*10} 金 · 平局每人 +${G.wave*5} 金<br>国王不参战，PK 后恢复原阵型继续守关。</div>`:`
       <div class="wrow">
         <span class="wnum">${G.wave > CFG.TOTAL_WAVES ? '加时 ' : ''}第 ${G.wave} 波</span>
         <span class="wtime">${G.phase === 'prep' ? Math.ceil(G.timer) + 's 后来袭' : '⚔ 战斗中'}</span>
@@ -181,7 +182,8 @@ function updateUI(force) {
       $('btnSell').addEventListener('click',()=>{requestUnitSale(f);});
     }
     $('selLiveStats').textContent=`❤${Math.max(0,Math.ceil(f.hp))}/${def.hp} · 法力 ${Math.floor(f.mana||0)}/${def.manaMax} · ${f.hp>0?'在场':'等待下波复活'}`;
-    sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>{const id=button.dataset.upgradeUid;button.disabled=G.phase==='over'||me.gold<(def.stances.includes(id)?0:UNITS[id].purchaseCost);});
+    sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>{const id=button.dataset.upgradeUid;button.disabled=!canManageArmy()||me.gold<(def.stances.includes(id)?0:UNITS[id].purchaseCost);});
+    $('btnSell').disabled=!canManageArmy();
     const refund=Math.floor(f.spent*(def.abil.refund||1));$('btnSell').textContent=`卖出 +${refund}金`;
     $('btnSell').disabled=G.phase==='over';
     let steroid=$('btnSteroids');

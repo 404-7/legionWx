@@ -19,7 +19,7 @@ function isWall(def) { return def.range <= 45; }
 
 /* 在偏好列附近找空格（行从中间向外扫描） */
 function aiFindCell(p, preferCol) {
-  const rows = [2, 3, 1, 4, 0, 5];
+  const rows = Array.from({length:CFG.ROWS},(_,i)=>i).sort((a,b)=>Math.abs(a-(CFG.ROWS-1)/2)-Math.abs(b-(CFG.ROWS-1)/2));
   const cols = [];
   for (let off = 0; off < CFG.COLS; off++) {
     const c1 = preferCol + off, c2 = preferCol - off;
