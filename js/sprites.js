@@ -418,7 +418,7 @@ const RACE_PALETTES = {
   undead: {main:'#739b96',dark:'#2b494a',light:'#c1d2bf',glow:'#83e0c9',skin:'#a6b6a2'},
 };
 function raceUnitSpr(c, def) {
-  const P=RACE_PALETTES[def.race], big=!!def.elite;
+  const P=RACE_PALETTES[def.race]||{main:RACES[def.race].color,dark:'#354459',light:'#e5dccc',glow:RACES[def.race].color,skin:'#c4b79b'}, big=!!def.elite;
   if (def.model==='tank'||def.model==='wagon') {
     sh(c); const wood=def.model==='wagon';
     for(const x of [14,25,38]) circ(c,x,46,5,'#303532',OUT,1.5);

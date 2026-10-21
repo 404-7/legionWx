@@ -56,7 +56,7 @@ function startPrep() {
   G.wave++;
   G.waveDef = waveDefFor(G.wave);
   for (const p of G.players) {
-    const inc = Math.round(p.income * gainMult(p));
+    const inc = G.wave === 1 ? 0 : Math.round(p.income * gainMult(p));
     p.gold += inc;
     p.paid = true;
     p.enemies = []; p.spawnList = [];
@@ -73,6 +73,8 @@ function startCombat() {
   G.combatT = 0;
   const iv = Math.max(0.5, 1.15 - G.wave * 0.012);
   for (const p of G.players) {
+    for(const f of p.fighters)if(f.steroids){f.max=f.def.hp*1.2;f.hp=f.max;}
+    start341Round(p);
     p.paid = false;
     p.leakCount = 0;
     p.spawnIv = iv; p.spawnT = 0.2;
@@ -88,14 +90,20 @@ function endWave() {
   for (const k of G.kings) {
     k.leaks = [];
   }
-  // 每波结束战士满血复活（阵亡的不回来）
-  for (const p of G.players) for (const f of p.fighters) {
-    f.hp = f.max; f.deadT = 0; f.reincUsed = false; f.cd = 0.3;
+  for (const p of G.players) {
+    p.gold += Math.round((G.waveDef.bonus || 0) * gainMult(p));
+    const survivors=p.fighters.filter(f=>f.hp>0&&!f.temporary);
+    if(survivors.some(f=>f.def.abil.slaveTrade))p.gold+=survivors.reduce((sum,f)=>sum+(f.uid==='slavemaster'?3:f.uid==='servant'?2:0),0);
+    p.fighters = p.fighters.filter(f => !f.temporary);
+    for (const f of p.fighters) {
+      f.max=f.def.hp;f.hp=f.max; f.deadT=0; f.reincUsed=false; f.cd=.3;f.steroids=false;
+      init341Fighter(f);
+    }
+    recalcAuras(p);
   }
   if (G.wave >= CFG.TOTAL_WAVES && !G.result) {
-    const a = G.kings[0].hp / G.kings[0].max, b = G.kings[1].hp / G.kings[1].max;
-    if (Math.abs(a - b) >= 0.02) { gameOver(a > b ? 0 : 1); return; }
-    addLog('双方国王血量接近，进入加时赛！', 'l-gold');
+    const a=G.kings[0].hp/G.kings[0].max,b=G.kings[1].hp/G.kings[1].max;
+    gameOver(Math.abs(a-b)<.00001 ? null : a>b ? 0 : 1); return;
   }
   startPrep();
 }
@@ -103,7 +111,7 @@ function endWave() {
 function gameOver(winner) {
   G.result = { winner };
   G.phase = 'over';
-  addLog(winner === 0 ? '🏆 蓝方胜利！' : '💀 蓝方战败…', winner === 0 ? 'l-green' : 'l-red');
+  addLog(winner === null ? '双方守住了最终波，平局！' : winner === 0 ? '🏆 蓝方胜利！' : '💀 蓝方战败…', winner === 0 ? 'l-green' : 'l-red');
   if (typeof showOverlay === 'function') showOverlay('result');
 }
 
@@ -173,6 +181,7 @@ function fieldStep(p, dt) {
       p.spawnT += p.spawnIv;
     }
   }
+  tick341(p, dt);
   // 战士（含复活倒计时）
   for (const f of p.fighters) {
     if (f.hp <= 0 && f.deadT <= 0) continue;
@@ -182,17 +191,6 @@ function fieldStep(p, dt) {
       continue;
     }
     fighterAct(p, f, dt);
-  }
-  // Regeneration and healing are time-based; strongest aura wins, never resurrects dead units.
-  const healers = p.fighters.filter(f => f.hp > 0 && f.deadT <= 0 && f.def.abil.healAura);
-  for (const f of p.fighters) {
-    if (f.hp <= 0 || f.deadT > 0) continue;
-    let hps = 0;
-    for (const healer of healers) {
-      const aura = healer.def.abil.healAura;
-      if (Math.hypot(f.x-healer.x,f.y-healer.y) <= aura.r) hps = Math.max(hps,aura.hps);
-    }
-    f.hp = Math.min(f.max, f.hp + (hps + f.max * (f.def.abil.regen?.p || 0)) * dt);
   }
   // 灼烧光环
   for (const f of p.fighters) {
@@ -215,12 +213,15 @@ function fieldStep(p, dt) {
     }
   }
   // 清理死亡
-  for (const e of p.enemies) if (e.hp <= 0) addPuff(e.x, e.y, '#ff8a80', 6 + e.r);
+  for (const e of p.enemies) if (e.hp <= 0) {
+    if(!e.rewarded){p.gold += Math.round((e.bounty||0)*gainMult(p));e.rewarded=true;}
+    addPuff(e.x,e.y,'#ff8a80',6+e.r);
+  }
   p.enemies = p.enemies.filter(e => e.hp > 0);
   const dead = p.fighters.filter(f => f.hp <= 0 && f.deadT <= 0 && !(f.def.abil && f.def.abil.reinc && !f.reincUsed));
   if (dead.length) {
-    for (const f of dead) addPuff(f.x, f.y, RACES[f.def.race].color, 12);
-    p.fighters = p.fighters.filter(f => !dead.includes(f));
+    for (const f of dead) if(!f.deathHandled){addPuff(f.x,f.y,RACES[f.def.race].color,12);death341(p,f);}
+    p.fighters = p.fighters.filter(f => !f.temporary || f.hp>0);
     recalcAuras(p);
   }
   // 结算
@@ -236,7 +237,7 @@ function spawnEnemy(p, item) {
   } else {
     const d = G.waveDef;
     e = { hp: d.hp, max: d.hp, dmg: d.dmg, aspd: d.aspd, range: d.range, speed: d.speed, armor: d.armor, atk: d.atk, r: d.r, regen: d.regen, magicImmune: d.magicImmune, boss: d.boss };
-    e.trait = d.trait;
+    e.trait = d.trait; e.bounty=d.bounty; e.armorPoints=d.armorPoints; e.regenFlat=d.regenFlat; e.air=d.air;
   }
   e.laneX = p.gx + 16 + Math.random() * (CFG.GRID_W - 32);
   e.x = e.laneX;
@@ -247,11 +248,12 @@ function spawnEnemy(p, item) {
 }
 
 function enemyAct(p, e, dt) {
-  if (e.hp <= 0) return;
+  if (e.hp <= 0 || e.stunT>0) return;
   e.cd -= dt;
   if (e.flash > 0) e.flash -= dt;
   if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowF = 1; }
   if (e.regen) e.hp = Math.min(e.max, e.hp + e.max * e.regen * dt);
+  if(e.regenFlat)e.hp=Math.min(e.max,e.hp+e.regenFlat*dt);
   const sp = e.speed * e.slowF;
 
   let tgt = null, td = 1e9;
@@ -263,7 +265,7 @@ function enemyAct(p, e, dt) {
   if (tgt && td < CFG.AGGRO) {
     const reach = e.range + e.r;
     if (td <= reach) {
-      if (e.cd <= 0) { e.cd = e.aspd; hitFighter(p, tgt, e.dmg, e.atk); e.flash = 0.12; }
+      if (e.cd <= 0) { e.cd = e.aspd/Math.max(.05,1-(e.attackSlow||0)); hitFighter(p, tgt, e.dmg*(1-(e.damageWeak||0)), e.atk, e); e.flash = 0.12; }
     } else {
       const nx = (tgt.x - e.x) / td, ny = (tgt.y - e.y) / td;
       e.x += nx * sp * dt; e.y += ny * sp * dt;
@@ -275,13 +277,19 @@ function enemyAct(p, e, dt) {
   }
 }
 
-function hitFighter(p, f, dmg, atk) {
-  const m = ATK_ARMOR[atk][f.def.armor] || 1;
-  f.hp -= dmg * m;
-  f.flash = 0.15;
-  if (f.hp <= 0 && f.def.abil && f.def.abil.reinc && !f.reincUsed) {
-    f.reincUsed = true; f.deadT = 2.2;
-  }
+function hitFighter(p,f,dmg,atk,attacker) {
+  const a=f.def.abil;
+  if(Object.values(f.buffs||{}).some(b=>b.invulnerable))return;
+  if(a.evasion&&Math.random()<a.evasion)return;
+  if(attacker&&Math.random()<(attacker.miss||0))return;
+  if(a.magicImmune&&(atk==='魔法'||atk==='法术'))return;
+  let amount=dmg*(ATK_ARMOR[atk]?.[f.def.armor]??1)*armorFactor(f.effArmor??f.def.armorPoints)*(f.damageTaken||1);
+  if(atk==='穿刺'&&a.defend)amount*=a.defend;
+  if(a.block&&Math.random()<a.block.chance)amount=Math.max(a.block.minimum,amount-a.block.amount);
+  if(a.manaShield&&f.mana>0){const absorb=Math.min(amount*a.manaShield.ratio,f.mana*a.manaShield.perMana);amount-=absorb;f.mana-=absorb/a.manaShield.perMana;}
+  f.hp-=amount;f.flash=.15;
+  if(attacker&&a.reflect&&attacker.range<=45)dmgEnemy(attacker,amount*a.reflect.p,'法术');
+  if(f.hp<=0&&a.reinc&&!f.reincUsed){f.reincUsed=true;f.deadT=2.2;}
 }
 
 function fighterAct(p, f, dt) {
@@ -298,24 +306,30 @@ function fighterAct(p, f, dt) {
     if (d - e.r - 12 <= R && progress > bx) { bx = progress; tgt = e; }
   }
   if (!tgt) return;
-  f.cd = f.def.aspd;
-  let dmg = f.effDmg;
-  const ab = f.def.abil || {};
-  if (ab.crit && Math.random() < ab.crit.c) dmg *= ab.crit.m;
-  if (f.def.range <= 45) {
-    const dealt = dmgEnemy(tgt, dmg, f.def.atk);
-    if (ab.lifesteal) f.hp = Math.min(f.max,f.hp + dealt*ab.lifesteal);
-    afterHits(p, tgt, dmg, f.def.atk, ab);
-    f.flash = 0.12;
-  } else {
-    G.projectiles.push({ p, x: f.x, y: f.y, px: f.x, py: f.y, tgt, sp: CFG.PROJ_SPEED, dmg, atk: f.def.atk, ab, t: 3 });
+  f.cd=f.def.aspd/(1+(f.effHaste||0));
+  f.attacks=(f.attacks||0)+1;
+  const ab=f.def.abil||{};
+  let dmg=(f.def.min+Math.random()*(f.def.max-f.def.min))*(f.def.dmg ? f.effDmg/f.def.dmg : 1)+(ab.flatDamage||0);
+  for(const b of Object.values(f.buffs||{}))dmg*=1+(b.damage||0);
+  if(ab.crit&&(!ab.crit.airOnly||tgt.air)&&Math.random()<ab.crit.c)dmg*=ab.crit.m;
+  if(ab.attackMana)f.mana=Math.min(f.def.manaMax,f.mana+ab.attackMana);
+  if(ab.manaHit&&f.mana>=ab.manaHit.mana&&(f.spellCD[ab.manaHit.id]||0)<=0){dmg+=ab.manaHit.damage;f.mana-=ab.manaHit.mana;f.spellCD[ab.manaHit.id]=ab.manaHit.cd;}
+  if(f.steroids)dmg*=1.25;
+  if(ab.focusManaDivisor)dmg+=Math.floor(f.mana/ab.focusManaDivisor);
+  if(f.illusionFactor)dmg*=f.illusionFactor;
+  const targets=[tgt,...p.enemies.filter(e=>e!==tgt&&e.hp>0&&Math.hypot(e.x-f.x,e.y-f.y)-e.r-12<=R).slice(0,(ab.multishot||1)-1)];
+  for(const target of targets){
+    if(f.def.melee){const dealt=dmgEnemy(target,dmg,f.def.atk);hit341(p,f,target,dealt);afterHits(p,target,dmg,f.def.atk,ab);f.flash=.12;}
+    else G.projectiles.push({p,source:f,x:f.x,y:f.y,px:f.x,py:f.y,tgt:target,sp:CFG.PROJ_SPEED,dmg,atk:f.def.atk,ab,t:3});
   }
 }
 
 function dmgEnemy(e, dmg, atk) {
   if (e.hp <= 0) return 0;
   let m = (ATK_ARMOR[atk] && ATK_ARMOR[atk][e.armor]) || 1;
-  if (e.magicImmune && atk === '魔法') m = 0.1;
+  if(e.magicImmune && (atk==='魔法'||atk==='法术'))m=0;
+  if(atk!=='法术')m*=armorFactor((e.armorPoints||0)-(e.armorLoss||0));
+  if(e.mark)m*=1+e.mark;
   const dealt = Math.min(e.hp, dmg * m);
   e.hp -= dmg * m;
   e.flash = 0.12;
@@ -351,7 +365,8 @@ function projStep(pr, dt) {
   const dx = t.x - pr.x, dy = t.y - pr.y, d = Math.hypot(dx, dy);
   const step = pr.sp * dt;
   if (d <= step + t.r) {
-    dmgEnemy(t, pr.dmg, pr.atk);
+    const dealt=dmgEnemy(t,pr.dmg,pr.atk);
+    if(pr.source)hit341(pr.p,pr.source,t,dealt);
     afterHits(pr.p, t, pr.dmg, pr.atk, pr.ab);
     return false;
   }
@@ -459,71 +474,61 @@ function mineStep(p, dt) {
 }
 
 function payClear(p) {
-  let g = Math.round((18 + G.wave * 3.4) * gainMult(p));
-  if (p.fighters.length === 0) g += 25 + G.wave * 3;   // 全灭重建补贴，避免一蹶不振
-  p.gold += g;
-  p.paid = true;
-  addFloater(p.gx + CFG.GRID_W / 2, p.gy + 14, `+${g}金`, '#f5c542');
-  if (p.isHuman) {
-    if (p.leakCount > 0) addLog(`${p.name} 第 ${G.wave} 波漏怪 ${p.leakCount} 个，奖励 +${g} 金`, 'l-red');
-    else addLog(`${p.name} 第 ${G.wave} 波防守成功，+${g} 金`, 'l-gold');
-  }
+  p.paid=true;
+  if(p.isHuman)addLog(p.leakCount ? `第 ${G.wave} 波漏怪 ${p.leakCount} 个` : `第 ${G.wave} 波防守成功`,p.leakCount?'l-red':'l-gold');
 }
 
 function cellFree(p, col, row) {
-  return !p.fighters.some(f => f.col === col && f.row === row);
+  return !p.fighters.some(f => !f.temporary && f.col === col && f.row === row);
 }
 
 function buyFighter(p, uid, col, row) {
   const def = UNITS[uid];
-  if (!def || p.gold < def.cost || col < 0 || col >= CFG.COLS || row < 0 || row >= CFG.ROWS || !cellFree(p, col, row)) return false;
-  p.gold -= def.cost;
+  if (!Object.hasOwn(UNITS,uid) || !def || def.elite || def.summonOnly || !Number.isInteger(col) || !Number.isInteger(row) || p.gold < def.purchaseCost || col < 0 || col >= CFG.COLS || row < 0 || row >= CFG.ROWS || !cellFree(p, col, row)) return false;
+  p.gold -= def.purchaseCost;
   p.fighters.push({
     def, uid, col, row,
     x: p.gx + (col + 0.5) * CFG.CELL, y: p.gy + (row + 0.5) * CFG.CELL,
-    hp: def.hp, max: def.hp, cd: 0.3, spent: def.cost,
+    hp: def.hp, max: def.hp, cd: 0.3, spent: def.purchaseCost,
     effDmg: def.dmg, flash: 0, deadT: 0, reincUsed: false,
   });
+  init341Fighter(p.fighters[p.fighters.length-1]);
   recalcAuras(p);
   return true;
 }
 
-function upgradeFighter(p, f) {
-  const nextId = f.def.up;
-  if (!nextId) return false;
-  const next = UNITS[nextId];
-  const cost = next.cost - f.def.cost;
-  if (p.gold < cost) return false;
-  p.gold -= cost;
-  f.spent += cost;
-  f.def = next; f.uid = nextId;
-  f.hp = next.hp; f.max = next.hp;
-  addFloater(f.x, f.y, '升级!', '#7ee08a');
-  recalcAuras(p);
-  return true;
+function upgradeFighter(p,f,targetId) {
+  if(!p.fighters.includes(f)||f.temporary)return false;
+  const nextId=targetId??f.def.up;
+  const stance=f.def.stances.includes(nextId);
+  if(!stance&&!f.def.upgrades.includes(nextId))return false;
+  const next=UNITS[nextId];if(!next)return false;
+  const cost=stance?0:next.purchaseCost;
+  if(p.gold<cost)return false;
+  const ratio=f.hp/f.max,mana=f.mana;
+  p.gold-=cost;f.spent+=cost;f.def=next;f.uid=nextId;f.hp=next.hp;f.max=next.hp;
+  init341Fighter(f);
+  if(stance){f.hp=f.max*ratio;f.mana=Math.min(next.manaMax,mana);}
+  addFloater(f.x,f.y,stance?'切换形态':'升级!','#7ee08a');recalcAuras(p);return true;
 }
 
 function sellFighter(p, f) {
   const i = p.fighters.indexOf(f);
-  if (i < 0) return false;
+  if (i < 0 || f.temporary) return false;
   p.fighters.splice(i, 1);
-  p.gold += f.spent;
-  addFloater(f.x, f.y, `+${f.spent}金`, '#f5c542');
+  const refund=Math.floor(f.spent*(f.def.abil.refund||1));p.gold += refund;
+  addFloater(f.x, f.y, `+${refund}金`, '#f5c542');
   if (G.selectedFighter === f) G.selectedFighter = null;
   recalcAuras(p);
   return true;
 }
 
 function recalcAuras(p) {
-  for (const f of p.fighters) f.effDmg = f.def.dmg;
-  for (const src of p.fighters) {
-    const a = src.def.abil && src.def.abil.aura;
-    if (!a || src.deadT > 0 || src.hp <= 0) continue;
-    for (const f of p.fighters) {
-      if (f !== src && f.deadT <= 0 && Math.hypot(f.x - src.x, f.y - src.y) <= a.r) {
-        f.effDmg *= (1 + a.p);
-      }
+  for(const f of p.fighters){let amp=0;
+    for(const src of p.fighters){const a=src.def.abil.aura;
+      if(a&&src.hp>0&&(!a.rangedOnly||!f.def.melee)&&Math.hypot(f.x-src.x,f.y-src.y)<=a.r)amp=Math.max(amp,a.p);
     }
+    f.effDmg=f.def.dmg*(1+amp);
   }
 }
 

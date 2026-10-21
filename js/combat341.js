@@ -1,0 +1,146 @@
+'use strict';
+// Stateful combat adapters for the supplied 3.41 unit/ability records.
+function armorFactor(points=0) { return points>=0 ? 1/(1+.06*points) : 2-Math.pow(.94,-points); }
+function init341Fighter(f) {
+  f.mana = Math.min(f.def.manaMax||0,f.def.manaStart||0);
+  f.spellCD={};f.buffs={};f.attacks=0;f.deathHandled=false;
+  f.effArmor=f.def.armorPoints||0;f.effHaste=0;f.effVamp=0;
+  f.guardianFactor=1;
+}
+function spell341Targets(p,f,r) {
+  return p.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-f.x,e.y-f.y)<=r+e.r)
+    .sort((a,b)=>Math.hypot(a.x-f.x,a.y-f.y)-Math.hypot(b.x-f.x,b.y-f.y));
+}
+function add341Status(e,key,data) {
+  e.statuses ||= {};
+  e.statuses[key]={...data};
+}
+function step341Enemy(e,dt) {
+  e.statuses ||= {};e.slowF=1;e.attackSlow=0;e.damageWeak=0;e.armorLoss=0;e.miss=0;e.stunT=0;
+  for(const [id,b] of Object.entries(e.statuses)) {
+    const active=Math.min(dt,b.time);b.time-=dt;
+    if(b.dps&&e.hp>0)dmgEnemy(e,b.dps*active,'法术');
+    e.slowF=Math.min(e.slowF,1-(b.move||0));
+    e.attackSlow=Math.max(e.attackSlow,b.attack||0);
+    e.damageWeak=Math.max(e.damageWeak,b.damage||0);
+    e.armorLoss=Math.max(e.armorLoss,b.armor||0);
+    e.miss=Math.max(e.miss,b.miss||0);
+    if(b.stun)e.stunT=Math.max(e.stunT,Math.max(.00001,b.time));
+    if(b.time<=0)delete e.statuses[id];
+  }
+}
+function tick341(p,dt) {
+  for(const e of p.enemies)step341Enemy(e,dt);
+  const alive=p.fighters.filter(f=>f.hp>0&&f.deadT<=0);
+  for(const f of alive) {
+    if(!f.buffs)init341Fighter(f);
+    for(const [id,b] of Object.entries(f.buffs)){b.time-=dt;if(b.time<=0)delete f.buffs[id];}
+    for(const id in f.spellCD)f.spellCD[id]-=dt;
+    if(f.temporary){f.life-=dt;if(f.life<=0){f.hp=0;continue;}}
+    let healing=f.def.regenFlat||0,manaRegen=f.def.manaRegen||0,haste=0,vamp=0,armor=0,amp=0;
+    for(const source of alive) {
+      const a=source.def.abil,d=Math.hypot(source.x-f.x,source.y-f.y);
+      if(a.healAura&&d<=a.healAura.r)amp=Math.max(amp,a.healAura.hps);
+      if(a.manaAura&&d<=a.manaAura.r)manaRegen+=f.def.manaMax*a.manaAura.p;
+      if(a.hasteAura&&d<=a.hasteAura.r)haste=Math.max(haste,a.hasteAura.p);
+      if(a.vampAura&&f.def.melee&&d<=a.vampAura.r)vamp=Math.max(vamp,a.vampAura.p);
+      if(a.armorAura&&d<=a.armorAura.r)armor=Math.max(armor,a.armorAura.armor);
+    }
+    for(const b of Object.values(f.buffs)){haste+=b.haste||0;armor+=b.armor||0;healing-=b.drain||0;}
+    if(f.def.abil.berserk){const ratio=f.hp/f.max;haste+=ratio<.2?.8:ratio<.4?.6:ratio<.6?.4:0;}
+    f.hp=Math.max(1,Math.min(f.max,f.hp+(healing+amp)*dt));
+    f.mana=Math.min(f.def.manaMax||0,f.mana+manaRegen*dt);
+    f.effArmor=(f.def.armorPoints||0)+armor;f.effHaste=haste;f.effVamp=vamp;
+    f.damageTaken=(f.illusionTaken||1)*(f.guardianFactor||1);
+    for(const c of f.def.abil.casts||[])cast341(p,f,c);
+    if(f.def.abil.slowAura)for(const e of spell341Targets(p,f,f.def.abil.slowAura.r))add341Status(e,'slowAura',{move:f.def.abil.slowAura.p,time:.15});
+    if(f.def.abil.weakenAura)for(const e of spell341Targets(p,f,f.def.abil.weakenAura.r))add341Status(e,'weakenAura',{damage:f.def.abil.weakenAura.p,time:.15});
+    if(f.def.abil.heartstopper)for(const e of spell341Targets(p,f,f.def.abil.heartstopper.r))dmgEnemy(e,e.max*f.def.abil.heartstopper.p*dt,'法术');
+    if(f.def.abil.explode&&spell341Targets(p,f,f.def.abil.explode.range).length){for(const e of spell341Targets(p,f,f.def.abil.explode.range))dmgEnemy(e,f.def.abil.explode.damage,'法术');f.hp=0;}
+  }
+  recalcAuras(p);
+}
+function cast341(p,f,c) {
+  if((f.spellCD[c.id]||0)>0||f.mana<c.mana)return;
+  if(c.hpThreshold&&f.hp/f.max>c.hpThreshold)return;
+  const r=Math.max(c.range||0,effRange(f.def)),targets=spell341Targets(p,f,r);
+  const friends=p.fighters.filter(g=>g.hp>0&&g.deadT<=0&&Math.hypot(g.x-f.x,g.y-f.y)<=r)
+    .sort((a,b)=>a.hp/a.max-b.hp/b.max);
+  const target=targets[0];let success=false;
+  if(c.kind==='heal'||c.kind==='healGroup'||c.kind==='healChain') {
+    const list=friends.filter(g=>g.hp<g.max).slice(0,c.kind==='heal'?1:c.n);
+    for(const [i,g] of list.entries()){const amount=c.amount*Math.pow(1-(c.falloff||0),i);g.hp=Math.min(g.max,g.hp+amount);addFloater(g.x,g.y-20,`+${Math.round(amount)}`,'#8cdbab');}
+    success=list.length>0;
+  } else if(c.kind==='armorBuff') {
+    const g=friends.find(g=>!g.buffs?.[c.id]);if(g){g.buffs ||= {};g.buffs[c.id]={armor:c.armor,time:c.duration};success=true;}
+  } else if(c.kind==='groupBuff'&&target) {
+    for(const g of friends){g.buffs ||= {};g.buffs[c.id]={...c,time:c.duration};}success=friends.length>0;
+  } else if(c.kind==='selfBuff'&&target) {
+    if(!f.buffs[c.id]){f.buffs[c.id]={...c,time:c.duration};success=true;}
+  } else if(c.kind==='allyBuff') {
+    const g=friends.find(g=>g!==f&&!g.buffs?.[c.id]);if(g){g.buffs ||= {};g.buffs[c.id]={...c,time:c.duration};success=true;}
+  } else if(c.kind==='illusion'&&target&&!f.temporary) {
+    const copy=spawn341Ally(p,f,f.def,c.duration);if(copy){copy.illusionFactor=c.factor;copy.illusionTaken=c.taken;copy.mana=0;success=true;}
+  } else if(c.kind==='summon'&&target) {
+    const def=Object.values(UNITS).find(d=>d.rawId===c.rawId);
+    if(def){for(let i=0;i<c.count;i++)spawn341Ally(p,f,def,c.duration);success=true;}
+  } else if(target) {
+    if(c.kind==='miss') {
+      for(const e of targets)add341Status(e,c.id,{time:c.duration,miss:c.miss});success=true;
+    } else if(c.kind==='breath') {
+      for(const e of targets){dmgEnemy(e,c.damage,'法术');add341Status(e,c.id,{time:c.duration,dps:c.dps});}success=true;
+    } else if(['debuff','haunt','root'].includes(c.kind)) {
+      add341Status(target,c.id,{time:target.boss?(c.boss||c.duration):c.duration,dps:c.dps||0,
+        move:c.kind==='root'?1:c.move||0,attack:c.attack||0,damage:c.damage||0});success=true;
+    } else if(c.kind==='aoe'||c.kind==='nova') {
+      for(const e of targets.slice(0,c.n||99)) {
+        dmgEnemy(e,c.kind==='nova'?(e===target?c.damage:0)+c.aoe:c.damage,'法术');
+        if(c.stun||c.move||c.attack)add341Status(e,c.id,{time:c.duration||c.stun,stun:!!c.stun,move:c.move||0,attack:c.attack||0});
+      }
+      success=true;
+    } else if(c.kind==='bolt') {
+      dmgEnemy(target,c.damage,'法术');add341Status(target,c.id,{time:target.boss?c.boss:c.stun,stun:true});success=true;
+    } else if(c.kind==='chain') {
+      targets.slice(0,c.n).forEach((e,i)=>dmgEnemy(e,c.damage*Math.pow(1-c.falloff,i),'法术'));success=true;
+    }
+  }
+  if(success){f.mana-=c.mana;f.spellCD[c.id]=Math.max(.1,c.cd||f.def.aspd);}
+}
+function spawn341Ally(p,parent,def,life=60) {
+  if(p.fighters.filter(f=>f.temporary&&f.hp>0).length>=128)return;
+  const f={def,uid:def.id,col:parent.col,row:parent.row,x:parent.x+(Math.random()-.5)*24,y:parent.y+(Math.random()-.5)*24,
+    hp:def.hp,max:def.hp,cd:.3,spent:0,effDmg:def.dmg,flash:0,deadT:0,reincUsed:false,temporary:true,life};
+  init341Fighter(f);p.fighters.push(f);return f;
+}
+function death341(p,f) {
+  if(f.deathHandled)return;f.deathHandled=true;
+  const a=f.def.abil;
+  if(a.deathRawSummon){const def=Object.values(UNITS).find(d=>d.rawId===a.deathRawSummon);if(def)spawn341Ally(p,f,def,240);}
+  if(a.deathSummon){const def=UNITS[a.deathSummon.id];if(def)for(let i=0;i<a.deathSummon.count;i++)spawn341Ally(p,f,def,240);}
+  if(a.deathHeal)for(const g of p.fighters.filter(g=>g!==f&&g.hp>0&&Math.hypot(g.x-f.x,g.y-f.y)<=a.deathHeal.r).slice(0,a.deathHeal.n))g.hp=Math.min(g.max,g.hp+a.deathHeal.amount);
+  if(a.deathBlast)for(const e of spell341Targets(p,f,a.deathBlast.r).slice(0,a.deathBlast.n))dmgEnemy(e,a.deathBlast.amount,'法术');
+}
+function hit341(p,f,e,dealt) {
+  const a=f.def.abil;
+  if(a.poison&&(!a.poison.airOnly||e.air)&&(!a.poison.hpThreshold||f.hp/f.max<=a.poison.hpThreshold))add341Status(e,'poison:'+f.uid+(a.poison.stack?':'+f.attacks:''),{time:a.poison.duration,...a.poison});
+  if(a.corrupt)add341Status(e,'corrupt',{time:a.corrupt.duration,armor:a.corrupt.armor});
+  if(a.mark)e.mark=a.mark;
+  if(a.bash&&Math.random()<a.bash.chance){dmgEnemy(e,a.bash.damage,'法术');add341Status(e,'bash',{time:e.boss?a.bash.boss:a.bash.duration,stun:true});}
+  if(a.pulverize&&Math.random()<a.pulverize.chance)for(const target of spell341Targets(p,f,a.pulverize.r).filter(t=>!t.air))dmgEnemy(target,a.pulverize.damage,'法术');
+  if(a.fireHit)dmgEnemy(e,a.fireHit,'法术');
+  if(a.aftershock&&Math.random()<a.aftershock.chance)for(const target of spell341Targets(p,f,a.aftershock.r).slice(0,a.aftershock.n))dmgEnemy(target,a.aftershock.damage,'法术');
+  if(a.spree&&(e.hp<=0||Math.random()<a.spree.chance))f.buffs.spree={damage:a.spree.damage,time:a.spree.duration};
+  const vamp=Math.max(a.lifesteal||0,f.effVamp||0);if(vamp)f.hp=Math.min(f.max,f.hp+dealt*vamp);
+  if(a.feast&&f.attacks%a.feast.every===0)f.hp=Math.min(f.max,f.hp+a.feast.heal);
+}
+function inject341Steroids(p,f) {
+  if(G.phase!=='prep'||!p.fighters.includes(f)||f.temporary||!f.def.abil.steroids||f.steroids||p.gold<50)return false;
+  p.gold-=50;f.steroids=true;addFloater(f.x,f.y,'下一波强化已准备','#b7da8e');return true;
+}
+function start341Round(p) {
+  for(const source of p.fighters){const a=source.def.abil.guardian;if(!a)continue;
+    const targets=p.fighters.filter(f=>f!==source&&!f.temporary&&Math.hypot(f.x-source.x,f.y-source.y)<=a.r)
+      .sort((x,y)=>Math.hypot(x.x-source.x,x.y-source.y)-Math.hypot(y.x-source.x,y.y-source.y)).slice(0,a.n);
+    for(const f of targets)f.guardianFactor=Math.min(f.guardianFactor||1,a.factor);
+  }
+}

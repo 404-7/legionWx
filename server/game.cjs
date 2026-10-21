@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const source = ['config', 'data', 'engine', 'ai'].map(name =>
+const source = ['source341', 'config', 'skills341', 'data', 'engine','combat341','ai'].map(name =>
   fs.readFileSync(path.join(__dirname, '..', 'js', name + '.js'), 'utf8')).join('\n');
 
 module.exports = function createGame(humans) {
@@ -13,7 +13,7 @@ module.exports = function createGame(humans) {
         newGame('normal'); G.online = true;
         // All online seats receive the same economy, including AI substitutes.
         G.diff.allyMult = G.diff.aiMult = 1;
-        G.players.forEach(p => p.gold = CFG.START_GOLD + CFG.START_INCOME);
+        G.players.forEach(p => p.gold = CFG.START_GOLD);
         for (const h of humans) {
           const p = G.players[h.slot]; p.isHuman = true; p.ai = null; p.name = h.name;
         }
@@ -25,11 +25,12 @@ module.exports = function createGame(humans) {
         if (!a || !['prep','combat'].includes(G.phase)) return false;
         const p = G.players[slot];
         if (!p || !p.isHuman) return false;
-        const f = p.fighters.find(f => f.col === a.col && f.row === a.row);
+        const f = p.fighters.find(f => !f.temporary && f.col === a.col && f.row === a.row);
         switch (a.type) {
-          case 'buy': return Object.hasOwn(UNITS, a.uid) && Number.isInteger(a.col) && Number.isInteger(a.row) && p.fighters.length < 36 && buyFighter(p, a.uid, a.col, a.row);
-          case 'upgrade': return !!f && upgradeFighter(p, f);
+          case 'buy': return Object.hasOwn(UNITS, a.uid) && Number.isInteger(a.col) && Number.isInteger(a.row) && p.fighters.filter(f=>!f.temporary).length < 36 && buyFighter(p, a.uid, a.col, a.row);
+          case 'upgrade': return !!f && upgradeFighter(p, f, a.uid);
           case 'sell': return !!f && sellFighter(p, f);
+          case 'steroids': return !!f && inject341Steroids(p,f);
           case 'king': return kingUpgrade(p, a.stat);
           case 'mineBuy': return buyMine(p);
           case 'mineUpgrade': return upgradeMine(p, a.id);

@@ -2,7 +2,7 @@
 /* ===== AI：建兵、升级、强化国王、雇佣兵 ===== */
 
 const AI_DECKS = Object.fromEntries(Object.keys(RACES).map(race=>[
-  race,Object.keys(UNITS).filter(id=>UNITS[id].race===race&&!UNITS[id].elite)
+  race,Object.keys(UNITS).filter(id=>UNITS[id].race===race&&!UNITS[id].elite&&!UNITS[id].summonOnly)
 ]));
 
 function aiSetupAll() {
@@ -87,7 +87,7 @@ function aiAct(p) {
 
   // 3) 升级现有兵（每波 35% 概率）
   if (Math.random() < 0.35) {
-    const upgradable = p.fighters.filter(f => f.def.up && p.gold >= UNITS[f.def.up].cost - f.def.cost + 80);
+    const upgradable = p.fighters.filter(f => f.def.up && p.gold >= UNITS[f.def.up].purchaseCost + 80);
     if (upgradable.length) {
       const f = upgradable[Math.floor(Math.random() * upgradable.length)];
       upgradeFighter(p, f);

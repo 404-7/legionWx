@@ -4,7 +4,7 @@ const fs = require('node:fs'), path = require('node:path'), vm = require('node:v
 const createGame = require('../server/game.cjs');
 function engine() {
   const context=vm.createContext({});
-  vm.runInContext(['config','data','engine','ai'].map(n=>fs.readFileSync(path.join(__dirname,'../js',n+'.js'),'utf8')).join('\n'),context);
+  vm.runInContext(['source341','config','skills341','data','engine','combat341','ai'].map(n=>fs.readFileSync(path.join(__dirname,'../js',n+'.js'),'utf8')).join('\n'),context);
   const run=code=>vm.runInContext(code,context);
   run("newGame('normal'); G.players.forEach(p=>p.ai=null)");
   return run;
@@ -12,10 +12,10 @@ function engine() {
 test('mines cost gold, pay on five-second boundaries and preserve timers across waves and upgrades',()=>{
   const run=engine();
   assert.equal(run('buyMine(G.players[0])'),true);
-  assert.equal(run('G.players[0].gold'),56);
+  assert.equal(run('G.players[0].gold'),200);
   for(let i=0;i<99;i++)run('simStep(.05)');
-  assert.equal(run('G.players[0].gold'),56);
-  run('simStep(.05)');assert.equal(run('G.players[0].gold'),64);
+  assert.equal(run('G.players[0].gold'),200);
+  run('simStep(.05)');assert.equal(run('G.players[0].gold'),208);
   run('G.players[0].gold=500; simStep(2); upgradeMine(G.players[0],0)');
   assert.equal(run('G.players[0].gold'),420);
   assert.equal(run('G.players[0].mines[0].elapsed'),2);
@@ -37,7 +37,7 @@ test('six mines per player, personal ownership, level cap and rejected actions n
   for(const id of ['0','-1','6','0.5','NaN','"0"','null'])assert.equal(run(`upgradeMine(G.players[0],${id})`),false);
   assert.equal(run('upgradeMine(G.players[2],0)'),false);
   run('simStep(5)'); assert.equal(run('G.players[0].gold'),8836);
-  assert.equal(run('G.players[2].gold'),156);
+  assert.equal(run('G.players[2].gold'),300);
   run('G.players[0].gold=0');assert.equal(run('upgradeMine(G.players[0],1)'),false);
   run('G.phase="over"; G.players[0].gold=999; simStep(10)');
   assert.equal(run('G.players[0].gold'),999);
@@ -58,11 +58,11 @@ test('online mine upgrades and payouts are owned by the authenticated seat',()=>
   assert.equal(game.snapshot().players[0].mines[0].level,1);
   assert.equal(game.action(2,{type:'mineUpgrade',id:0,slot:0}),false);
   for(let i=0;i<300;i++)game.step(.05);
-  assert.equal(game.snapshot().players[0].gold,80);
+  assert.equal(game.snapshot().players[0].gold,224);
   assert.equal(game.action(0,{type:'mineUpgrade',id:0}),true);
-  assert.equal(game.snapshot().players[0].gold,0);
+  assert.equal(game.snapshot().players[0].gold,144);
   assert.equal(game.snapshot().players[0].mines[0].level,2);
   for(let i=0;i<100;i++)game.step(.05);
-  assert.equal(game.snapshot().players[0].gold,12);
-  assert.equal(game.snapshot().players[2].gold,156);
+  assert.equal(game.snapshot().players[0].gold,156);
+  assert.equal(game.snapshot().players[2].gold,300);
 });

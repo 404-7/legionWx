@@ -20,11 +20,12 @@ function performAction(a) {
     api('action', a).catch(e => notice(e.message));
     return false;
   }
-  const p = localPlayer(), f = p.fighters.find(f => f.col === a.col && f.row === a.row);
+  const p = localPlayer(), f = p.fighters.find(f => !f.temporary && f.col === a.col && f.row === a.row);
   switch (a.type) {
     case 'buy': return buyFighter(p,a.uid,a.col,a.row);
-    case 'upgrade': return !!f && upgradeFighter(p,f);
+    case 'upgrade': return !!f && upgradeFighter(p,f,a.uid);
     case 'sell': return !!f && sellFighter(p,f);
+    case 'steroids': return !!f && inject341Steroids(p,f);
     case 'king': return kingUpgrade(p, a.stat);
     case 'mineBuy': return buyMine(p);
     case 'mineUpgrade': return upgradeMine(p, a.id);

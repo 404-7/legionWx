@@ -198,6 +198,7 @@ function drawMines(c, p, t) {
 }
 
 function drawFighter(c, f, p, t) {
+  if(f.hp<=0&&f.deadT<=0)return;
   if (f.deadT > 0) {   // 复活倒计时幽灵
     c.globalAlpha = 0.35;
     c.drawImage(SPR[f.uid], f.x - SPR_N / 2, f.y - SPR_N / 2 + 6);

@@ -2,10 +2,16 @@
 /* ===== UI：商店 / 波次预览 / 选中单位 / 国王 / 雇佣兵 / 日志 / 弹窗 ===== */
 const $ = id => document.getElementById(id);
 const SHOP_ORDER = Object.keys(RACES);
-let shopRace = SHOP_ORDER[0];
+let shopRace = SHOP_ORDER[0], shopCatalog=false;
+const escape341 = text=>String(text??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function source341Details(def) {
+  const text=(def.abil.sources||[]).map(id=>{const a=ABILITIES341[id];return '<p><b>'+escape341(skillValue(a,'anam',id))+'</b> '+escape341(skillText(a))+(def.abil.pending.includes(id)?' <em>触发效果待移植</em>':'')+'</p>';}).join('');
+  return '<details class="source-details"><summary>原版属性与技能</summary><div>'+escape341(def.english)+' · 原表第 '+(def.sourceRow??'地图')+' 行<br>攻击 '+def.min+'–'+def.max+' / '+def.aspd+' 秒 · 表列 DPS '+Number(def.sourceDps).toFixed(2)+'<br>生命 '+def.hp+' · 护甲值 '+def.armorPoints+' · 原始射程 '+def.rawRange+' · 人口 '+(def.food??'—')+'<br>法力 '+def.manaStart+'/'+def.manaMax+' · 回蓝 '+def.manaRegen+'/秒<br>本级费用 '+(def.purchaseCost??'召唤物')+' · 表列总价 '+def.cost+text+'</div></details>';
+}
 
 function buildShop() {
   const root = $('shop');
+  root.classList.toggle('catalog-view',shopCatalog);
   root.innerHTML = '';
   const tabs = document.createElement('div'); tabs.className = 'race-tabs';
   tabs.setAttribute('role','group'); tabs.setAttribute('aria-label','兵种种族');
@@ -16,6 +22,9 @@ function buildShop() {
     button.addEventListener('click',()=>{shopRace=id;if(G)selectShop(null);buildShop();if(G)updateUI(true);});tabs.appendChild(button);
   }
   root.appendChild(tabs);
+  const catalog=document.createElement('button');catalog.className='btn catalog-toggle';
+  catalog.textContent=shopCatalog?'← 返回可建造基础兵种':'查看本族完整图鉴 · 含进阶与召唤物';
+  catalog.addEventListener('click',()=>{shopCatalog=!shopCatalog;buildShop();if(G)updateUI(true);});root.appendChild(catalog);
   for (const race of SHOP_ORDER.filter(id=>id===shopRace)) {
     const group = document.createElement('div');
     group.className = 'raceGroup';
@@ -26,13 +35,14 @@ function buildShop() {
     grid.style.gridTemplateColumns = '1fr 1fr';
     grid.style.gap = '6px';
     for (const [uid, def] of Object.entries(UNITS)) {
-      if (def.race !== race || !isBaseUnit(uid)) continue;
+      if (def.race !== race || (!shopCatalog && !isBaseUnit(uid)) || !def.sourceRow) continue;
       const card = document.createElement('div');
       card.className = 'ucard';
       card.dataset.uid = uid;
       card.setAttribute('role','button'); card.tabIndex=0;
+      card.classList.toggle('catalog-only',!isBaseUnit(uid));
       card.setAttribute('aria-label',def.name+'，'+def.role+'，'+def.cost+' 金');
-      card.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();selectShop(uid);}});
+      card.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();if(isBaseUnit(uid))selectShop(uid);else card.querySelector('details').open=!card.querySelector('details').open;}});
       const portrait = document.createElement('canvas');
       portrait.className = 'portrait';
       portrait.width = 46; portrait.height = 46;
@@ -41,14 +51,14 @@ function buildShop() {
       body.className = 'uBody';
       body.innerHTML = `
         <div class="uName"><span>${def.name}</span><span class="cost">${def.cost}</span></div>
-        <div class="uRole">${def.role} · T${def.tier}</div><div class="uStats">❤${def.hp} ⚔${def.dmg} ${def.range > 50 ? '远程' : '近战'}</div>
+        <div class="uRole">${def.role} · T${def.tier}${def.summonOnly?' · 召唤物':def.elite?' · 进阶':''}</div><div class="uStats">❤${def.hp} ⚔${def.min}–${def.max} ${def.range > 50 ? '远程' : '近战'}</div>
         <div class="uTags">
           <span class="chip atk">${def.atk}</span><span class="chip armor">${def.armor}</span>
-          ${abilDesc(def) ? `<span class="chip abil">${abilDesc(def)}</span>` : ''}<span class="upgrade-path">→ ${UNITS[def.up].name} · 升级 ${UNITS[def.up].cost-def.cost} 金</span>
-        </div>`;
+          ${abilDesc(def) ? `<span class="chip abil">${abilDesc(def)}</span>` : ''}${def.upgrades.map(id=>`<span class="upgrade-path">→ ${UNITS[id].name} · 升级 ${UNITS[id].purchaseCost} 金</span>`).join('')}
+        </div>${source341Details(def)}`;
       card.appendChild(portrait);
       card.appendChild(body);
-      card.addEventListener('click', () => selectShop(uid));
+      card.addEventListener('click', event => {if(event.target.closest('details'))return;if(isBaseUnit(uid))selectShop(uid);else card.querySelector('details').open=!card.querySelector('details').open;});
       grid.appendChild(card);
     }
     group.appendChild(grid);
@@ -57,8 +67,7 @@ function buildShop() {
 }
 
 function isBaseUnit(uid) {
-  // 商店只卖基础兵种：没有任何单位的升级目标指向它
-  return !Object.values(UNITS).some(d => d.up === uid);
+  return !!UNITS[uid] && !UNITS[uid].elite && !UNITS[uid].summonOnly;
 }
 
 function buildMercs() {
@@ -159,46 +168,24 @@ function updateUI(force) {
     card.classList.toggle('sel', G.selectedShop === card.dataset.uid);
   });
 
-  // 选中单位
-  const sb = $('selBox');
-  if (G.selectedFighter) {
-    const f = G.selectedFighter;
-    if (f.hp <= 0 && f.deadT <= 0) { G.selectedFighter = null; sb.style.display = 'none'; delete sb.dataset.signature; }
-    else {
-      sb.style.display = '';
-      const def = f.def;
-      const upDef = def.up ? UNITS[def.up] : null;
-      const upCost = upDef ? upDef.cost - def.cost : 0;
-      const signature = [f.uid,f.col,f.row,f.spent].join('|');
-      if (sb.dataset.signature !== signature) {
-      sb.dataset.signature = signature;
-      $('selInfo').innerHTML = `
-        <div class="selHead">
-          <canvas id="selPortrait" width="64" height="64"></canvas>
-          <div>
-            <div class="sName">${def.name} <span style="color:${RACES[def.race].color}">◆${RACES[def.race].name}</span></div>
-            <div class="sStats" id="selLiveStats"></div>
-            <div>${def.atk}攻击 · ${def.armor}</div>
-          </div>
-        </div>
-        <div class="sStats">${abilDesc(def) || '无特殊能力'}<br>已投入 ${f.spent} 金（卖出全额返还）</div>
-        <div class="btnRow">
-          <button class="btn" id="btnUp" ${upDef ? '' : 'disabled'}>${upDef ? `升级→${upDef.name} (${upCost}金)` : '无法升级'}</button>
-          <button class="btn" id="btnSell">卖出 +${f.spent}金</button>
-        </div>`;
-      drawPortrait(document.getElementById('selPortrait'), f.uid, 64);
-      const bu = $('btnUp');
-      if (upDef) {
-        bu.disabled = me.gold < upCost;
-        bu.addEventListener('click', () => { performAction({ type:'upgrade', col:f.col, row:f.row }); updateUI(true); });
-      }
-      $('btnSell').addEventListener('click', () => { performAction({ type:'sell', col:f.col, row:f.row }); updateUI(true); });
-      }
-      $('selLiveStats').textContent = `❤ ${Math.ceil(f.hp)}/${def.hp} · ⚔ ${Math.round(f.effDmg)} · ${def.range > 50 ? '远程' : '近战'}`;
-      $('btnUp').disabled = !upDef || me.gold < upCost || G.phase === 'over';
-      $('btnSell').disabled = G.phase === 'over';
+  const sb=$('selBox'),f=G.selectedFighter;
+  if(f&&me.fighters.includes(f)&&!f.temporary) {
+    sb.style.display='';const def=f.def,signature=[f.uid,f.col,f.row,f.spent].join('|');
+    if(sb.dataset.signature!==signature){sb.dataset.signature=signature;
+      $('selInfo').innerHTML=`<div class="selHead"><canvas id="selPortrait" width="64" height="64"></canvas><div><div class="sName">${def.name}</div><small>${def.english} · ${RACES[def.race].name}</small><div class="sStats" id="selLiveStats"></div><div>${def.atk} · ${def.armor}（${def.armorPoints}）</div></div></div><div class="sStats">${abilDesc(def)||'无特殊能力'}<br>已投入 ${f.spent} 金 · 阵亡后下波复活</div>${source341Details(def)}<div class="upgrade-options">${def.upgrades.map(id=>`<button class="btn" data-upgrade-uid="${id}">升级 → ${UNITS[id].name} · ${UNITS[id].purchaseCost} 金<small>❤${UNITS[id].hp} · ⚔${UNITS[id].min}–${UNITS[id].max}</small></button>`).join('')}${def.stances.map(id=>`<button class="btn" data-upgrade-uid="${id}">切换 → ${UNITS[id].name} · 免费</button>`).join('')}<button class="btn" id="btnSell">卖出 +${f.spent}金</button></div>`;
+      drawPortrait($('selPortrait'),f.uid,64);
+      sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>button.addEventListener('click',()=>{performAction({type:'upgrade',col:f.col,row:f.row,uid:button.dataset.upgradeUid});updateUI(true);}));
+      $('btnSell').addEventListener('click',()=>{performAction({type:'sell',col:f.col,row:f.row});updateUI(true);});
     }
-  } else { sb.style.display = 'none'; delete sb.dataset.signature; }
+    $('selLiveStats').textContent=`❤${Math.max(0,Math.ceil(f.hp))}/${def.hp} · 法力 ${Math.floor(f.mana||0)}/${def.manaMax} · ${f.hp>0?'在场':'等待下波复活'}`;
+    sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>{const id=button.dataset.upgradeUid;button.disabled=G.phase==='over'||me.gold<(def.stances.includes(id)?0:UNITS[id].purchaseCost);});
+    const refund=Math.floor(f.spent*(def.abil.refund||1));$('btnSell').textContent=`卖出 +${refund}金`;
+    $('btnSell').disabled=G.phase==='over';
+    let steroid=$('btnSteroids');
+    if(def.abil.steroids&&!steroid){steroid=document.createElement('button');steroid.id='btnSteroids';steroid.className='btn';sb.querySelector('.upgrade-options').prepend(steroid);
+      steroid.addEventListener('click',()=>{performAction({type:'steroids',col:f.col,row:f.row});updateUI(true);});}
+    if(steroid){steroid.textContent=f.steroids?'下一波强化已准备':'注射强化 · 50金 · 下一波生命+20%、攻击+25%';steroid.disabled=G.phase!=='prep'||f.steroids||me.gold<50;}
+  }else{sb.style.display='none';delete sb.dataset.signature;}
 
   // 国王
   const k = G.kings[me.team];
@@ -261,13 +248,13 @@ function showOverlay(mode) {
     ov.style.display = 'flex';
     ov.innerHTML = `<div class="panel" id="menuPanel"></div>`;
   } else if (mode === 'result') {
-    const win = G.result.winner === localPlayer().team;
+    const win = G.result.winner === localPlayer().team, tie=G.result.winner===null;
     const k0 = G.kings[0], k1 = G.kings[1];
     ov.style.display = 'flex';
     ov.innerHTML = `
       <div class="panel" style="text-align:center">
-        <h1 style="font-size:42px;color:${win ? 'var(--green)' : 'var(--red)'}">${win ? '🏆 胜利！' : '💀 战败'}</h1>
-        <p class="tagline">${win ? '你的军团守住了王城！' : '你的国王倒下了……'}</p>
+        <h1 style="font-size:42px;color:${win ? 'var(--green)' : 'var(--red)'}">${tie?'双方平局':win ? '🏆 胜利！' : '💀 战败'}</h1>
+        <p class="tagline">${tie?'双方国王守住了最终波。':win ? '你的军团守住了王城！' : '对方国王赢得了这场对局。'}</p>
         <div style="font-size:14px;line-height:2;color:#c3d2e8">
           坚守波次：<b>${G.wave}</b><br>
           蓝方国王剩余：<b style="color:var(--blue)">${Math.max(0, Math.ceil(k0.hp))}</b> ·
@@ -330,7 +317,7 @@ function bindEvents() {
     }
     // 选中己方战士
     if (cell) {
-      const f = me.fighters.find(f => f.col === cell.col && f.row === cell.row && f.deadT <= 0);
+      const f = me.fighters.find(f => !f.temporary && f.col === cell.col && f.row === cell.row && f.deadT <= 0);
       G.selectedFighter = f || null;
       updateUI(true);
     }

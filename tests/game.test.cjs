@@ -12,7 +12,8 @@ test('king stats upgrade independently, share within the team and reject invalid
   king=game.snapshot().kings[0];
   assert.deepEqual({...king.upgrades},{health:1,attack:1,regen:0});
   assert.equal(king.dmg,69); assert.equal(king.max,4350); assert.equal(king.regen,2);
-  assert.equal(game.snapshot().players[1].gold,76);
+  assert.equal(game.snapshot().players[1].gold,220);
+  assert.equal(game.action(1,{type:'king',stat:'attack'}),true);
   assert.equal(game.action(1,{type:'king',stat:'attack'}),false);
   assert.equal(game.action(2,{type:'king',stat:'regen'}),true);
   assert.equal(game.snapshot().kings[1].regen,3);
@@ -26,7 +27,7 @@ test('king stats upgrade independently, share within the team and reject invalid
 test('king regeneration scales with elapsed time in prep and combat and clamps to max HP', () => {
   const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
   const ctx=vm.createContext({});
-  vm.runInContext(['config','data','engine','ai'].map(name=>fs.readFileSync(path.join(__dirname,'../js',name+'.js'),'utf8')).join('\n'),ctx);
+  vm.runInContext(['source341','config','skills341','data','engine','combat341','ai'].map(name=>fs.readFileSync(path.join(__dirname,'../js',name+'.js'),'utf8')).join('\n'),ctx);
   const run=code=>vm.runInContext(code,ctx);
   run("newGame('normal'); G.kings[0].hp -= 100; kingUpgrade(G.players[0], 'regen'); simStep(1)");
   assert.equal(run('G.kings[0].hp'),4103);
@@ -40,8 +41,8 @@ test('king regeneration scales with elapsed time in prep and combat and clamps t
 test('server owns economy, rejects malformed commands and isolates rooms', () => {
   const a = createGame(humans), b = createGame(humans);
   assert.equal(a.action(0,{type:'buy',uid:'ent',col:2,row:2}),true);
-  assert.equal(a.snapshot().players[0].gold,111);
-  assert.equal(b.snapshot().players[0].gold,156);
+  assert.equal(a.snapshot().players[0].gold,280);
+  assert.equal(b.snapshot().players[0].gold,300);
   for (const action of [
     {type:'buy',uid:'ent',col:2,row:2},
     {type:'buy',uid:'ent',col:NaN,row:1},
@@ -86,14 +87,14 @@ test('upgrades, sales, mercenaries and king upgrades settle on the correct seat'
   assert.equal(game.action(0,{type:'upgrade',col:0,row:0}),true);
   assert.equal(game.snapshot().players[0].fighters[0].uid,'guardian');
   assert.equal(game.action(0,{type:'sell',col:0,row:0}),true);
-  assert.equal(game.snapshot().players[0].gold,156);
+  assert.equal(game.snapshot().players[0].gold,300);
   assert.equal(game.action(0,{type:'merc',mid:'imp',target:2}),true);
   assert.equal(game.snapshot().players[2].mercQueue[0],'imp');
   assert.equal(game.snapshot().players[0].income,7);
   assert.equal(game.action(0,{type:'king'}),true);
   assert.equal(game.snapshot().kings[0].lvl,1);
   assert.equal(game.snapshot().kings[1].lvl,0);
-  assert.equal(game.snapshot().players[0].gold,51);
+  assert.equal(game.snapshot().players[0].gold,195);
 });
 test('complete simulation remains serializable and produces a terminal result', () => {
   const game=createGame(humans);

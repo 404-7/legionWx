@@ -1,0 +1,4067 @@
+{
+  "version": "3.41",
+  "source": "3.41 stats 2011-10-25.xls",
+  "sourceHash": "6bf7b089cd3cf13d56886eb5566e8538fb71dbf830178f6bd885dbea319191aa",
+  "mapSource": {
+    "file": "Legion TD Mega 3.41 unprotect.w3x",
+    "sha256": "1fe202a1e60e64a5b2f6a5498ac169fe3039590f7f41e3abbb8ded6ba154114b"
+  },
+  "note": "Object data and web combat adapters; not a Warcraft engine emulation. See docs/source341.md for rule differences and inherited-default approximations.",
+  "units": [
+    {
+      "id": "gnoll_warrior",
+      "name": "Gnoll Warrior",
+      "row": 2,
+      "buildingId": "h010",
+      "fighterId": "h02L",
+      "upgrades": [
+        "gnoll_savage"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A026",
+          "base": "Aspo",
+          "name": "Gnoll Poison"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "poison"
+      ],
+      "pending": []
+    },
+    {
+      "id": "gnoll_savage",
+      "name": "Gnoll Savage",
+      "row": 3,
+      "buildingId": "h011",
+      "fighterId": "h02M",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A027",
+          "base": "Aspo",
+          "name": "Deadly Poison"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "poison"
+      ],
+      "pending": []
+    },
+    {
+      "id": "ogre_basher",
+      "name": "Ogre Basher",
+      "row": 4,
+      "buildingId": "h012",
+      "fighterId": "h02N",
+      "upgrades": [
+        "ogre_pulverizer"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A00D",
+          "base": "ACbh",
+          "name": "Club Smash"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "bash"
+      ],
+      "pending": []
+    },
+    {
+      "id": "ogre_pulverizer",
+      "name": "Ogre Pulverizer",
+      "row": 5,
+      "buildingId": "h013",
+      "fighterId": "h02O",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A00E",
+          "base": "ACbh",
+          "name": "Knock Out"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "bash"
+      ],
+      "pending": []
+    },
+    {
+      "id": "harpy",
+      "name": "Harpy",
+      "row": 6,
+      "buildingId": "h014",
+      "fighterId": "h02P",
+      "upgrades": [
+        "medusa"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A00F",
+          "base": "Aspo",
+          "name": "Envenom"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "poison"
+      ],
+      "pending": []
+    },
+    {
+      "id": "medusa",
+      "name": "Medusa",
+      "row": 7,
+      "buildingId": "h015",
+      "fighterId": "h02Q",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A00G",
+          "base": "Aspo",
+          "name": "Enchanted Poison"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "poison"
+      ],
+      "pending": []
+    },
+    {
+      "id": "troll_fighter",
+      "name": "Troll Fighter",
+      "row": 8,
+      "buildingId": "h016",
+      "fighterId": "h02R",
+      "upgrades": [
+        "troll_champion"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "troll_champion",
+      "name": "Troll Champion",
+      "row": 9,
+      "buildingId": "h017",
+      "fighterId": "h02S",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "S000",
+          "base": "SCae",
+          "name": "Adrenaline Rush"
+        },
+        {
+          "id": "S002",
+          "base": "SCae",
+          "name": "Adrenaline Rush"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "hasteAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "grizzly",
+      "name": "Grizzly",
+      "row": 10,
+      "buildingId": "h018",
+      "fighterId": "h02T",
+      "upgrades": [
+        "greymane"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "greymane",
+      "name": "Greymane",
+      "row": 11,
+      "buildingId": "h019",
+      "fighterId": "h02U",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A00H",
+          "base": "ACro",
+          "name": "Battle Cry"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "spawn_of_dragon",
+      "name": "Spawn of Dragon",
+      "row": 12,
+      "buildingId": "h01A",
+      "fighterId": "h02V",
+      "upgrades": [
+        "dragon_aspect"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A00I",
+          "base": "Aimp",
+          "name": "Circle Slash"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "splash"
+      ],
+      "pending": []
+    },
+    {
+      "id": "dragon_aspect",
+      "name": "Dragon Aspect",
+      "row": 13,
+      "buildingId": "h01B",
+      "fighterId": "h02W",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A00J",
+          "base": "Aimp",
+          "name": "Whitefire"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "splash"
+      ],
+      "pending": []
+    },
+    {
+      "id": "peewee",
+      "name": "Peewee",
+      "row": 14,
+      "buildingId": "h00M",
+      "fighterId": "h00L",
+      "upgrades": [
+        "veteran"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "veteran",
+      "name": "Veteran",
+      "row": 15,
+      "buildingId": "h00T",
+      "fighterId": "h028",
+      "upgrades": [],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "infantry",
+      "name": "Infantry",
+      "row": 16,
+      "buildingId": "h00O",
+      "fighterId": "h02B",
+      "upgrades": [
+        "zeus",
+        "pyro"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "pyro",
+      "name": "Pyro",
+      "row": 17,
+      "buildingId": "h00Y",
+      "fighterId": "h02C",
+      "upgrades": [],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "zeus",
+      "name": "Zeus",
+      "row": 18,
+      "buildingId": "h00X",
+      "fighterId": "h02D",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A05R",
+          "base": "ACsa",
+          "name": "Power Surge"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "manaHit",
+        "attackMana"
+      ],
+      "pending": []
+    },
+    {
+      "id": "captain",
+      "name": "Captain",
+      "row": 19,
+      "buildingId": "h00P",
+      "fighterId": "h029",
+      "upgrades": [
+        "admiral"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A009",
+          "base": "ACac",
+          "name": "Leadership"
+        },
+        {
+          "id": "A02X",
+          "base": "ACac",
+          "name": "Leadership"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "aura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "admiral",
+      "name": "Admiral",
+      "row": 20,
+      "buildingId": "h00Z",
+      "fighterId": "h02A",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A00A",
+          "base": "ACac",
+          "name": "Superiority"
+        },
+        {
+          "id": "A031",
+          "base": "ACac",
+          "name": "Superiority"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "aura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "tempest",
+      "name": "Tempest",
+      "row": 21,
+      "buildingId": "h00N",
+      "fighterId": "h02G",
+      "upgrades": [
+        "leviathan"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "leviathan",
+      "name": "Leviathan",
+      "row": 22,
+      "buildingId": "h00U",
+      "fighterId": "h02H",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A03W",
+          "base": "Aimp",
+          "name": "Shrapnel"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "aftershock"
+      ],
+      "pending": []
+    },
+    {
+      "id": "cyborg",
+      "name": "Cyborg",
+      "row": 23,
+      "buildingId": "h00Q",
+      "fighterId": "h02I",
+      "upgrades": [
+        "krogoth"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "krogoth",
+      "name": "Krogoth",
+      "row": 24,
+      "buildingId": "h00W",
+      "fighterId": "h02J",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A00C",
+          "base": "ACct",
+          "name": "Vital Slice"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "crit"
+      ],
+      "pending": []
+    },
+    {
+      "id": "neotank",
+      "name": "Neotank",
+      "row": 25,
+      "buildingId": "h00S",
+      "fighterId": "h02E",
+      "upgrades": [
+        "doomsday_machine"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "doomsday_machine",
+      "name": "Doomsday Machine",
+      "row": 26,
+      "buildingId": "h00V",
+      "fighterId": "h02F",
+      "upgrades": [],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "ent",
+      "name": "Ent",
+      "row": 27,
+      "buildingId": "h01C",
+      "fighterId": "h02X",
+      "upgrades": [
+        "guardian"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "guardian",
+      "name": "Guardian",
+      "row": 28,
+      "buildingId": "h01D",
+      "fighterId": "h02Y",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A06B",
+          "base": "Aenr",
+          "name": "Entangle"
+        },
+        {
+          "id": "A06C",
+          "base": "Aimp",
+          "name": "Entangle"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "ranger",
+      "name": "Ranger",
+      "row": 29,
+      "buildingId": "h01E",
+      "fighterId": "h02Z",
+      "upgrades": [
+        "meliai"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A00K",
+          "base": "ACct",
+          "name": "Vulture Eye"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "crit"
+      ],
+      "pending": []
+    },
+    {
+      "id": "meliai",
+      "name": "Meliai",
+      "row": 30,
+      "buildingId": "h01F",
+      "fighterId": "h030",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A00L",
+          "base": "ACct",
+          "name": "Precision"
+        },
+        {
+          "id": "A05W",
+          "base": "Aimp",
+          "name": "Mark Target"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "crit",
+        "mark"
+      ],
+      "pending": []
+    },
+    {
+      "id": "sprite",
+      "name": "Sprite",
+      "row": 31,
+      "buildingId": "h01H",
+      "fighterId": "h031",
+      "upgrades": [
+        "thunderbird"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A00M",
+          "base": "ACev",
+          "name": "Faerie Luck"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "evasion"
+      ],
+      "pending": []
+    },
+    {
+      "id": "thunderbird",
+      "name": "Thunderbird",
+      "row": 32,
+      "buildingId": "h01G",
+      "fighterId": "h032",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A03U",
+          "base": "Aimp",
+          "name": "Aftershock"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "aftershock"
+      ],
+      "pending": []
+    },
+    {
+      "id": "tree_of_travel",
+      "name": "Tree of Travel",
+      "row": 33,
+      "buildingId": "h01I",
+      "fighterId": "h033",
+      "upgrades": [
+        "tree_of_time"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A00Q",
+          "base": "ACua",
+          "name": "Helping Hand"
+        },
+        {
+          "id": "A032",
+          "base": "ACua",
+          "name": "Helping Hand"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "moveAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "tree_of_time",
+      "name": "Tree of Time",
+      "row": 34,
+      "buildingId": "h01J",
+      "fighterId": "h034",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A00O",
+          "base": "ACua",
+          "name": "Chrono Trigger"
+        },
+        {
+          "id": "A066",
+          "base": "ACnr",
+          "name": "Tree of Time"
+        },
+        {
+          "id": "A064",
+          "base": "Aimp",
+          "name": "Chrono Trigger"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "slowAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "halfbreed",
+      "name": "Halfbreed",
+      "row": 35,
+      "buildingId": "h01K",
+      "fighterId": "h035",
+      "upgrades": [
+        "goliath"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "goliath",
+      "name": "Goliath",
+      "row": 36,
+      "buildingId": "h01L",
+      "fighterId": "h036",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A05K",
+          "base": "ACav",
+          "name": "Reassurance"
+        },
+        {
+          "id": "A00R",
+          "base": "Ansk",
+          "name": "Natural Armor"
+        },
+        {
+          "id": "A05J",
+          "base": "ACav",
+          "name": "Reassurance"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "armorAura",
+        "block"
+      ],
+      "pending": []
+    },
+    {
+      "id": "yggdrasil",
+      "name": "Yggdrasil",
+      "row": 37,
+      "buildingId": "h01M",
+      "fighterId": "h037",
+      "upgrades": [
+        "tree_of_life",
+        "tree_of_knowledge"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A02F",
+          "base": "Aasl",
+          "name": "Sacred Blessing"
+        },
+        {
+          "id": "A029",
+          "base": "AEfk",
+          "name": "Sacred Blessing"
+        },
+        {
+          "id": "A02A",
+          "base": "Aimp",
+          "name": "Sacred Blessing"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "tree_of_life",
+      "name": "Tree of Life",
+      "row": 38,
+      "buildingId": "h01N",
+      "fighterId": "h038",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A01A",
+          "base": "Asph",
+          "name": "Tree of Life SFX"
+        },
+        {
+          "id": "A02G",
+          "base": "Aasl",
+          "name": "Water of Life"
+        },
+        {
+          "id": "A02C",
+          "base": "AEfk",
+          "name": "Water of Life"
+        },
+        {
+          "id": "A02B",
+          "base": "Aimp",
+          "name": "Water of Life"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "deathHeal"
+      ],
+      "pending": []
+    },
+    {
+      "id": "tree_of_knowledge",
+      "name": "Tree of Knowledge",
+      "row": 39,
+      "buildingId": "h01O",
+      "fighterId": "h039",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A00N",
+          "base": "ACah",
+          "name": "Forbidden Fruit"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "reflect",
+        "deathBlast"
+      ],
+      "pending": []
+    },
+    {
+      "id": "bone_warrior",
+      "name": "Bone Warrior",
+      "row": 40,
+      "buildingId": "h01P",
+      "fighterId": "h03A",
+      "upgrades": [
+        "skeletor",
+        "fire_archer",
+        "dark_mage"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A02K",
+          "base": "Aimp",
+          "name": "Frenzy (shadow)"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "regenFlat"
+      ],
+      "pending": []
+    },
+    {
+      "id": "skeletor",
+      "name": "Skeletor",
+      "row": 41,
+      "buildingId": "h01Q",
+      "fighterId": "h03B",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A02K",
+          "base": "Aimp",
+          "name": "Frenzy (shadow)"
+        },
+        {
+          "id": "A02W",
+          "base": "Aimp",
+          "name": "Killing Spree"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "spree",
+        "regenFlat"
+      ],
+      "pending": []
+    },
+    {
+      "id": "fire_archer",
+      "name": "Fire Archer",
+      "row": 42,
+      "buildingId": "h01R",
+      "fighterId": "h03C",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A00W",
+          "base": "ACsa",
+          "name": "Flaming Arrows"
+        },
+        {
+          "id": "A02K",
+          "base": "Aimp",
+          "name": "Frenzy (shadow)"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "manaHit",
+        "regenFlat"
+      ],
+      "pending": []
+    },
+    {
+      "id": "dark_mage",
+      "name": "Dark Mage",
+      "row": 43,
+      "buildingId": "h01S",
+      "fighterId": "h03D",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A00X",
+          "base": "ACuf",
+          "name": "Mindwarp"
+        },
+        {
+          "id": "A02K",
+          "base": "Aimp",
+          "name": "Frenzy (shadow)"
+        },
+        {
+          "id": "A033",
+          "base": "Aimp",
+          "name": "Mindwarp"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "regenFlat"
+      ],
+      "pending": []
+    },
+    {
+      "id": "carrion_spitter",
+      "name": "Carrion Spitter",
+      "row": 44,
+      "buildingId": "h01T",
+      "fighterId": "h03E",
+      "upgrades": [
+        "nightcrawler"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "nightcrawler",
+      "name": "Nightcrawler",
+      "row": 45,
+      "buildingId": "h01U",
+      "fighterId": "h03F",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A04Z",
+          "base": "Aspo",
+          "name": "Sticky Webs"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "poison"
+      ],
+      "pending": []
+    },
+    {
+      "id": "gateguard",
+      "name": "Gateguard",
+      "row": 46,
+      "buildingId": "h01V",
+      "fighterId": "h03G",
+      "upgrades": [
+        "harbinger"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A00Y",
+          "base": "AHwe",
+          "name": "Conjure Fiend"
+        },
+        {
+          "id": "A02M",
+          "base": "Aimp",
+          "name": "Conjure Fiend"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "fiend",
+      "name": "Fiend",
+      "row": 47,
+      "buildingId": null,
+      "fighterId": "n001",
+      "upgrades": [],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "harbinger",
+      "name": "Harbinger",
+      "row": 48,
+      "buildingId": "h01W",
+      "fighterId": "h03H",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A00Z",
+          "base": "AHwe",
+          "name": "Conjure Fanatic"
+        },
+        {
+          "id": "A02N",
+          "base": "Aimp",
+          "name": "Conjure Fanatic"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "fanatic",
+      "name": "Fanatic",
+      "row": 49,
+      "buildingId": null,
+      "fighterId": "n002",
+      "upgrades": [],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "overseer",
+      "name": "Overseer",
+      "row": 50,
+      "buildingId": "h01X",
+      "fighterId": "h03I",
+      "upgrades": [
+        "keeper_of_souls"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A010",
+          "base": "ACvp",
+          "name": "Blood Thirst"
+        },
+        {
+          "id": "A02Y",
+          "base": "ACvp",
+          "name": "Blood Thirst"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "vampAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "keeper_of_souls",
+      "name": "Keeper of Souls",
+      "row": 51,
+      "buildingId": "h01Y",
+      "fighterId": "h03J",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A011",
+          "base": "ACvp",
+          "name": "Sound of Madness"
+        },
+        {
+          "id": "A030",
+          "base": "ACvp",
+          "name": "Sound of Madness"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "vampAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "nightmare",
+      "name": "Nightmare",
+      "row": 52,
+      "buildingId": "h01Z",
+      "fighterId": "h03K",
+      "upgrades": [
+        "doppelganger"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A012",
+          "base": "ANdb",
+          "name": "Shadow Walker"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "crit",
+        "evasion"
+      ],
+      "pending": []
+    },
+    {
+      "id": "doppelganger",
+      "name": "Doppelganger",
+      "row": 53,
+      "buildingId": "h020",
+      "fighterId": "h03L",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A013",
+          "base": "ANdb",
+          "name": "Fatality"
+        },
+        {
+          "id": "A007",
+          "base": "Asph",
+          "name": "Doppelganger SFX"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "crit",
+        "evasion"
+      ],
+      "pending": []
+    },
+    {
+      "id": "lord_of_death",
+      "name": "Lord of Death",
+      "row": 54,
+      "buildingId": "h021",
+      "fighterId": "h03M",
+      "upgrades": [
+        "hades"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A014",
+          "base": "AHwe",
+          "name": "Invoke Inferno"
+        },
+        {
+          "id": "A02P",
+          "base": "Aimp",
+          "name": "Invoke Inferno"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "infernal",
+      "name": "Infernal",
+      "row": 55,
+      "buildingId": null,
+      "fighterId": "h05A",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A03G",
+          "base": "Aasl",
+          "name": "Spell Immunity"
+        },
+        {
+          "id": "A03D",
+          "base": "ACbh",
+          "name": ""
+        },
+        {
+          "id": "A0BU",
+          "base": "Aasl",
+          "name": "Bash"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "magicImmune",
+        "bash",
+        "burn"
+      ],
+      "pending": []
+    },
+    {
+      "id": "hades",
+      "name": "Hades",
+      "row": 56,
+      "buildingId": "h022",
+      "fighterId": "h03N",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A015",
+          "base": "AHwe",
+          "name": "Diablo"
+        },
+        {
+          "id": "A02O",
+          "base": "Aimp",
+          "name": "Diablo"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "diablotic",
+      "name": "Diablotic",
+      "row": 57,
+      "buildingId": null,
+      "fighterId": "u005",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A0BT",
+          "base": "AHwe",
+          "name": "Raise Imp"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "proton",
+      "name": "Proton",
+      "row": 58,
+      "buildingId": "h040",
+      "fighterId": "h04C",
+      "upgrades": [
+        "adept"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "adept",
+      "name": "Adept",
+      "row": 59,
+      "buildingId": "h041",
+      "fighterId": "h04D",
+      "upgrades": [],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "aqua_spirit",
+      "name": "Aqua Spirit",
+      "row": 60,
+      "buildingId": "h042",
+      "fighterId": "h04E",
+      "upgrades": [
+        "oceanus"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A01D",
+          "base": "Aimp",
+          "name": "Water Splash"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "chain"
+      ],
+      "pending": []
+    },
+    {
+      "id": "oceanus",
+      "name": "Oceanus",
+      "row": 61,
+      "buildingId": "h043",
+      "fighterId": "h04F",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A01E",
+          "base": "Aimp",
+          "name": "Deluge"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "chain"
+      ],
+      "pending": []
+    },
+    {
+      "id": "watcher",
+      "name": "Watcher",
+      "row": 62,
+      "buildingId": "h044",
+      "fighterId": "h04G",
+      "upgrades": [
+        "violet"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "violet",
+      "name": "Violet",
+      "row": 63,
+      "buildingId": "h045",
+      "fighterId": "h04H",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A05I",
+          "base": "Aasl",
+          "name": "Blue Wind"
+        },
+        {
+          "id": "A01J",
+          "base": "Aimp",
+          "name": "Blue Wind"
+        },
+        {
+          "id": "A01F",
+          "base": "Apxf",
+          "name": "Blue Wind"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "mudman",
+      "name": "Mudman",
+      "row": 64,
+      "buildingId": "h046",
+      "fighterId": "h04I",
+      "upgrades": [
+        "golem"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "golem",
+      "name": "Golem",
+      "row": 65,
+      "buildingId": "h047",
+      "fighterId": "h04J",
+      "upgrades": [],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "disciple",
+      "name": "Disciple",
+      "row": 66,
+      "buildingId": "h048",
+      "fighterId": "h04K",
+      "upgrades": [
+        "messiah"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A02L",
+          "base": "ACsa",
+          "name": "Mana Burst"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "manaHit"
+      ],
+      "pending": []
+    },
+    {
+      "id": "messiah",
+      "name": "Messiah",
+      "row": 67,
+      "buildingId": "h049",
+      "fighterId": "h04L",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A02L",
+          "base": "ACsa",
+          "name": "Mana Burst"
+        },
+        {
+          "id": "A01G",
+          "base": "ACba",
+          "name": "Amplify Magic"
+        },
+        {
+          "id": "A02Z",
+          "base": "ACba",
+          "name": "Amplify Magic"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "manaHit",
+        "manaAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "seer_of_darkness",
+      "name": "Seer of Darkness",
+      "row": 68,
+      "buildingId": "h04A",
+      "fighterId": "h04M",
+      "upgrades": [
+        "fenix"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A01H",
+          "base": "ACmf",
+          "name": "Energy Shield"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "manaShield"
+      ],
+      "pending": []
+    },
+    {
+      "id": "fenix",
+      "name": "Fenix",
+      "row": 69,
+      "buildingId": "h04B",
+      "fighterId": "h04N",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A01H",
+          "base": "ACmf",
+          "name": "Energy Shield"
+        },
+        {
+          "id": "A01I",
+          "base": "Aimp",
+          "name": "Focus Energy"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "manaShield",
+        "focusManaDivisor"
+      ],
+      "pending": []
+    },
+    {
+      "id": "specter",
+      "name": "Specter",
+      "row": 70,
+      "buildingId": "h05N",
+      "fighterId": "h061",
+      "upgrades": [
+        "wraith"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A044",
+          "base": "ACev",
+          "name": "Phase Out"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "evasion"
+      ],
+      "pending": []
+    },
+    {
+      "id": "wraith",
+      "name": "Wraith",
+      "row": 71,
+      "buildingId": "h05O",
+      "fighterId": "h063",
+      "upgrades": [
+        "mercurial"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A045",
+          "base": "ACsw",
+          "name": "Disturb"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "mercurial",
+      "name": "Mercurial",
+      "row": 72,
+      "buildingId": "h05P",
+      "fighterId": "h064",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A046",
+          "base": "ACsw",
+          "name": "Traumatize"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "wanderer",
+      "name": "Wanderer",
+      "row": 73,
+      "buildingId": "h05S",
+      "fighterId": "h065",
+      "upgrades": [
+        "soul_of_hero_def",
+        "soul_of_villain"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "soul_of_hero_atk",
+      "name": "Soul of Hero (atk)",
+      "row": 74,
+      "buildingId": "h05Q",
+      "fighterId": "h066",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A049",
+          "base": "Abrf",
+          "name": "Change Stance"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "soul_of_hero_def",
+      "name": "Soul of Hero (def)",
+      "row": 75,
+      "buildingId": "h062",
+      "fighterId": "h067",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A049",
+          "base": "Abrf",
+          "name": "Change Stance"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "soul_of_villain",
+      "name": "Soul of Villain",
+      "row": 76,
+      "buildingId": "h05T",
+      "fighterId": "h068",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A047",
+          "base": "AIcb",
+          "name": "Violate"
+        },
+        {
+          "id": "A04L",
+          "base": "Aimp",
+          "name": "Violate"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "corrupt"
+      ],
+      "pending": []
+    },
+    {
+      "id": "phantom",
+      "name": "Phantom",
+      "row": 77,
+      "buildingId": "h05R",
+      "fighterId": "h069",
+      "upgrades": [
+        "hell_raiser"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A04T",
+          "base": "Aasl",
+          "name": "Silent Scream"
+        },
+        {
+          "id": "A048",
+          "base": "AEfk",
+          "name": "Silent Scream"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "hell_raiser",
+      "name": "Hell Raiser",
+      "row": 78,
+      "buildingId": "h05U",
+      "fighterId": "h06A",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A04U",
+          "base": "Aasl",
+          "name": "Cacophony"
+        },
+        {
+          "id": "A04A",
+          "base": "AEfk",
+          "name": "Cacophony"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "outcast",
+      "name": "Outcast",
+      "row": 79,
+      "buildingId": "h05V",
+      "fighterId": "h06B",
+      "upgrades": [
+        "forsaken_one"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "forsaken_one",
+      "name": "Forsaken One",
+      "row": 80,
+      "buildingId": "h05W",
+      "fighterId": "h06C",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A04Q",
+          "base": "Asph",
+          "name": "Forsaken One SFX"
+        },
+        {
+          "id": "A04B",
+          "base": "ACif",
+          "name": "Insanity"
+        },
+        {
+          "id": "A04C",
+          "base": "Aimp",
+          "name": "Insanity"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "apparition",
+      "name": "Apparition",
+      "row": 81,
+      "buildingId": "h05X",
+      "fighterId": "h06D",
+      "upgrades": [
+        "gravekeeper"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A0AS",
+          "base": "ACac",
+          "name": "Sickness Aura"
+        },
+        {
+          "id": "A0AR",
+          "base": "Aimp",
+          "name": "Sickness Aura"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "weakenAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "gravekeeper",
+      "name": "Gravekeeper",
+      "row": 82,
+      "buildingId": "h05Y",
+      "fighterId": "h06E",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A04D",
+          "base": "ACac",
+          "name": "Despair Aura"
+        },
+        {
+          "id": "A04W",
+          "base": "Aimp",
+          "name": "Despair Aura"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "weakenAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "dark_priest",
+      "name": "Dark Priest",
+      "row": 83,
+      "buildingId": "h05Z",
+      "fighterId": "h06F",
+      "upgrades": [
+        "meridian"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A04P",
+          "base": "Asph",
+          "name": "Dark Priest SFX"
+        },
+        {
+          "id": "A04J",
+          "base": "ACuf",
+          "name": "Haunting"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "meridian",
+      "name": "Meridian",
+      "row": 84,
+      "buildingId": "h060",
+      "fighterId": "h06G",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A04S",
+          "base": "ACmf",
+          "name": "Ghost Essence"
+        },
+        {
+          "id": "A04K",
+          "base": "ACuf",
+          "name": "Catastrophe"
+        },
+        {
+          "id": "A04R",
+          "base": "Alit",
+          "name": ""
+        }
+      ],
+      "adapters": [
+        "casts",
+        "manaShield"
+      ],
+      "pending": []
+    },
+    {
+      "id": "goblin_scientist",
+      "name": "Goblin Scientist",
+      "row": 85,
+      "buildingId": "h06J",
+      "fighterId": "h06U",
+      "upgrades": [
+        "dwarven_engineer"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "dwarven_engineer",
+      "name": "Dwarven Engineer",
+      "row": 86,
+      "buildingId": "h078",
+      "fighterId": "h079",
+      "upgrades": [
+        "mutant"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A069",
+          "base": "Aimp",
+          "name": "Mortar"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "splash"
+      ],
+      "pending": []
+    },
+    {
+      "id": "mutant",
+      "name": "Mutant",
+      "row": 87,
+      "buildingId": "h06I",
+      "fighterId": "h06W",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A053",
+          "base": "AAns",
+          "name": "Inject Steroids"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "steroids"
+      ],
+      "pending": []
+    },
+    {
+      "id": "servant",
+      "name": "Servant",
+      "row": 88,
+      "buildingId": "h06K",
+      "fighterId": "h06X",
+      "upgrades": [
+        "slavemaster"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "slavemaster",
+      "name": "Slavemaster",
+      "row": 89,
+      "buildingId": "h06L",
+      "fighterId": "h06Y",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A055",
+          "base": "Aimp",
+          "name": "Slave Trade"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "slaveTrade"
+      ],
+      "pending": []
+    },
+    {
+      "id": "tribesman",
+      "name": "Tribesman",
+      "row": 90,
+      "buildingId": "h06M",
+      "fighterId": "h06V",
+      "upgrades": [
+        "alpha_male"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A056",
+          "base": "ACen",
+          "name": "Throw Net"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "alpha_male",
+      "name": "Alpha Male",
+      "row": 91,
+      "buildingId": "h06N",
+      "fighterId": "h06Z",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A058",
+          "base": "Absk",
+          "name": "Fury"
+        },
+        {
+          "id": "A056",
+          "base": "ACen",
+          "name": "Throw Net"
+        },
+        {
+          "id": "A057",
+          "base": "Aimp",
+          "name": "Fury"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "medicine_man",
+      "name": "Medicine Man",
+      "row": 92,
+      "buildingId": "h06O",
+      "fighterId": "h070",
+      "upgrades": [
+        "oracle"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A059",
+          "base": "AChv",
+          "name": "Mend"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "oracle",
+      "name": "Oracle",
+      "row": 93,
+      "buildingId": "h06P",
+      "fighterId": "h071",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A061",
+          "base": "AEfk",
+          "name": "Guardian Spirit"
+        },
+        {
+          "id": "A05B",
+          "base": "Aimp",
+          "name": "Guardian Spirit"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "guardian"
+      ],
+      "pending": []
+    },
+    {
+      "id": "harlot",
+      "name": "Harlot",
+      "row": 94,
+      "buildingId": "h06Q",
+      "fighterId": "h072",
+      "upgrades": [
+        "mistress"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "mistress",
+      "name": "Mistress",
+      "row": 95,
+      "buildingId": "h06R",
+      "fighterId": "h073",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A05C",
+          "base": "ANdh",
+          "name": "Seduce"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "minotaur",
+      "name": "Minotaur",
+      "row": 96,
+      "buildingId": "h06S",
+      "fighterId": "h074",
+      "upgrades": [
+        "bigfoot"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A05D",
+          "base": "AHtc",
+          "name": "Tremor"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "bigfoot",
+      "name": "Bigfoot",
+      "row": 97,
+      "buildingId": "h06T",
+      "fighterId": "h075",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A05E",
+          "base": "Awrs",
+          "name": "Fissure"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "hatchling",
+      "name": "Hatchling",
+      "row": 98,
+      "buildingId": "h07J",
+      "fighterId": "h07K",
+      "upgrades": [
+        "swamprunner"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "swamprunner",
+      "name": "Swamprunner",
+      "row": 99,
+      "buildingId": "h07L",
+      "fighterId": "h07Z",
+      "upgrades": [
+        "fangtooth",
+        "defiler"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "fangtooth",
+      "name": "Fangtooth",
+      "row": 100,
+      "buildingId": "h07N",
+      "fighterId": "h081",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A06O",
+          "base": "Aimp",
+          "name": "Feast"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "feast"
+      ],
+      "pending": []
+    },
+    {
+      "id": "defiler",
+      "name": "Defiler",
+      "row": 101,
+      "buildingId": "h07M",
+      "fighterId": "h080",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A076",
+          "base": "Aspo",
+          "name": "Biotoxin"
+        },
+        {
+          "id": "A06N",
+          "base": "AEpa",
+          "name": "Biotoxin"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "poison"
+      ],
+      "pending": []
+    },
+    {
+      "id": "egg_sack",
+      "name": "Egg Sack",
+      "row": 102,
+      "buildingId": "h07O",
+      "fighterId": "h082",
+      "upgrades": [
+        "sky_dragon"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A06P",
+          "base": "Absk",
+          "name": "Withdraw"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "sky_dragon",
+      "name": "Sky Dragon",
+      "row": 103,
+      "buildingId": "h07P",
+      "fighterId": "h083",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A0BG",
+          "base": "ACct",
+          "name": "Brawl"
+        },
+        {
+          "id": "A06Q",
+          "base": "Aimp",
+          "name": "Brawl"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "crit"
+      ],
+      "pending": []
+    },
+    {
+      "id": "bottom_feeder",
+      "name": "Bottom Feeder",
+      "row": 104,
+      "buildingId": "h07Q",
+      "fighterId": "h084",
+      "upgrades": [
+        "king_claw"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A06R",
+          "base": "Aimp",
+          "name": "Delicacy"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "refund"
+      ],
+      "pending": []
+    },
+    {
+      "id": "king_claw",
+      "name": "King Claw",
+      "row": 105,
+      "buildingId": "h07R",
+      "fighterId": "h085",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A06R",
+          "base": "Aimp",
+          "name": "Delicacy"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "refund"
+      ],
+      "pending": []
+    },
+    {
+      "id": "mermaid",
+      "name": "Mermaid",
+      "row": 106,
+      "buildingId": "h07S",
+      "fighterId": "h086",
+      "upgrades": [
+        "highborne"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A06S",
+          "base": "AUfa",
+          "name": "Sphere"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "highborne",
+      "name": "Highborne",
+      "row": 107,
+      "buildingId": "h07T",
+      "fighterId": "h087",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A06V",
+          "base": "AHwe",
+          "name": "Storm Geyser"
+        },
+        {
+          "id": "A07Y",
+          "base": "AUfa",
+          "name": "Sphere"
+        },
+        {
+          "id": "A06W",
+          "base": "Aimp",
+          "name": "Storm Geyser"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "komodo",
+      "name": "Komodo",
+      "row": 108,
+      "buildingId": "h07U",
+      "fighterId": "h08B",
+      "upgrades": [
+        "trident"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A06Z",
+          "base": "ACbl",
+          "name": "Submerge"
+        },
+        {
+          "id": "A06X",
+          "base": "Apsh",
+          "name": "Submerge"
+        },
+        {
+          "id": "A06Y",
+          "base": "Aimp",
+          "name": "Submerge"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "trident",
+      "name": "Trident",
+      "row": 109,
+      "buildingId": "h07V",
+      "fighterId": "h088",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A070",
+          "base": "ACbh",
+          "name": "Concussion"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "bash"
+      ],
+      "pending": []
+    },
+    {
+      "id": "sea_giant",
+      "name": "Sea Giant",
+      "row": 110,
+      "buildingId": "h07W",
+      "fighterId": "h089",
+      "upgrades": [
+        "hydra"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "hydra",
+      "name": "Hydra",
+      "row": 111,
+      "buildingId": "h07X",
+      "fighterId": "h08A",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A074",
+          "base": "Aimp",
+          "name": "Triple Attack"
+        },
+        {
+          "id": "A072",
+          "base": "Aimp",
+          "name": "Mitosis"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "multishot",
+        "deathSummon"
+      ],
+      "pending": []
+    },
+    {
+      "id": "mini_hydra",
+      "name": "Mini Hydra",
+      "row": 112,
+      "buildingId": null,
+      "fighterId": "h07Y",
+      "upgrades": [],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "colt",
+      "name": "Colt",
+      "row": 113,
+      "buildingId": "h08F",
+      "fighterId": "h08E",
+      "upgrades": [
+        "rider"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "rider",
+      "name": "Rider",
+      "row": 114,
+      "buildingId": "h08I",
+      "fighterId": "h08J",
+      "upgrades": [],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "novice",
+      "name": "Novice",
+      "row": 115,
+      "buildingId": "h08H",
+      "fighterId": "h08G",
+      "upgrades": [
+        "crusader"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "crusader",
+      "name": "Crusader",
+      "row": 116,
+      "buildingId": "h08L",
+      "fighterId": "h08K",
+      "upgrades": [],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "sentry",
+      "name": "Sentry",
+      "row": 117,
+      "buildingId": "h08N",
+      "fighterId": "h08M",
+      "upgrades": [
+        "nightsaber"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A07I",
+          "base": "ACsa",
+          "name": "Magic Missile"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "manaHit"
+      ],
+      "pending": []
+    },
+    {
+      "id": "nightsaber",
+      "name": "Nightsaber",
+      "row": 118,
+      "buildingId": "h08P",
+      "fighterId": "h08O",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "Amgl",
+          "base": "Amgl",
+          "name": ""
+        }
+      ],
+      "adapters": [
+        "casts",
+        "chain"
+      ],
+      "pending": []
+    },
+    {
+      "id": "prisoner",
+      "name": "Prisoner",
+      "row": 119,
+      "buildingId": "h08Q",
+      "fighterId": "h08R",
+      "upgrades": [
+        "maverick"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "maverick",
+      "name": "Maverick",
+      "row": 120,
+      "buildingId": "h08S",
+      "fighterId": "h08T",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A07G",
+          "base": "AOmi",
+          "name": "Mirage"
+        },
+        {
+          "id": "A08M",
+          "base": "Aimp",
+          "name": "Mirage"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "druid",
+      "name": "Druid",
+      "row": 121,
+      "buildingId": "h08V",
+      "fighterId": "h092",
+      "upgrades": [
+        "ascendant",
+        "sword_mage"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A0BN",
+          "base": "ACcl",
+          "name": "Wrath of Nature"
+        },
+        {
+          "id": "A0BP",
+          "base": "AIll",
+          "name": "Wrath of Nature"
+        },
+        {
+          "id": "A07X",
+          "base": "Aimp",
+          "name": "Wrath of Nature"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "ascendant",
+      "name": "Ascendant",
+      "row": 122,
+      "buildingId": "h08Y",
+      "fighterId": "h08X",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A02D",
+          "base": "AIcb",
+          "name": "Faerie Fire"
+        },
+        {
+          "id": "A0B1",
+          "base": "Aimp",
+          "name": "Faerie Fire"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "corrupt"
+      ],
+      "pending": []
+    },
+    {
+      "id": "sword_mage",
+      "name": "Sword Mage",
+      "row": 123,
+      "buildingId": "h08Z",
+      "fighterId": "h08W",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A07Z",
+          "base": "AIfb",
+          "name": "Enchant Fire"
+        },
+        {
+          "id": "A081",
+          "base": "Aimp",
+          "name": "Enchanted Fire"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "flatDamage",
+        "fireHit"
+      ],
+      "pending": []
+    },
+    {
+      "id": "moon_guard",
+      "name": "Moon Guard",
+      "row": 124,
+      "buildingId": "h090",
+      "fighterId": "h091",
+      "upgrades": [
+        "warden"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A07H",
+          "base": "AEfk",
+          "name": ""
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "warden",
+      "name": "Warden",
+      "row": 125,
+      "buildingId": "h093",
+      "fighterId": "h094",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A07L",
+          "base": "ANdb",
+          "name": "Coup De Grace"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "crit",
+        "evasion"
+      ],
+      "pending": []
+    },
+    {
+      "id": "tuskarr",
+      "name": "Tuskarr",
+      "row": 126,
+      "buildingId": "h0BC",
+      "fighterId": "n00B",
+      "upgrades": [
+        "tuskarr_spearman"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "tuskarr_spearman",
+      "name": "Tuskarr Spearman",
+      "row": 127,
+      "buildingId": "h0BD",
+      "fighterId": "n00C",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A090",
+          "base": "AItn",
+          "name": "+12 damage"
+        },
+        {
+          "id": "A08V",
+          "base": "AHca",
+          "name": "Ice Spear"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "flatDamage",
+        "poison"
+      ],
+      "pending": []
+    },
+    {
+      "id": "frost_wolf",
+      "name": "Frost Wolf",
+      "row": 128,
+      "buildingId": "h0BE",
+      "fighterId": "n00D",
+      "upgrades": [
+        "pandaren"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A09A",
+          "base": "Aspo",
+          "name": "Bleeding"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "poison"
+      ],
+      "pending": []
+    },
+    {
+      "id": "pandaren",
+      "name": "Pandaren",
+      "row": 129,
+      "buildingId": "h0BG",
+      "fighterId": "n00K",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A098",
+          "base": "AUfn",
+          "name": ""
+        },
+        {
+          "id": "A099",
+          "base": "Aimp",
+          "name": "Frost Nova"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "ice_troll",
+      "name": "Ice Troll",
+      "row": 130,
+      "buildingId": "h0BH",
+      "fighterId": "o001",
+      "upgrades": [
+        "ice_troll_shaman"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A08S",
+          "base": "AEah",
+          "name": "Frost Shield"
+        },
+        {
+          "id": "A09X",
+          "base": "AEah",
+          "name": "Frost Shield"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "reflect"
+      ],
+      "pending": []
+    },
+    {
+      "id": "ice_troll_shaman",
+      "name": "Ice Troll Shaman",
+      "row": 131,
+      "buildingId": "h0BI",
+      "fighterId": "n00E",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A08W",
+          "base": "Aspo",
+          "name": "Cold Attack"
+        },
+        {
+          "id": "A08T",
+          "base": "AEah",
+          "name": "Ice Shield"
+        },
+        {
+          "id": "A0AQ",
+          "base": "AEah",
+          "name": "Ice Shield"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "poison",
+        "reflect"
+      ],
+      "pending": []
+    },
+    {
+      "id": "polar_bear",
+      "name": "Polar Bear",
+      "row": 132,
+      "buildingId": "h0BJ",
+      "fighterId": "n00F",
+      "upgrades": [
+        "magnataur"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A034",
+          "base": "ACbh",
+          "name": ""
+        },
+        {
+          "id": "A091",
+          "base": "Aasl",
+          "name": "Frost Aura"
+        },
+        {
+          "id": "A097",
+          "base": "ACua",
+          "name": "Frost Aura"
+        },
+        {
+          "id": "A09D",
+          "base": "Aimp",
+          "name": "Frost Aura"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "bash",
+        "slowAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "magnataur",
+      "name": "Magnataur",
+      "row": 133,
+      "buildingId": "h0BK",
+      "fighterId": "n00G",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A093",
+          "base": "ACct",
+          "name": ""
+        },
+        {
+          "id": "A09J",
+          "base": "ACua",
+          "name": "Frost Aura"
+        },
+        {
+          "id": "A091",
+          "base": "Aasl",
+          "name": "Frost Aura"
+        },
+        {
+          "id": "A09K",
+          "base": "Aimp",
+          "name": "Frost Aura"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "crit",
+        "slowAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "wandigoo",
+      "name": "Wandigoo",
+      "row": 134,
+      "buildingId": "h0BM",
+      "fighterId": "n00I",
+      "upgrades": [
+        "ancient_wandigoo"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A08Z",
+          "base": "ACes",
+          "name": ""
+        },
+        {
+          "id": "A08Y",
+          "base": "Aasl",
+          "name": "Evasion"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "evasion"
+      ],
+      "pending": []
+    },
+    {
+      "id": "ancient_wandigoo",
+      "name": "Ancient Wandigoo",
+      "row": 135,
+      "buildingId": "h0BL",
+      "fighterId": "n00H",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A08X",
+          "base": "ACes",
+          "name": ""
+        },
+        {
+          "id": "A08Y",
+          "base": "Aasl",
+          "name": "Evasion"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "evasion"
+      ],
+      "pending": []
+    },
+    {
+      "id": "young_frost_dragon",
+      "name": "Young Frost Dragon",
+      "row": 136,
+      "buildingId": "h0BO",
+      "fighterId": "h0BN",
+      "upgrades": [
+        "azure_dragon"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A096",
+          "base": "ACbf",
+          "name": ""
+        }
+      ],
+      "adapters": [
+        "casts",
+        "splash"
+      ],
+      "pending": []
+    },
+    {
+      "id": "azure_dragon",
+      "name": "Azure Dragon",
+      "row": 137,
+      "buildingId": "h0BP",
+      "fighterId": "n00J",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A080",
+          "base": "Afrb",
+          "name": "Dragon Breath Effect"
+        },
+        {
+          "id": "A09B",
+          "base": "AUfa",
+          "name": "Azure's Armor"
+        },
+        {
+          "id": "A095",
+          "base": "Aimp",
+          "name": "Azure's Breath"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "small_land_mine",
+      "name": "Small Land Mine",
+      "row": 138,
+      "buildingId": "h0A8",
+      "fighterId": "h0A7",
+      "upgrades": [
+        "medium_land_mine"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A08H",
+          "base": "Aimp",
+          "name": "Kaboom!"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "explode"
+      ],
+      "pending": []
+    },
+    {
+      "id": "medium_land_mine",
+      "name": "Medium Land Mine",
+      "row": 139,
+      "buildingId": "h0AT",
+      "fighterId": "h0AV",
+      "upgrades": [
+        "ultra_land_mine"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A08G",
+          "base": "Aimp",
+          "name": "Kaboom!"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "explode"
+      ],
+      "pending": []
+    },
+    {
+      "id": "ultra_land_mine",
+      "name": "Ultra Land Mine",
+      "row": 140,
+      "buildingId": "h0AU",
+      "fighterId": "h0AW",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A08I",
+          "base": "Aimp",
+          "name": "Kaboom!"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "explode"
+      ],
+      "pending": []
+    },
+    {
+      "id": "geomancer",
+      "name": "Geomancer",
+      "row": 141,
+      "buildingId": "h0AE",
+      "fighterId": "h0AD",
+      "upgrades": [
+        "clockwreck"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "clockwreck",
+      "name": "Clockwreck",
+      "row": 142,
+      "buildingId": "h0AF",
+      "fighterId": "h0AG",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A08F",
+          "base": "ANcs",
+          "name": "Cluster Rockets(goblin)"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "machine_turrent",
+      "name": "Machine Turrent",
+      "row": 143,
+      "buildingId": "h0AB",
+      "fighterId": "h0AC",
+      "upgrades": [
+        "machine_robot"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A08B",
+          "base": "Aimp",
+          "name": "Burst Shot"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "chain"
+      ],
+      "pending": []
+    },
+    {
+      "id": "machine_robot",
+      "name": "Machine Robot",
+      "row": 144,
+      "buildingId": "h0AA",
+      "fighterId": "h0A9",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A08B",
+          "base": "Aimp",
+          "name": "Burst Shot"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "chain"
+      ],
+      "pending": []
+    },
+    {
+      "id": "flying_machine",
+      "name": "Flying Machine",
+      "row": 145,
+      "buildingId": "h0AH",
+      "fighterId": "h0AI",
+      "upgrades": [
+        "helicopter"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A08J",
+          "base": "ACat",
+          "name": "Telescope"
+        },
+        {
+          "id": "A09N",
+          "base": "ACat",
+          "name": "Telescope"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "aura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "helicopter",
+      "name": "Helicopter",
+      "row": 146,
+      "buildingId": "h0AJ",
+      "fighterId": "h0AK",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A08K",
+          "base": "ACat",
+          "name": "Advanced Telescope"
+        },
+        {
+          "id": "A00S",
+          "base": "ACat",
+          "name": "Advanced Telescope"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "aura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "goblin_alchemist",
+      "name": "Goblin Alchemist",
+      "row": 147,
+      "buildingId": "h0AL",
+      "fighterId": "h0AM",
+      "upgrades": [
+        "goblin_blaster"
+      ],
+      "sourceSkills": [
+        {
+          "id": "S004",
+          "base": "SCae",
+          "name": "Chemical Rage"
+        },
+        {
+          "id": "A089",
+          "base": "Aimp",
+          "name": "Chemical Rage"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "hasteAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "goblin_blaster",
+      "name": "Goblin Blaster",
+      "row": 148,
+      "buildingId": "h0AO",
+      "fighterId": "h0AN",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A08E",
+          "base": "ACbl",
+          "name": "Overclocking"
+        },
+        {
+          "id": "A08C",
+          "base": "Aimp",
+          "name": "Overclocking"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "steamroller",
+      "name": "Steamroller",
+      "row": 149,
+      "buildingId": "h0AR",
+      "fighterId": "h0AS",
+      "upgrades": [
+        "assault_tank"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A088",
+          "base": "Aimp",
+          "name": "Goblin Driver"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "deathRawSummon"
+      ],
+      "pending": []
+    },
+    {
+      "id": "assault_tank",
+      "name": "Assault Tank",
+      "row": 150,
+      "buildingId": "h0AQ",
+      "fighterId": "h0AP",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A088",
+          "base": "Aimp",
+          "name": "Goblin Driver"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "deathRawSummon"
+      ],
+      "pending": []
+    },
+    {
+      "id": "peasant",
+      "name": "Peasant",
+      "row": 151,
+      "buildingId": "h09L",
+      "fighterId": "h09F",
+      "upgrades": [
+        "militia"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "militia",
+      "name": "Militia",
+      "row": 152,
+      "buildingId": "h09H",
+      "fighterId": "h09K",
+      "upgrades": [],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "archer",
+      "name": "Archer",
+      "row": 153,
+      "buildingId": "h09W",
+      "fighterId": "h09Y",
+      "upgrades": [
+        "elite_archer"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "elite_archer",
+      "name": "Elite Archer",
+      "row": 154,
+      "buildingId": "h09M",
+      "fighterId": "h09G",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A07M",
+          "base": "Aroc",
+          "name": "Multishot"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "multishot"
+      ],
+      "pending": []
+    },
+    {
+      "id": "footman",
+      "name": "Footman",
+      "row": 155,
+      "buildingId": "h09N",
+      "fighterId": "h09V",
+      "upgrades": [
+        "guard"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "guard",
+      "name": "Guard",
+      "row": 156,
+      "buildingId": "h09O",
+      "fighterId": "h09P",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A07S",
+          "base": "Aasl",
+          "name": "Defence"
+        },
+        {
+          "id": "A07N",
+          "base": "Adef",
+          "name": ""
+        }
+      ],
+      "adapters": [
+        "casts",
+        "defend"
+      ],
+      "pending": []
+    },
+    {
+      "id": "priest",
+      "name": "Priest",
+      "row": 157,
+      "buildingId": "h09R",
+      "fighterId": "h09Q",
+      "upgrades": [
+        "high_priest"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A07P",
+          "base": "Ahea",
+          "name": ""
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "high_priest",
+      "name": "High Priest",
+      "row": 158,
+      "buildingId": "h09S",
+      "fighterId": "h09Z",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A07O",
+          "base": "Ahea",
+          "name": "Greater Heal"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "knight",
+      "name": "Knight",
+      "row": 159,
+      "buildingId": "h09T",
+      "fighterId": "h09D",
+      "upgrades": [
+        "cavalier"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "cavalier",
+      "name": "Cavalier",
+      "row": 160,
+      "buildingId": "h09U",
+      "fighterId": "h09X",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A07Q",
+          "base": "Ansk",
+          "name": "Harden Armor"
+        },
+        {
+          "id": "A07R",
+          "base": "Aasl",
+          "name": "Harden Armor"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "block"
+      ],
+      "pending": []
+    },
+    {
+      "id": "dragon_hawk",
+      "name": "Dragon Hawk",
+      "row": 161,
+      "buildingId": "h0A3",
+      "fighterId": "h0A2",
+      "upgrades": [
+        "royal_griffin"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "royal_griffin",
+      "name": "Royal Griffin",
+      "row": 162,
+      "buildingId": "h0A0",
+      "fighterId": "h09I",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A0BV",
+          "base": "Asth",
+          "name": ""
+        }
+      ],
+      "adapters": [
+        "casts",
+        "chain"
+      ],
+      "pending": []
+    },
+    {
+      "id": "orc_warrior",
+      "name": "Orc Warrior",
+      "row": 163,
+      "buildingId": "h0BF",
+      "fighterId": "h0AY",
+      "upgrades": [
+        "blood_orc_warrior"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "blood_orc_warrior",
+      "name": "Blood Orc Warrior",
+      "row": 164,
+      "buildingId": "h0BS",
+      "fighterId": "h0BT",
+      "upgrades": [
+        "wolverine"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A0A6",
+          "base": "Auhf",
+          "name": "Frenzy"
+        },
+        {
+          "id": "A0AP",
+          "base": "Aimp",
+          "name": "Frenzy (orc)"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "wolverine",
+      "name": "Wolverine",
+      "row": 165,
+      "buildingId": "h0BU",
+      "fighterId": "h0CD",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A0A7",
+          "base": "ACct",
+          "name": "Finishing Blow!"
+        },
+        {
+          "id": "A0A8",
+          "base": "Aimp",
+          "name": "Berserk"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "crit",
+        "berserk"
+      ],
+      "pending": []
+    },
+    {
+      "id": "orc_warlock",
+      "name": "Orc Warlock",
+      "row": 166,
+      "buildingId": "h0BV",
+      "fighterId": "o002",
+      "upgrades": [
+        "blood_orc_warlock"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A019",
+          "base": "Acri",
+          "name": ""
+        },
+        {
+          "id": "A0AB",
+          "base": "AIll",
+          "name": "Cripple"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "blood_orc_warlock",
+      "name": "Blood Orc Warlock",
+      "row": 167,
+      "buildingId": "h0BW",
+      "fighterId": "n00P",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A03A",
+          "base": "AIcb",
+          "name": "Corruption"
+        },
+        {
+          "id": "A0AD",
+          "base": "Aimp",
+          "name": "Corruption"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "corrupt"
+      ],
+      "pending": []
+    },
+    {
+      "id": "raider",
+      "name": "Raider",
+      "row": 168,
+      "buildingId": "h0BX",
+      "fighterId": "h0BY",
+      "upgrades": [
+        "blood_raider"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A0A4",
+          "base": "AHwe",
+          "name": "Summon Wolf"
+        },
+        {
+          "id": "A0A2",
+          "base": "Aimp",
+          "name": "Summon Wolf"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "blood_raider",
+      "name": "Blood Raider",
+      "row": 169,
+      "buildingId": "h0C0",
+      "fighterId": "h0BZ",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A0A5",
+          "base": "AHwe",
+          "name": "Summon Blood Wolf"
+        },
+        {
+          "id": "A0A3",
+          "base": "Aimp",
+          "name": "Summon Blood Wolf"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "young_witch_doctor",
+      "name": "Young Witch Doctor",
+      "row": 170,
+      "buildingId": "h0C4",
+      "fighterId": "h0C3",
+      "upgrades": [
+        "elder_witch_doctor"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A0A1",
+          "base": "ACnr",
+          "name": "Healing Aura"
+        },
+        {
+          "id": "A0AG",
+          "base": "Aimp",
+          "name": "Healing Aura"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "healAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "elder_witch_doctor",
+      "name": "Elder Witch Doctor",
+      "row": 171,
+      "buildingId": "h0C2",
+      "fighterId": "h0C1",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A0A0",
+          "base": "ACnr",
+          "name": "Greater Healing Aura"
+        },
+        {
+          "id": "A0AF",
+          "base": "Aimp",
+          "name": "Greater Healing Aura"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "healAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "wyvern",
+      "name": "Wyvern",
+      "row": 172,
+      "buildingId": "h0C5",
+      "fighterId": "h0C6",
+      "upgrades": [
+        "wind_rider"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "wind_rider",
+      "name": "Wind Rider",
+      "row": 173,
+      "buildingId": "h0C8",
+      "fighterId": "h0C7",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A09Z",
+          "base": "Aven",
+          "name": ""
+        }
+      ],
+      "adapters": [
+        "casts",
+        "poison"
+      ],
+      "pending": []
+    },
+    {
+      "id": "orc_warchief",
+      "name": "Orc Warchief",
+      "row": 174,
+      "buildingId": "h0C9",
+      "fighterId": "h0CA",
+      "upgrades": [
+        "thrall"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A07K",
+          "base": "Awar",
+          "name": ""
+        }
+      ],
+      "adapters": [
+        "casts",
+        "pulverize"
+      ],
+      "pending": []
+    },
+    {
+      "id": "thrall",
+      "name": "Thrall",
+      "row": 175,
+      "buildingId": "h0CC",
+      "fighterId": "h0CB",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A0AO",
+          "base": "AIll",
+          "name": "Storm Bolt"
+        },
+        {
+          "id": "A09Y",
+          "base": "Aimp",
+          "name": "Storm Bolt"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "acolyte",
+      "name": "Acolyte",
+      "row": 176,
+      "buildingId": "h0CF",
+      "fighterId": "h0CE",
+      "upgrades": [
+        "revenant"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "revenant",
+      "name": "Revenant",
+      "row": 177,
+      "buildingId": "h0CH",
+      "fighterId": "h0CG",
+      "upgrades": [],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "ghoul",
+      "name": "Ghoul",
+      "row": 178,
+      "buildingId": "h0CI",
+      "fighterId": "h0CJ",
+      "upgrades": [
+        "frenzy_ghoul"
+      ],
+      "sourceSkills": [],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "frenzy_ghoul",
+      "name": "Frenzy Ghoul",
+      "row": 179,
+      "buildingId": "h0CK",
+      "fighterId": "h0CL",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A01N",
+          "base": "AIva",
+          "name": "Life Steal"
+        },
+        {
+          "id": "A0B9",
+          "base": "Aimp",
+          "name": "Life Steal"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "lifesteal"
+      ],
+      "pending": []
+    },
+    {
+      "id": "meat_wagon",
+      "name": "Meat Wagon",
+      "row": 180,
+      "buildingId": "h0CO",
+      "fighterId": "h0CM",
+      "upgrades": [
+        "war_machine"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A0B6",
+          "base": "Aimp",
+          "name": "Small Splash"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "splash"
+      ],
+      "pending": []
+    },
+    {
+      "id": "war_machine",
+      "name": "War Machine",
+      "row": 181,
+      "buildingId": "h0CP",
+      "fighterId": "h0CN",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A0B7",
+          "base": "Aimp",
+          "name": "Small Splash"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "splash"
+      ],
+      "pending": []
+    },
+    {
+      "id": "necromancer",
+      "name": "Necromancer",
+      "row": 182,
+      "buildingId": "h0CQ",
+      "fighterId": "h0CR",
+      "upgrades": [
+        "necrolyte",
+        "ghost"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A0BB",
+          "base": "AHwe",
+          "name": "Raise Dead"
+        },
+        {
+          "id": "A0BA",
+          "base": "Aimp",
+          "name": "Raise Dead"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "necrolyte",
+      "name": "Necrolyte",
+      "row": 183,
+      "buildingId": "h0CS",
+      "fighterId": "h0CT",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A0BC",
+          "base": "AHwe",
+          "name": "Raise Dead"
+        },
+        {
+          "id": "A0BD",
+          "base": "Aimp",
+          "name": "Raise Dead"
+        }
+      ],
+      "adapters": [
+        "casts"
+      ],
+      "pending": []
+    },
+    {
+      "id": "ghost",
+      "name": "Ghost",
+      "row": 184,
+      "buildingId": "h0CV",
+      "fighterId": "h0CU",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A0BH",
+          "base": "AUau",
+          "name": "Heartstopper Aura"
+        },
+        {
+          "id": "A0BE",
+          "base": "Aimp",
+          "name": "Heartstopper Aura"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "heartstopper"
+      ],
+      "pending": []
+    },
+    {
+      "id": "zombie",
+      "name": "Zombie",
+      "row": 185,
+      "buildingId": "h0CW",
+      "fighterId": "h0CX",
+      "upgrades": [
+        "the_butcher"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A0BF",
+          "base": "ACac",
+          "name": "Infectious diseases"
+        },
+        {
+          "id": "A0BI",
+          "base": "Aimp",
+          "name": "Infectious diseases"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "weakenAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "the_butcher",
+      "name": "The Butcher",
+      "row": 186,
+      "buildingId": "h0CY",
+      "fighterId": "h0CZ",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A0AE",
+          "base": "AIva",
+          "name": "Life Steal"
+        },
+        {
+          "id": "A0BK",
+          "base": "ACac",
+          "name": "Plague"
+        },
+        {
+          "id": "A0BJ",
+          "base": "Aimp",
+          "name": "Plague"
+        },
+        {
+          "id": "A0BR",
+          "base": "Aimp",
+          "name": "Life Steal"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "lifesteal",
+        "weakenAura"
+      ],
+      "pending": []
+    },
+    {
+      "id": "guardian_of_death",
+      "name": "Guardian of Death",
+      "row": 187,
+      "buildingId": "h0D0",
+      "fighterId": "h0D1",
+      "upgrades": [
+        "death_dragon"
+      ],
+      "sourceSkills": [
+        {
+          "id": "A0B2",
+          "base": "Aimp",
+          "name": "Cleaving Attack"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "splash"
+      ],
+      "pending": []
+    },
+    {
+      "id": "death_dragon",
+      "name": "Death Dragon",
+      "row": 188,
+      "buildingId": "h0D2",
+      "fighterId": "h0D3",
+      "upgrades": [],
+      "sourceSkills": [
+        {
+          "id": "A0B4",
+          "base": "Aimp",
+          "name": "Death's Breath"
+        }
+      ],
+      "adapters": [
+        "casts",
+        "splash"
+      ],
+      "pending": []
+    }
+  ]
+}
