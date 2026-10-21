@@ -39,6 +39,17 @@ const KING_UPGRADES = {
   regen: { name: '生命恢复', effect: '每秒恢复 +1 生命', amount: 1 },
 };
 
+const MINE = {
+  COST: 100, LIMIT: 6, INTERVAL: 5,
+  LEVELS: [
+    { gold: 8, upgrade: 80 },
+    { gold: 12, upgrade: 120 },
+    { gold: 18, upgrade: 180 },
+    { gold: 26, upgrade: 260 },
+    { gold: 36, upgrade: null },
+  ],
+};
+
 const ATK_TYPES  = ['普通', '穿刺', '魔法', '攻城'];
 const ARMOR_TYPES = ['无甲', '轻甲', '中甲', '重甲'];
 

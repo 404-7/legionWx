@@ -29,7 +29,7 @@ function newGame(diffKey) {
       exitX: L.fx + 150, exitY: i % 2 ? 444 : 356,
       spawnX: L.fx + 150, spawnY: i % 2 ? 764 : 36,
       direction: i % 2 ? -1 : 1,
-      fighters: [], enemies: [], mercQueue: [],
+      fighters: [], enemies: [], mercQueue: [], mines: [],
       spawnList: [], spawnT: 0, spawnIv: 1, paid: true,
       ai: null, aiT: 0,
     });
@@ -131,6 +131,9 @@ function waveDefFor(w) {
 /* ---------- 模拟主循环 ---------- */
 function simStep(dt) {
   if (G.phase === 'prep' || G.phase === 'combat') {
+    G.floaters = G.floaters.filter(f => { f.t -= dt; f.y -= 20 * dt; return f.t > 0; });
+    G.fx = G.fx.filter(f => (f.t -= dt) > 0);
+    for (const p of G.players) mineStep(p, dt);
     for (const k of G.kings) if (k.hp > 0) k.hp = Math.min(k.max, k.hp + k.regen * dt);
   }
   if (G.phase === 'prep') {
@@ -146,8 +149,6 @@ function simStep(dt) {
     for (const p of G.players) fieldStep(p, dt);
     for (const k of G.kings) { kingStep(k, dt); if (G.phase === 'over') return; }
     G.projectiles = G.projectiles.filter(pr => projStep(pr, dt));
-    G.floaters = G.floaters.filter(f => { f.t -= dt; f.y -= 20 * dt; return f.t > 0; });
-    G.fx = G.fx.filter(f => (f.t -= dt) > 0);
     if (G.combatT > CFG.COMBAT_TIMEOUT) forceLeakAll();
     if (G.players.every(p => p.paid) && G.kings.every(k => k.leaks.length === 0)) endWave();
   }
@@ -402,6 +403,43 @@ function kingStep(k, dt) {
 }
 
 /* ---------- 经济 / 操作 ---------- */
+function minePosition(p, index) {
+  return { x: (p.team === 0 ? 470 : 775) + (index % 2) * 55,
+    y: (p.id % 2 ? 530 : 100) + Math.floor(index / 2) * 62 };
+}
+
+function buyMine(p) {
+  if (!['prep', 'combat'].includes(G.phase) || p.mines.length >= MINE.LIMIT || p.gold < MINE.COST) return false;
+  p.gold -= MINE.COST;
+  p.mines.push({ id: p.mines.length, level: 1, elapsed: 0 });
+  addLog(`${p.name} 建造金矿（${p.mines.length}/${MINE.LIMIT}）`, 'l-gold');
+  return true;
+}
+
+function upgradeMine(p, id) {
+  if (!['prep', 'combat'].includes(G.phase) || !Number.isInteger(id)) return false;
+  const mine = p.mines.find(m => m.id === id);
+  if (!mine || mine.level >= MINE.LEVELS.length) return false;
+  const cost = MINE.LEVELS[mine.level - 1].upgrade;
+  if (p.gold < cost) return false;
+  p.gold -= cost; mine.level++;
+  addLog(`${p.name} 的 ${id + 1} 号金矿升至 Lv.${mine.level}`, 'l-gold');
+  return true;
+}
+
+function mineStep(p, dt) {
+  for (const mine of p.mines) {
+    mine.elapsed += dt;
+    const ticks = Math.floor((mine.elapsed + 1e-9) / MINE.INTERVAL);
+    if (!ticks) continue;
+    mine.elapsed = Math.max(0, mine.elapsed - ticks * MINE.INTERVAL);
+    const gold = ticks * MINE.LEVELS[mine.level - 1].gold;
+    p.gold += gold;
+    const pos = minePosition(p, mine.id);
+    addFloater(pos.x, pos.y - 15, `+${gold}金`, '#f5c542');
+  }
+}
+
 function payClear(p) {
   let g = Math.round((18 + G.wave * 3.4) * gainMult(p));
   if (p.fighters.length === 0) g += 25 + G.wave * 3;   // 全灭重建补贴，避免一蹶不振

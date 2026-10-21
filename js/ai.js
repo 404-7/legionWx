@@ -35,6 +35,11 @@ function aiAct(p) {
   if (!a) return;
   const w = G.wave;
 
+  // Keep enough gold for defenders while investing in the same mines as humans.
+  if (w >= 3 && p.mines.length < Math.min(MINE.LIMIT, Math.floor(w / 3)) && p.gold >= MINE.COST + 180) buyMine(p);
+  const mine = p.mines.find(m => m.level < MINE.LEVELS.length && p.gold >= MINE.LEVELS[m.level - 1].upgrade + 300);
+  if (mine) upgradeMine(p, mine.id);
+
   // 1) 强化国王（关键节点，留足买兵钱）
   const king = G.kings[p.team];
   const stat = king.hp < king.max * .5 ? 'health'

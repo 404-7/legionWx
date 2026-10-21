@@ -217,3 +217,9 @@ main{padding:8px 14px 14px;gap:16px}
 #menuPanel::-webkit-scrollbar{width:5px}#menuPanel::-webkit-scrollbar-thumb{background:#4c634b;border-radius:5px}
 .king-upgrades .btn{white-space:normal;text-align:left;line-height:1.5}
 .king-upgrades small{display:block;font-size:10px;color:var(--dim);font-weight:400;margin-top:3px}
+#mineInfo{color:var(--gold);font-size:12px;line-height:1.6}
+.mine-list{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.mine-row{display:flex;align-items:center;gap:8px;justify-content:space-between;padding:9px 7px;border:1px solid #3a4d35;border-radius:7px;background:#15271e;cursor:pointer}
+.mine-row.selected{border-color:var(--gold)}
+.mine-row b{font-size:11px;color:#e0c891}.mine-row small{display:block;font-size:10px;color:var(--dim);margin-top:4px}
+.mine-row .btn{font-size:10px;padding:7px}

@@ -70,6 +70,7 @@ function draw(now) {
 
   drawMap(c, t);
   for (const p of G.players) drawField(p, t);
+  for (const p of G.players) drawMines(c, p, t);
   for (const k of G.kings) { drawKing(k, t); for (const e of k.leaks) drawEnemy(c, e, t); }
 
   // 弹道（拖尾）
@@ -163,6 +164,37 @@ function drawField(p, t) {
     c.beginPath(); c.arc(f.x, f.y, effRange(f.def), 0, 7); c.stroke();
     c.globalAlpha = 1;
   }
+}
+
+function drawMines(c, p, t) {
+  const mineTop = minePosition(p, 0);
+  c.textAlign = 'center'; c.font = '11px "Microsoft YaHei"';
+  c.fillStyle = p.id === localPlayer().id ? '#e4ca87' : '#8b9d86';
+  c.fillText(`${p.name} · 矿区 ${p.mines.length}/${MINE.LIMIT}`, mineTop.x + 27, mineTop.y - 34);
+  for (let i = 0; i < MINE.LIMIT; i++) {
+    const { x, y } = minePosition(p, i), mine = p.mines[i];
+    const selected = p.id === localPlayer().id && G.selectedMine === i;
+    c.fillStyle = mine ? '#354230' : 'rgba(38,55,43,.35)';
+    c.strokeStyle = selected ? '#fff0a6' : mine ? '#a38a4e' : '#3a4b3b';
+    c.lineWidth = selected ? 2 : 1;
+    roundRect(c, x - 23, y - 24, 46, 51, 7); c.fill(); c.stroke();
+    if (!mine) { c.fillStyle = '#536650'; c.fillText('◇', x, y + 4); continue; }
+    // Rock entrance, timber beam and ore: code-native artwork matching the existing sprites.
+    c.fillStyle = '#657060'; c.beginPath();
+    c.moveTo(x-18,y+7); c.lineTo(x-13,y-9); c.lineTo(x-3,y-18);
+    c.lineTo(x+13,y-11); c.lineTo(x+19,y+7); c.closePath(); c.fill();
+    c.fillStyle = '#111b17'; c.fillRect(x-8,y-8,16,17);
+    c.strokeStyle = '#bb995b'; c.lineWidth = 3;
+    c.beginPath(); c.moveTo(x-10,y+8); c.lineTo(x-10,y-9); c.lineTo(x+10,y-9); c.lineTo(x+10,y+8); c.stroke();
+    c.fillStyle = '#f1d068';
+    for (let j=0;j<3;j++) { c.beginPath(); c.arc(x-10+j*8,y+6-(j%2)*3,3,0,7); c.fill(); }
+    c.fillStyle = '#ecd59a'; c.font = '9px "Microsoft YaHei"';
+    c.fillText(`${i+1} · Lv.${mine.level}`,x,y+20);
+    c.fillStyle = '#1c281e'; c.fillRect(x-18,y+29,36,3);
+    c.fillStyle = '#dab66b'; c.fillRect(x-18,y+29,36*Math.min(1,mine.elapsed/MINE.INTERVAL),3);
+    c.font = '11px "Microsoft YaHei"';
+  }
+  c.textAlign = 'left';
 }
 
 function drawFighter(c, f, p, t) {

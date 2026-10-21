@@ -110,6 +110,7 @@ function buildAtkTable() {
 function updateUI(force) {
   if (!G) return;
   const me = localPlayer();
+  updateMines(me);
   $('stGold').textContent = Math.floor(me.gold);
   $('stIncome').textContent = me.income;
   $('stValue').textContent = playerValue(me);
@@ -211,6 +212,28 @@ function updateUI(force) {
   }
 }
 
+function updateMines(me) {
+  const total = me.mines.reduce((sum,m) => sum + MINE.LEVELS[m.level-1].gold,0);
+  $('mineInfo').textContent = `已建 ${me.mines.length}/${MINE.LIMIT} · 合计 ${total} 金 / 5 秒`;
+  const buy = $('btnMineBuy');
+  buy.textContent = me.mines.length >= MINE.LIMIT ? '金矿已达上限（6/6）' : `购买金矿 · ${MINE.COST} 金`;
+  buy.disabled = me.gold < MINE.COST || me.mines.length >= MINE.LIMIT || G.phase === 'over';
+  const list = $('mineList'), signature = me.mines.map(m=>`${m.id}:${m.level}`).join('|');
+  if (list.dataset.signature !== signature) {
+    list.dataset.signature = signature;
+    list.innerHTML = me.mines.map(m=>{
+      const def = MINE.LEVELS[m.level-1], next = MINE.LEVELS[m.level];
+      return `<div class="mine-row" data-mine-id="${m.id}"><div><b>◆ ${m.id+1} 号金矿 · Lv.${m.level}</b><small>${def.gold} 金 / 5 秒 <span data-mine-time="${m.id}"></span></small></div><button class="btn" data-mine-upgrade="${m.id}" title="${next ? `升级后 ${next.gold} 金 / 5 秒` : '已达最高等级'}">${next ? `升级 ${def.upgrade} 金` : '已满级'}</button></div>`;
+    }).join('');
+  }
+  list.querySelectorAll('[data-mine-id]').forEach(row=>{
+    const mine = me.mines[+row.dataset.mineId], def = MINE.LEVELS[mine.level-1];
+    row.classList.toggle('selected',G.selectedMine === mine.id);
+    row.querySelector('[data-mine-time]').textContent = `· ${Math.ceil(MINE.INTERVAL-mine.elapsed)}s`;
+    row.querySelector('button').disabled = def.upgrade === null || me.gold < def.upgrade || G.phase === 'over';
+  });
+}
+
 /* ---------- 弹窗 ---------- */
 function showOverlay(mode) {
   const ov = $('overlay');
@@ -272,6 +295,12 @@ function bindEvents() {
     const me = localPlayer();
     const pos = canvasPos(e);
     const cell = fieldCellAt(me, pos.x, pos.y);
+    const mine = me.mines.find(m => { const at = minePosition(me,m.id); return Math.abs(pos.x-at.x)<=23 && Math.abs(pos.y-at.y)<=27; });
+    if (mine) {
+      G.selectedMine = mine.id; G.selectedShop = null; G.selectedFighter = null;
+      cv.classList.remove('placing');
+      $('mineBox').scrollIntoView({block:'nearest'}); updateUI(true); return;
+    }
     if (G.selectedShop) {
       if (cell && performAction({ type:'buy', uid:G.selectedShop, col:cell.col, row:cell.row })) {
         if (me.gold < UNITS[G.selectedShop].cost) selectShop(null);
@@ -290,6 +319,19 @@ function bindEvents() {
   cv.addEventListener('contextmenu', e => {
     e.preventDefault();
     if (G && G.selectedShop) selectShop(null);
+  });
+
+  $('btnMineBuy').addEventListener('click', () => {
+    if (!G || G.phase === 'over') return;
+    performAction({type:'mineBuy'}); updateUI(true);
+  });
+  $('mineList').addEventListener('click', event => {
+    if (!G || G.phase === 'over') return;
+    const row = event.target.closest('[data-mine-id]');
+    if (!row) return;
+    G.selectedMine = +row.dataset.mineId;
+    if (event.target.closest('[data-mine-upgrade]')) performAction({type:'mineUpgrade',id:G.selectedMine});
+    updateUI(true);
   });
 
   document.querySelectorAll('[data-king-stat]').forEach(button => {

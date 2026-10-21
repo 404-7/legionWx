@@ -26,6 +26,8 @@ function performAction(a) {
     case 'upgrade': return !!f && upgradeFighter(p,f);
     case 'sell': return !!f && sellFighter(p,f);
     case 'king': return kingUpgrade(p, a.stat);
+    case 'mineBuy': return buyMine(p);
+    case 'mineUpgrade': return upgradeMine(p, a.id);
     case 'merc': return sendMerc(p,G.players[a.target],a.mid);
   }
 }
@@ -55,6 +57,7 @@ function connectRoom(session) {
     const old = G;
     G = state;
     G.selectedShop = old?.selectedShop || null; G.hover = old?.hover || null;
+    G.selectedMine = old?.selectedMine ?? null;
     const selected = old?.selectedFighter;
     G.selectedFighter = selected ? localPlayer().fighters.find(f => f.col === selected.col && f.row === selected.row) : null;
     $('btnPause').disabled = true; $('btnSpeed').disabled = true;
