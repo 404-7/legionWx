@@ -408,43 +408,65 @@ function kingSpr(c, team) {
   eyes(c, cx, hy + 1, 2.3, 1.5, P.glow);
 }
 
+// Native canvas art for the six legions; no Warcraft asset downloads required.
+const RACE_PALETTES = {
+  mech: {main:'#b9b6a0',dark:'#555c62',light:'#eee4c3',glow:'#f4c96b',skin:'#c5bba0'},
+  nature: {main:'#749d5a',dark:'#344d2c',light:'#c0d7a0',glow:'#a5e07d',skin:'#d1c8a0'},
+  beast: {main:'#aa805a',dark:'#584431',light:'#dbbd8e',glow:'#efbd64',skin:'#bda06c'},
+  shadow: {main:'#7d6a9b',dark:'#342942',light:'#c7b6dc',glow:'#c9a8ff',skin:'#dfd9bf'},
+  orc: {main:'#829d5c',dark:'#3f512c',light:'#c1cc8d',glow:'#d6e58f',skin:'#7b9b56'},
+  undead: {main:'#739b96',dark:'#2b494a',light:'#c1d2bf',glow:'#83e0c9',skin:'#a6b6a2'},
+};
+function raceUnitSpr(c, def) {
+  const P=RACE_PALETTES[def.race], big=!!def.elite;
+  if (def.model==='tank'||def.model==='wagon') {
+    sh(c); const wood=def.model==='wagon';
+    for(const x of [14,25,38]) circ(c,x,46,5,'#303532',OUT,1.5);
+    rct(c,9,29,38,14,4,wood?'#73604b':P.main);
+    rct(c,20,20,20,14,3,wood?'#9a927c':P.dark);
+    rct(c,34,23,17,5,2,wood?'#d1c7a1':PAL.metal.main);
+    if(wood){circ(c,26,25,6,'#dedac1');rct(c,22,23,3,3,1,OUT,false);rct(c,28,23,3,3,1,OUT,false);}
+    else {circ(c,23,27,3,P.glow,false);rct(c,11,32,12,3,1,P.light,false);}
+  } else if(def.model==='tree') {
+    const bark={...P,main:'#856947',dark:'#4b3e2a',light:'#b5a173'};
+    construct(c,{pal:bark,big,glowEye:P.glow});
+    c.strokeStyle=bark.dark;c.lineWidth=4;
+    c.beginPath();c.moveTo(18,22);c.lineTo(8,12);c.lineTo(5,6);c.moveTo(36,22);c.lineTo(46,12);c.lineTo(49,6);c.stroke();
+    for(const [x,y,r] of [[9,10,7],[18,8,8],[30,6,9],[42,10,8]])circ(c,x,y,r,P.main,OUT,1);
+  } else if(['robot','gate'].includes(def.model)) {
+    construct(c,{pal:P,big,helmet:def.model==='robot',shield:true,glowEye:P.glow});
+    if(def.model==='robot'){rct(c,24,26,8,9,2,P.dark);circ(c,28,30,2,P.glow,false);}
+    else {pth(c,[[17,17],[12,5],[23,13]],P.light);pth(c,[[33,13],[44,5],[39,17]],P.light);}
+  } else if(['fairy','harpy','dragon'].includes(def.model)) {
+    if(def.id==='medusa')human(c,{pal:P,robe:1,weapon:'staff',glowEye:P.glow});
+    else winged(c,{pal:P,crest:1,tail:def.model==='dragon',beak:def.model!=='dragon',glowEye:P.glow});
+    if(def.model==='dragon'){pth(c,[[20,20],[14,8],[25,16]],P.light);pth(c,[[31,16],[42,8],[36,20]],P.light);}
+  } else if(['ogre','ghoul','spitter'].includes(def.model)) {
+    monster(c,{pal:P,body:def.model==='ogre'?'muscle':def.model==='ghoul'?'lean':'dome',teeth:1,glowEye:P.glow});
+    if(def.model==='spitter')for(const dx of [-1,1]){c.strokeStyle=P.light;c.lineWidth=2;c.beginPath();c.moveTo(28+dx*9,36);c.lineTo(28+dx*20,32);c.lineTo(28+dx*23,45);c.stroke();}
+  } else if(def.model==='nightmare') {
+    beast(c,{pal:P,big,mane:1,glowEye:P.glow});
+  } else {
+    const caster=['warlock','witch','acolyte','necro'].includes(def.model);
+    human(c,{pal:P,skin:P.skin,robe:caster,hood:['acolyte','necro','archer'].includes(def.model),
+      helm:['rifle','captain','warchief'].includes(def.model),hat:def.model==='witch',
+      cape:big?P.dark:null,scale:big?1.08:1,
+      weapon:caster?'staff':def.model==='archer'?'bow':def.model==='rifle'?'crossbow':'sword',glowEye:P.glow});
+    if(def.model==='rifle'){rct(c,34,29,17,4,1,P.dark);rct(c,32,30,7,9,1,'#64513a');}
+    if(def.model==='skeleton') {
+      circ(c,28,20,7,'#e2dbc1');rct(c,23,18,4,3,1,OUT,false);rct(c,29,18,4,3,1,OUT,false);
+      c.strokeStyle='#e2dbc1';c.lineWidth=2;for(const y of [31,35,39]){c.beginPath();c.moveTo(22,y);c.lineTo(33,y);c.stroke();}
+    }
+    if(['orc','warchief','gnoll'].includes(def.model)){pth(c,[[23,25],[23,20],[26,25]],'#efe0af');pth(c,[[30,25],[33,20],[33,25]],'#efe0af');}
+  }
+  if(big){circ(c,45,8,5,P.glow,OUT,1);c.fillStyle=P.dark;c.font='bold 8px sans-serif';c.textAlign='center';c.fillText('II',45,11);c.textAlign='left';}
+}
+
 /* ---------- 组装全部贴图 ---------- */
 function buildSprites() {
   const mk = (id, fn) => { const cv = mkc(SPR_N, SPR_N); fn(cv.getContext('2d')); SPR[id] = cv; };
 
-  /* 火 */
-  mk('fire_elem', c => elemental(c, { type: 'flame', pal: PAL.fire }));
-  mk('fire_lord', c => elemental(c, { type: 'flame', pal: PAL.fire, big: 1, crown: 1 }));
-  mk('lava_warrior', c => construct(c, { pal: PAL.fire, cracks: '#ffca62' }));
-  mk('lava_giant', c => construct(c, { pal: PAL.fire, cracks: '#ffca62', big: 1, glowEye: '#ffca62' }));
-  mk('flame_archer', c => human(c, { pal: PAL.fire, robe: 1, hood: 1, weapon: 'bow' }));
-  mk('sniper', c => human(c, { pal: PAL.fire, robe: 1, hat: 1, weapon: 'crossbow', bigWeapon: 1, glowEye: '#ffe082' }));
-  mk('phoenix', c => winged(c, { pal: PAL.fire, crest: 1, tail: 1, beak: 1, glowEye: '#fff59d' }));
-
-  /* 水 */
-  mk('water_nymph', c => human(c, { pal: PAL.water, robe: 1, weapon: 'staff' }));
-  mk('tide_maiden', c => human(c, { pal: PAL.water, robe: 1, cape: PAL.water.dark, weapon: 'trident' }));
-  mk('coral_guard', c => construct(c, { pal: PAL.water, helmet: 1, shield: 1 }));
-  mk('deep_giant', c => construct(c, { pal: PAL.water, big: 1, glowEye: '#b3e5fc' }));
-  mk('ice_mage', c => human(c, { pal: { main: '#81d4fa', dark: '#3d8eb4', light: '#e1f5fe', glow: '#b3ecff', skin: '#e8c9b0' }, robe: 1, hat: 1, weapon: 'staff' }));
-  mk('kraken', c => krakenSpr(c));
-
-  /* 土 */
-  mk('golem', c => construct(c, { pal: PAL.earth }));
-  mk('rock_guard', c => construct(c, { pal: PAL.earth, helmet: 1, shield: 1 }));
-  mk('earth_priest', c => human(c, { pal: { main: '#9c8b5e', dark: '#5d5030', light: '#cfc093', glow: '#a5d6a7', skin: '#d9b98c' }, robe: 1, hood: 1, weapon: 'staff' }));
-  mk('prophet', c => human(c, { pal: { main: '#8b9c5e', dark: '#4c5d30', light: '#cfe0a8', glow: '#e6ffb3', skin: '#d9b98c' }, robe: 1, cape: '#5d5030', weapon: 'staff' }));
-  mk('thorn_archer', c => human(c, { pal: { main: '#7cb342', dark: '#43671e', light: '#c0e8a0', glow: '#d9ff9e', skin: '#cbe6a0' }, robe: 1, hood: 1, weapon: 'bow' }));
-  mk('siege_ballista', c => construct(c, { pal: PAL.earth, helmet: 1, big: 1 }));
-  mk('titan', c => construct(c, { pal: { main: '#a9825e', dark: '#6d4a2c', light: '#e0c49a', glow: '#ffd54f' }, big: 1, helmet: 1, glowEye: '#ffd54f' }));
-
-  /* 风 */
-  mk('wind_elem', c => elemental(c, { type: 'cloud', pal: PAL.wind }));
-  mk('storm', c => elemental(c, { type: 'cloud', pal: { main: '#90caf9', dark: '#5470a8', light: '#e3f2fd', glow: '#ffe57f' }, bolt: 1 }));
-  mk('wolf_rider', c => beast(c, { pal: { main: '#9aa86e', dark: '#5c6b3a', light: '#d4e0b0', glow: '#ffe082' } }));
-  mk('alpha_wolf', c => beast(c, { pal: { main: '#8a9862', dark: '#4c5a2e', light: '#c8d8a0', glow: '#ffab40' }, big: 1, mane: 1, scar: 1, glowEye: '#ffab40' }));
-  mk('eagle_eye', c => winged(c, { pal: { main: '#b0bec5', dark: '#607d8b', light: '#eceff1', glow: '#80d8ff' }, beak: 1, humanoidBow: 1, glowEye: '#80d8ff' }));
-  mk('storm_lord', c => human(c, { pal: { main: '#7986cb', dark: '#3949ab', light: '#c5cae9', glow: '#ffe57f', skin: '#e8d5b5' }, robe: 1, hat: 1, weapon: 'staff', glowEye: '#ffe57f' }));
+  for (const [id,def] of Object.entries(UNITS)) mk(id,c=>raceUnitSpr(c,def));
 
   /* 敌方（按波次特性选形象） */
   mk('en_grunt', c => monster(c, { pal: PAL.foe, body: 'blob', horns: 1, teeth: 1 }));

@@ -175,6 +175,7 @@ function fieldStep(p, dt) {
   }
   // 战士（含复活倒计时）
   for (const f of p.fighters) {
+    if (f.hp <= 0 && f.deadT <= 0) continue;
     if (f.deadT > 0) {
       f.deadT -= dt;
       if (f.deadT <= 0) { f.hp = f.max * 0.5; addFloater(f.x, f.y, '复活!', '#7ee08a'); recalcAuras(p); }
@@ -182,10 +183,21 @@ function fieldStep(p, dt) {
     }
     fighterAct(p, f, dt);
   }
+  // Regeneration and healing are time-based; strongest aura wins, never resurrects dead units.
+  const healers = p.fighters.filter(f => f.hp > 0 && f.deadT <= 0 && f.def.abil.healAura);
+  for (const f of p.fighters) {
+    if (f.hp <= 0 || f.deadT > 0) continue;
+    let hps = 0;
+    for (const healer of healers) {
+      const aura = healer.def.abil.healAura;
+      if (Math.hypot(f.x-healer.x,f.y-healer.y) <= aura.r) hps = Math.max(hps,aura.hps);
+    }
+    f.hp = Math.min(f.max, f.hp + (hps + f.max * (f.def.abil.regen?.p || 0)) * dt);
+  }
   // 灼烧光环
   for (const f of p.fighters) {
     const b = f.def.abil && f.def.abil.burn;
-    if (!b || f.deadT > 0) continue;
+    if (!b || f.hp <= 0 || f.deadT > 0) continue;
     for (const e of p.enemies) {
       if (e.hp > 0 && Math.hypot(e.x - f.x, e.y - f.y) <= b.r) { e.hp -= b.dps * dt; e.flash = 0.08; }
     }
@@ -207,7 +219,7 @@ function fieldStep(p, dt) {
   p.enemies = p.enemies.filter(e => e.hp > 0);
   const dead = p.fighters.filter(f => f.hp <= 0 && f.deadT <= 0 && !(f.def.abil && f.def.abil.reinc && !f.reincUsed));
   if (dead.length) {
-    for (const f of dead) addPuff(f.x, f.y, EL_COLORS[f.def.el], 12);
+    for (const f of dead) addPuff(f.x, f.y, RACES[f.def.race].color, 12);
     p.fighters = p.fighters.filter(f => !dead.includes(f));
     recalcAuras(p);
   }
@@ -235,6 +247,7 @@ function spawnEnemy(p, item) {
 }
 
 function enemyAct(p, e, dt) {
+  if (e.hp <= 0) return;
   e.cd -= dt;
   if (e.flash > 0) e.flash -= dt;
   if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowF = 1; }
@@ -272,6 +285,7 @@ function hitFighter(p, f, dmg, atk) {
 }
 
 function fighterAct(p, f, dt) {
+  if (f.hp <= 0) return;
   if (f.flash > 0) f.flash -= dt;
   f.cd -= dt;
   if (f.cd > 0) return;
@@ -289,7 +303,8 @@ function fighterAct(p, f, dt) {
   const ab = f.def.abil || {};
   if (ab.crit && Math.random() < ab.crit.c) dmg *= ab.crit.m;
   if (f.def.range <= 45) {
-    dmgEnemy(tgt, dmg, f.def.atk);
+    const dealt = dmgEnemy(tgt, dmg, f.def.atk);
+    if (ab.lifesteal) f.hp = Math.min(f.max,f.hp + dealt*ab.lifesteal);
     afterHits(p, tgt, dmg, f.def.atk, ab);
     f.flash = 0.12;
   } else {
@@ -298,10 +313,13 @@ function fighterAct(p, f, dt) {
 }
 
 function dmgEnemy(e, dmg, atk) {
+  if (e.hp <= 0) return 0;
   let m = (ATK_ARMOR[atk] && ATK_ARMOR[atk][e.armor]) || 1;
   if (e.magicImmune && atk === '魔法') m = 0.1;
+  const dealt = Math.min(e.hp, dmg * m);
   e.hp -= dmg * m;
   e.flash = 0.12;
+  return dealt;
 }
 
 /* 溅射 / 连锁 / 减速 等命中后效果 */

@@ -223,3 +223,15 @@ main{padding:8px 14px 14px;gap:16px}
 .mine-row.selected{border-color:var(--gold)}
 .mine-row b{font-size:11px;color:#e0c891}.mine-row small{display:block;font-size:10px;color:var(--dim);margin-top:4px}
 .mine-row .btn{font-size:10px;padding:7px}
+.race-tabs{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px}
+.race-tabs .btn{font-size:11px;padding:9px 5px}
+.race-title{font-size:16px;letter-spacing:2px;margin:2px 0 8px}
+.race-desc{font-size:11px;color:#d1d9c6;line-height:1.6}
+.race-tip{font-size:10px;color:var(--dim);line-height:1.7;margin:6px 0 12px}
+.uRole{font-size:10px;color:#ceb77d;margin:4px 0}
+.upgrade-path{display:block;color:#9bbba1;font-size:9px;line-height:1.7;margin-top:4px}
+.raceGroup .ucard{align-items:flex-start;min-width:0}.raceGroup .uName{flex-wrap:wrap;gap:3px}
+.ucard:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.raceGroup .ucard.poor{opacity:1;background:#11201e;border-color:#293c33}
+.raceGroup .ucard.poor .cost{color:var(--red)}
+.raceGroup .ucard.poor .portrait{opacity:.6}

@@ -211,16 +211,17 @@ function drawFighter(c, f, p, t) {
   const ab = f.def.abil || {};
 
   // 光环底圈
-  if (ab.aura) {
+  const aura = ab.aura || ab.healAura;
+  if (aura) {
     const pulse = .5 + Math.sin(t * 2.5) * .2;
     c.globalAlpha = .1 + pulse * .06;
-    c.fillStyle = EL_COLORS[f.def.el];
-    c.beginPath(); c.arc(f.x, f.y + 4, ab.aura.r, 0, 7); c.fill();
+    c.fillStyle = RACES[f.def.race].color;
+    c.beginPath(); c.arc(f.x, f.y + 4, aura.r, 0, 7); c.fill();
     c.globalAlpha = .35;
-    c.strokeStyle = EL_COLORS[f.def.el];
+    c.strokeStyle = RACES[f.def.race].color;
     c.setLineDash([6, 8]); c.lineDashOffset = -t * 20;
     c.lineWidth = 1.5;
-    c.beginPath(); c.arc(f.x, f.y + 4, ab.aura.r, 0, 7); c.stroke();
+    c.beginPath(); c.arc(f.x, f.y + 4, aura.r, 0, 7); c.stroke();
     c.setLineDash([]); c.lineDashOffset = 0;
     c.globalAlpha = 1;
   }
@@ -229,7 +230,7 @@ function drawFighter(c, f, p, t) {
     for (let i = 0; i < 2; i++) {
       const ang = t * 4 + i * Math.PI;
       c.globalAlpha = .8;
-      c.fillStyle = '#ffca62';
+      c.fillStyle = f.def.race === 'undead' ? '#89d5a5' : '#ffca62';
       c.beginPath(); c.arc(f.x + Math.cos(ang) * 12, f.y + Math.sin(ang) * 8 - 6, 1.5, 0, 7); c.fill();
     }
     c.globalAlpha = 1;

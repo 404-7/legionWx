@@ -61,7 +61,14 @@ const ATK_ARMOR = {
   '攻城': { '无甲': 1.25, '轻甲': 1.00, '中甲': 0.70, '重甲': 1.05 },
 };
 
-const EL_COLORS = { '火': '#ff7043', '水': '#4fc3f7', '土': '#c9975a', '风': '#a5d6a7' };
+const RACES = {
+  mech: { name: '机械', icon: '⚙', color: '#e6bd71', desc: '装甲前排、领导光环与远程火力', tip: '新兵挡线，机枪手输出；队长为周围单位增伤。' },
+  nature: { name: '自然', icon: '♣', color: '#9bd18b', desc: '树人坚守、游侠点杀与生命恢复', tip: '树人承担伤害，游侠后排射击；生命之树持续治疗。' },
+  beast: { name: '野兽', icon: '♞', color: '#d4a77d', desc: '猛兽重击、持续压制与龙族范围伤害', tip: '食人魔抵挡前锋，鹰身女妖减速；龙裔清理密集怪群。' },
+  shadow: { name: '暗影', icon: '☽', color: '#b6a0e5', desc: '骷髅狂攻、蛛网控制与不死守卫', tip: '腐肉喷吐者减速，守门人复活续战；梦魇针对单体。' },
+  orc: { name: '兽人', icon: '⚑', color: '#9dc78b', desc: '重装近战、巫医治疗与酋长震击', tip: '步兵搭配巫医续航，术士减速；酋长提供近战溅射。' },
+  undead: { name: '亡灵', icon: '☠', color: '#82c8c5', desc: '食尸鬼吸血、绞肉车轰击与瘟疫消耗', tip: '食尸鬼近战吸血；绞肉车在后排攻击，死灵法师以瘟疫消耗。' },
+};
 const TEAM_COLORS = ['#4da3ff', '#ff6a4d'];
 
 const TRAIT_INFO = {

@@ -1,17 +1,17 @@
 'use strict';
 /* ===== AI：建兵、升级、强化国王、雇佣兵 ===== */
 
-const AI_DECKS = {
-  windfire:  ['golem', 'flame_archer', 'wind_elem', 'earth_priest', 'rock_guard', 'sniper', 'storm_lord', 'phoenix'],
-  earthwater:['coral_guard', 'water_nymph', 'thorn_archer', 'ice_mage', 'deep_giant', 'tide_maiden', 'siege_ballista', 'kraken'],
-  fireearth: ['lava_warrior', 'flame_archer', 'golem', 'fire_elem', 'lava_giant', 'rock_guard', 'sniper', 'titan'],
-};
+const AI_DECKS = Object.fromEntries(Object.keys(RACES).map(race=>[
+  race,Object.keys(UNITS).filter(id=>UNITS[id].race===race&&!UNITS[id].elite)
+]));
 
 function aiSetupAll() {
-  const deckKeys = ['windfire', 'earthwater', 'fireearth'];
-  G.players.forEach((p, i) => {
-    if (i === 0) return;
-    p.ai = { deck: AI_DECKS[deckKeys[i - 1]], aggression: 0.5 + (i - 1) * 0.25 };
+  const deckKeys = Object.keys(AI_DECKS);
+  const offset = Math.floor(Math.random()*deckKeys.length);
+  G.players.forEach((p,i)=>{
+    if(p.isHuman)return;
+    const race=deckKeys[(offset+i-1)%deckKeys.length];
+    p.ai={race,deck:AI_DECKS[race],aggression:.5+(i-1)*.25};
   });
 }
 
@@ -53,18 +53,25 @@ function aiAct(p) {
   const desiredWalls = Math.min(3 + Math.ceil(w / 8), 6);
   const wallIds = a.deck.filter(id => isWall(UNITS[id]));
   const rangedIds = a.deck.filter(id => !isWall(UNITS[id]));
+  const supportIds = a.deck.filter(id => ['治疗','辅助'].includes(UNITS[id].role));
+  const needsSupport = w >= 3 && !p.fighters.some(f => ['治疗','辅助'].includes(f.def.role));
+  if (needsSupport) {
+    const pick = supportIds.find(id=>p.gold>=UNITS[id].cost+60);
+    const cell = pick && aiFindCell(p,3);
+    if (cell) buyFighter(p,pick,cell.col,cell.row);
+  }
 
   let buys = 0;
   while (buys < 6) {
     let pick = null, cell = null;
     if (walls < desiredWalls) {
       // 买得起最便宜的墙，否则攒钱
-      const affordable = wallIds.filter(id => UNITS[id].cost <= p.gold).sort((x, y) => UNITS[x].cost - UNITS[y].cost);
+      const affordable = wallIds.filter(id => UNITS[id].cost <= p.gold).sort((x, y) => w>=7 ? UNITS[y].cost-UNITS[x].cost : UNITS[x].cost-UNITS[y].cost);
       if (!affordable.length) break;
       pick = affordable[0];
       cell = aiFindCell(p, 1);
     } else {
-      const affordable = rangedIds.filter(id => UNITS[id].cost <= p.gold - 20);
+      const affordable = rangedIds.filter(id => UNITS[id].cost <= p.gold - 20 && !['治疗','辅助'].includes(UNITS[id].role));
       if (!affordable.length) break;
       // 2/3 概率买最贵（更高级兵），1/3 随机
       pick = Math.random() < 0.33

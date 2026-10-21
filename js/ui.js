@@ -1,25 +1,38 @@
 'use strict';
 /* ===== UI：商店 / 波次预览 / 选中单位 / 国王 / 雇佣兵 / 日志 / 弹窗 ===== */
 const $ = id => document.getElementById(id);
-const SHOP_ORDER = ['火', '水', '土', '风'];
+const SHOP_ORDER = Object.keys(RACES);
+let shopRace = SHOP_ORDER[0];
 
 function buildShop() {
   const root = $('shop');
   root.innerHTML = '';
-  for (const el of SHOP_ORDER) {
+  const tabs = document.createElement('div'); tabs.className = 'race-tabs';
+  tabs.setAttribute('role','group'); tabs.setAttribute('aria-label','兵种种族');
+  for (const id of SHOP_ORDER) {
+    const button = document.createElement('button'); button.className='btn race-tab';
+    button.textContent=RACES[id].icon+' '+RACES[id].name; button.dataset.race=id;
+    button.classList.toggle('active',shopRace===id); button.setAttribute('aria-pressed',String(shopRace===id));
+    button.addEventListener('click',()=>{shopRace=id;if(G)selectShop(null);buildShop();if(G)updateUI(true);});tabs.appendChild(button);
+  }
+  root.appendChild(tabs);
+  for (const race of SHOP_ORDER.filter(id=>id===shopRace)) {
     const group = document.createElement('div');
-    group.className = 'elGroup';
+    group.className = 'raceGroup';
     group.style.gridColumn = '1 / -1';
-    group.innerHTML = `<div class="elTitle" style="color:${EL_COLORS[el]}">◆ ${el}系</div>`;
+    group.innerHTML = `<div class="race-title" style="color:${RACES[race].color}">${RACES[race].icon} ${RACES[race].name}军团</div><p class="race-desc">${RACES[race].desc}</p><p class="race-tip">${RACES[race].tip}</p>`;
     const grid = document.createElement('div');
     grid.style.display = 'grid';
     grid.style.gridTemplateColumns = '1fr 1fr';
     grid.style.gap = '6px';
     for (const [uid, def] of Object.entries(UNITS)) {
-      if (def.el !== el || !isBaseUnit(uid)) continue;
+      if (def.race !== race || !isBaseUnit(uid)) continue;
       const card = document.createElement('div');
       card.className = 'ucard';
       card.dataset.uid = uid;
+      card.setAttribute('role','button'); card.tabIndex=0;
+      card.setAttribute('aria-label',def.name+'，'+def.role+'，'+def.cost+' 金');
+      card.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();selectShop(uid);}});
       const portrait = document.createElement('canvas');
       portrait.className = 'portrait';
       portrait.width = 46; portrait.height = 46;
@@ -28,10 +41,10 @@ function buildShop() {
       body.className = 'uBody';
       body.innerHTML = `
         <div class="uName"><span>${def.name}</span><span class="cost">${def.cost}</span></div>
-        <div class="uStats">❤${def.hp} ⚔${def.dmg} ${def.range > 50 ? '远程' : '近战'}${def.up ? ` →可升级` : ''}</div>
+        <div class="uRole">${def.role} · T${def.tier}</div><div class="uStats">❤${def.hp} ⚔${def.dmg} ${def.range > 50 ? '远程' : '近战'}</div>
         <div class="uTags">
           <span class="chip atk">${def.atk}</span><span class="chip armor">${def.armor}</span>
-          ${abilDesc(def) ? `<span class="chip abil">${abilDesc(def)}</span>` : ''}
+          ${abilDesc(def) ? `<span class="chip abil">${abilDesc(def)}</span>` : ''}<span class="upgrade-path">→ ${UNITS[def.up].name} · 升级 ${UNITS[def.up].cost-def.cost} 金</span>
         </div>`;
       card.appendChild(portrait);
       card.appendChild(body);
@@ -150,18 +163,21 @@ function updateUI(force) {
   const sb = $('selBox');
   if (G.selectedFighter) {
     const f = G.selectedFighter;
-    if (!f.hp && f.deadT <= 0) { G.selectedFighter = null; sb.style.display = 'none'; }
+    if (f.hp <= 0 && f.deadT <= 0) { G.selectedFighter = null; sb.style.display = 'none'; delete sb.dataset.signature; }
     else {
       sb.style.display = '';
       const def = f.def;
       const upDef = def.up ? UNITS[def.up] : null;
       const upCost = upDef ? upDef.cost - def.cost : 0;
+      const signature = [f.uid,f.col,f.row,f.spent].join('|');
+      if (sb.dataset.signature !== signature) {
+      sb.dataset.signature = signature;
       $('selInfo').innerHTML = `
         <div class="selHead">
           <canvas id="selPortrait" width="64" height="64"></canvas>
           <div>
-            <div class="sName">${def.name} <span style="color:${EL_COLORS[def.el]}">◆${def.el}</span></div>
-            <div class="sStats">❤ ${Math.ceil(f.hp)}/${def.hp} · ⚔ ${Math.round(f.effDmg)} · ${def.range > 50 ? '远程' : '近战'}</div>
+            <div class="sName">${def.name} <span style="color:${RACES[def.race].color}">◆${RACES[def.race].name}</span></div>
+            <div class="sStats" id="selLiveStats"></div>
             <div>${def.atk}攻击 · ${def.armor}</div>
           </div>
         </div>
@@ -177,8 +193,12 @@ function updateUI(force) {
         bu.addEventListener('click', () => { performAction({ type:'upgrade', col:f.col, row:f.row }); updateUI(true); });
       }
       $('btnSell').addEventListener('click', () => { performAction({ type:'sell', col:f.col, row:f.row }); updateUI(true); });
+      }
+      $('selLiveStats').textContent = `❤ ${Math.ceil(f.hp)}/${def.hp} · ⚔ ${Math.round(f.effDmg)} · ${def.range > 50 ? '远程' : '近战'}`;
+      $('btnUp').disabled = !upDef || me.gold < upCost || G.phase === 'over';
+      $('btnSell').disabled = G.phase === 'over';
     }
-  } else sb.style.display = 'none';
+  } else { sb.style.display = 'none'; delete sb.dataset.signature; }
 
   // 国王
   const k = G.kings[me.team];

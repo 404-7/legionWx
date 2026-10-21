@@ -39,20 +39,20 @@ test('king regeneration scales with elapsed time in prep and combat and clamps t
 });
 test('server owns economy, rejects malformed commands and isolates rooms', () => {
   const a = createGame(humans), b = createGame(humans);
-  assert.equal(a.action(0,{type:'buy',uid:'golem',col:2,row:2}),true);
+  assert.equal(a.action(0,{type:'buy',uid:'ent',col:2,row:2}),true);
   assert.equal(a.snapshot().players[0].gold,111);
   assert.equal(b.snapshot().players[0].gold,156);
   for (const action of [
-    {type:'buy',uid:'golem',col:2,row:2},
-    {type:'buy',uid:'golem',col:NaN,row:1},
-    {type:'buy',uid:'golem',col:6,row:0},
+    {type:'buy',uid:'ent',col:2,row:2},
+    {type:'buy',uid:'ent',col:NaN,row:1},
+    {type:'buy',uid:'ent',col:6,row:0},
     {type:'buy',uid:'__proto__',col:0,row:0},
     {type:'merc',mid:'constructor',target:2},
     {type:'merc',mid:'imp',target:0},
     {type:'pause'}, {type:'speed',speed:10}
   ]) assert.equal(!!a.action(0,action),false);
   assert.equal(!!a.action(1,{type:'king'}),false);
-  assert.equal(a.action(2,{type:'buy',uid:'golem',col:2,row:2}),true);
+  assert.equal(a.action(2,{type:'buy',uid:'ent',col:2,row:2}),true);
   const s = a.snapshot();
   assert.equal(s.players[0].ai,undefined);
   assert.equal(s.players[2].isHuman,true);
@@ -81,10 +81,10 @@ test('four routes move toward the middle and leaked monsters turn toward their k
 });
 test('upgrades, sales, mercenaries and king upgrades settle on the correct seat', () => {
   const game=createGame(humans);
-  assert.equal(game.action(0,{type:'buy',uid:'golem',col:0,row:0}),true);
+  assert.equal(game.action(0,{type:'buy',uid:'ent',col:0,row:0}),true);
   assert.equal(game.action(2,{type:'sell',col:0,row:0}),false);
   assert.equal(game.action(0,{type:'upgrade',col:0,row:0}),true);
-  assert.equal(game.snapshot().players[0].fighters[0].uid,'rock_guard');
+  assert.equal(game.snapshot().players[0].fighters[0].uid,'guardian');
   assert.equal(game.action(0,{type:'sell',col:0,row:0}),true);
   assert.equal(game.snapshot().players[0].gold,156);
   assert.equal(game.action(0,{type:'merc',mid:'imp',target:2}),true);

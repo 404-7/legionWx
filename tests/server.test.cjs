@@ -35,7 +35,7 @@ test('two independent clients join, share authoritative purchases, reconnect and
   const sa=await stream(a),sb=await stream(b);
   assert.equal((await post('start',{},b)).status,403);
   assert.equal((await post('start',{},a)).status,200);
-  assert.equal((await post('action',{type:'buy',uid:'golem',col:1,row:1,slot:2,gold:99999},a)).status,200);
+  assert.equal((await post('action',{type:'buy',uid:'ent',col:1,row:1,slot:2,gold:99999},a)).status,200);
   const [va,vb]=await Promise.all([sa.next(v=>v.state?.players[0].fighters.length===1),sb.next(v=>v.state?.players[0].fighters.length===1)]);
   assert.equal(va.state.players[0].gold,111);
   assert.equal(vb.state.players[0].gold,111);

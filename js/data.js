@@ -4,41 +4,99 @@
 /* abil 可选字段：
    splash{p,r} 溅射  slow{p,d} 减速  burn{dps,r} 灼烧光环
    aura{p,r} 攻击光环  crit{c,m} 暴击  reinc 复活  chain{n,f} 连锁  regen{p} 自愈 */
-const UNITS = {
-  /* ---- 火：爆发 / 溅射 ---- */
-  fire_elem:     { name: '火元素',   cost: 55,  el: '火', atk: '魔法', armor: '轻甲', hp: 130,  dmg: 27, aspd: 1.15, range: 135, abil: { splash: { p: .5, r: 46 } }, up: 'fire_lord' },
-  fire_lord:     { name: '烈焰领主', cost: 165, el: '火', atk: '魔法', armor: '中甲', hp: 340,  dmg: 66, aspd: 1.05, range: 145, abil: { splash: { p: .6, r: 56 } } },
-  lava_warrior:  { name: '熔岩武士', cost: 50,  el: '火', atk: '普通', armor: '重甲', hp: 580,  dmg: 24, aspd: .95,  range: 36,  abil: { burn: { dps: 15, r: 60 } }, up: 'lava_giant' },
-  lava_giant:    { name: '熔岩巨兽', cost: 170, el: '火', atk: '普通', armor: '重甲', hp: 1300, dmg: 55, aspd: .90,  range: 40,  abil: { burn: { dps: 32, r: 72 } } },
-  flame_archer:  { name: '火焰射手', cost: 60,  el: '火', atk: '穿刺', armor: '无甲', hp: 150,  dmg: 19, aspd: .62,  range: 150, abil: {}, up: 'sniper' },
-  sniper:        { name: '狙击手',   cost: 160, el: '火', atk: '穿刺', armor: '轻甲', hp: 300,  dmg: 46, aspd: .55,  range: 165, abil: { crit: { c: .25, m: 2 } } },
-  phoenix:       { name: '凤凰',     cost: 300, el: '火', atk: '魔法', armor: '轻甲', hp: 430,  dmg: 75, aspd: 1.0,  range: 150, abil: { splash: { p: .55, r: 52 }, reinc: {} } },
+// Inspired by Warcraft III Legion TD Mega 3.41 race/unit lines.
+// Web-adapted costs, combat stats and abilities; upgrade cost is the total-cost difference.
+const UNITS = {};
+function unitLine(race, tier, model, role, base, upgraded) {
+  const [id,name,cost,hp,dmg,aspd,range,atk,armor,abil={}] = base;
+  const [upId,upName,upCost,upHp,upDmg,upAspd,upRange,upAtk,upArmor,upAbil={}] = upgraded;
+  UNITS[id] = { race,tier,model,role,id,name,cost,hp,dmg,aspd,range,atk,armor,abil,up:upId };
+  UNITS[upId] = { race,tier,model,role,id:upId,name:upName,cost:upCost,hp:upHp,dmg:upDmg,aspd:upAspd,range:upRange,atk:upAtk,armor:upArmor,abil:upAbil,elite:true };
+}
 
-  /* ---- 水：控制 / 消耗 ---- */
-  water_nymph:   { name: '水灵',     cost: 50,  el: '水', atk: '魔法', armor: '轻甲', hp: 140,  dmg: 23, aspd: 1.10, range: 130, abil: { slow: { p: .35, d: 1.6 } }, up: 'tide_maiden' },
-  tide_maiden:   { name: '潮汐女神', cost: 160, el: '水', atk: '魔法', armor: '中甲', hp: 330,  dmg: 55, aspd: 1.0,  range: 140, abil: { slow: { p: .45, d: 2.0 }, splash: { p: .4, r: 40 } } },
-  coral_guard:   { name: '珊瑚守卫', cost: 55,  el: '水', atk: '普通', armor: '中甲', hp: 720,  dmg: 20, aspd: 1.0,  range: 36,  abil: {}, up: 'deep_giant' },
-  deep_giant:    { name: '深海巨人', cost: 175, el: '水', atk: '普通', armor: '重甲', hp: 1560, dmg: 50, aspd: .95,  range: 40,  abil: { regen: { p: .015 } } },
-  ice_mage:      { name: '寒冰法师', cost: 110, el: '水', atk: '魔法', armor: '轻甲', hp: 240,  dmg: 44, aspd: 1.30, range: 140, abil: { slow: { p: .5, d: 2.2 } } },
-  kraken:        { name: '海妖',     cost: 290, el: '水', atk: '魔法', armor: '中甲', hp: 410,  dmg: 70, aspd: 1.10, range: 150, abil: { chain: { n: 3, f: .7 }, slow: { p: .3, d: 1.2 } } },
+// Mechanical: frontline, guns, leadership and siege.
+unitLine('mech',1,'robot','前排',
+  ['peewee','机械新兵',40,540,18,1,36,'普通','中甲'],
+  ['veteran','机械老兵',145,1320,48,.9,40,'普通','重甲']);
+unitLine('mech',2,'rifle','速射',
+  ['infantry','机枪兵',60,165,20,.62,155,'穿刺','轻甲'],
+  ['pyro','烈焰机甲',185,520,40,.7,145,'穿刺','重甲',{splash:{p:.45,r:48}}]);
+unitLine('mech',3,'captain','辅助',
+  ['captain','机械队长',110,740,29,1.1,38,'普通','中甲',{aura:{p:.12,r:145}}],
+  ['admiral','机械统帅',270,1600,67,1,42,'普通','重甲',{aura:{p:.22,r:165}}]);
+unitLine('mech',4,'tank','攻城',
+  ['neotank','新式坦克',280,850,76,1.4,165,'攻城','重甲',{splash:{p:.5,r:56}}],
+  ['doomsday','末日战车',560,1650,145,1.25,180,'攻城','重甲',{splash:{p:.65,r:68}}]);
 
-  /* ---- 土：坦克 / 光环 ---- */
-  golem:         { name: '石头人',   cost: 45,  el: '土', atk: '普通', armor: '重甲', hp: 620,  dmg: 20, aspd: 1.0,  range: 36,  abil: {}, up: 'rock_guard' },
-  rock_guard:    { name: '岩石守卫', cost: 150, el: '土', atk: '普通', armor: '重甲', hp: 1400, dmg: 52, aspd: .95,  range: 40,  abil: {} },
-  earth_priest:  { name: '大地祭司', cost: 90,  el: '土', atk: '魔法', armor: '无甲', hp: 220,  dmg: 30, aspd: 1.20, range: 120, abil: { aura: { p: .14, r: 150 } }, up: 'prophet' },
-  prophet:       { name: '荒野先知', cost: 230, el: '土', atk: '魔法', armor: '轻甲', hp: 380,  dmg: 62, aspd: 1.15, range: 130, abil: { aura: { p: .24, r: 160 } } },
-  thorn_archer:  { name: '荆棘射手', cost: 70,  el: '土', atk: '攻城', armor: '无甲', hp: 160,  dmg: 30, aspd: 1.35, range: 140, abil: {}, up: 'siege_ballista' },
-  siege_ballista:{ name: '攻城弩',   cost: 180, el: '土', atk: '攻城', armor: '轻甲', hp: 330,  dmg: 72, aspd: 1.30, range: 150, abil: {} },
-  titan:         { name: '泰坦',     cost: 320, el: '土', atk: '普通', armor: '重甲', hp: 1860, dmg: 78, aspd: 1.10, range: 42,  abil: { aura: { p: .16, r: 170 } } },
+// Nature: sustain and ranged support.
+unitLine('nature',1,'tree','前排',
+  ['ent','树人',45,620,20,1,36,'普通','重甲'],
+  ['guardian','树人守护者',150,1400,52,.95,40,'普通','重甲',{slow:{p:.25,d:1.5}}]);
+unitLine('nature',2,'archer','狙击',
+  ['ranger','游侠',60,155,25,.95,190,'穿刺','无甲'],
+  ['meliai','森林女猎手',175,360,55,.85,205,'穿刺','轻甲',{crit:{c:.2,m:1.8}}]);
+unitLine('nature',3,'fairy','法术',
+  ['sprite','精灵龙',85,230,27,.85,140,'魔法','轻甲',{regen:{p:.01}}],
+  ['thunderbird','雷鸟',225,520,59,1.05,155,'魔法','中甲',{chain:{n:2,f:.65}}]);
+unitLine('nature',4,'tree','治疗',
+  ['yggdrasil','世界之树',260,1500,47,1.2,42,'魔法','重甲',{healAura:{hps:7,r:155},regen:{p:.005}}],
+  ['tree_life','生命之树',510,2600,88,1.1,44,'魔法','重甲',{healAura:{hps:15,r:175},regen:{p:.008}}]);
 
-  /* ---- 风：速攻 / 游击 ---- */
-  wind_elem:     { name: '风元素',   cost: 40,  el: '风', atk: '魔法', armor: '无甲', hp: 110,  dmg: 16, aspd: .75,  range: 120, abil: {}, up: 'storm' },
-  storm:         { name: '风暴元素', cost: 130, el: '风', atk: '魔法', armor: '轻甲', hp: 250,  dmg: 36, aspd: .70,  range: 135, abil: {} },
-  wolf_rider:    { name: '狼骑兵',   cost: 55,  el: '风', atk: '穿刺', armor: '中甲', hp: 470,  dmg: 20, aspd: .60,  range: 38,  abil: { crit: { c: .15, m: 2 } }, up: 'alpha_wolf' },
-  alpha_wolf:    { name: '头狼',     cost: 165, el: '风', atk: '穿刺', armor: '中甲', hp: 1000,  dmg: 45, aspd: .55,  range: 42,  abil: { crit: { c: .30, m: 2 } } },
-  eagle_eye:     { name: '鹰眼',     cost: 90,  el: '风', atk: '穿刺', armor: '无甲', hp: 200,  dmg: 40, aspd: 1.25, range: 205, abil: {} },
-  storm_lord:    { name: '风暴领主', cost: 300, el: '风', atk: '魔法', armor: '轻甲', hp: 390,  dmg: 62, aspd: 1.0,  range: 150, abil: { chain: { n: 3, f: .7 } } },
-};
+// Beast: durable bruisers and area pressure.
+unitLine('beast',1,'gnoll','斗士',
+  ['gnoll','豺狼人战士',40,450,21,.9,36,'普通','轻甲',{slow:{p:.12,d:1}}],
+  ['gnoll_savage','豺狼人蛮兵',140,1050,48,.8,40,'普通','中甲',{slow:{p:.2,d:1.5}}]);
+unitLine('beast',2,'ogre','重击',
+  ['ogre','食人魔',70,840,26,1.35,38,'攻城','重甲',{crit:{c:.15,m:1.8}}],
+  ['pulverizer','食人魔粉碎者',200,1720,62,1.2,42,'攻城','重甲',{crit:{c:.2,m:2},splash:{p:.3,r:45}}]);
+unitLine('beast',3,'harpy','控制',
+  ['harpy','鹰身女妖',90,260,30,1,140,'魔法','轻甲',{slow:{p:.3,d:1.6}}],
+  ['medusa','美杜莎',235,600,65,.95,150,'魔法','中甲',{slow:{p:.45,d:2}}]);
+unitLine('beast',4,'dragon','范围',
+  ['dragon_spawn','龙裔',285,1000,65,1.1,42,'普通','重甲',{splash:{p:.45,r:55}}],
+  ['dragon_aspect','巨龙化身',550,1800,122,1.05,145,'普通','重甲',{splash:{p:.6,r:65}}]);
+
+// Shadow: attack cadence, control and reincarnation.
+unitLine('shadow',1,'skeleton','快攻',
+  ['bone_warrior','骷髅战士',35,350,15,.6,36,'普通','中甲'],
+  ['skeletor','骷髅勇士',130,900,36,.5,40,'普通','中甲',{crit:{c:.2,m:2}}]);
+unitLine('shadow',2,'spitter','控制',
+  ['carrion_spitter','腐肉喷吐者',65,210,22,.85,145,'穿刺','中甲',{slow:{p:.2,d:1.4}}],
+  ['nightcrawler','地穴潜伏者',185,470,44,.7,155,'穿刺','中甲',{slow:{p:.4,d:1.8}}]);
+unitLine('shadow',3,'gate','守卫',
+  ['gateguard','守门人',100,820,28,1.1,38,'普通','重甲',{reinc:{}}],
+  ['harbinger','灾厄先驱',260,1640,61,1,42,'普通','重甲',{reinc:{},aura:{p:.12,r:135}}]);
+unitLine('shadow',4,'nightmare','刺杀',
+  ['nightmare','梦魇',255,1000,39,.55,38,'普通','无甲',{crit:{c:.2,m:2}}],
+  ['doppelganger','幻影魔',510,1800,68,.45,42,'普通','无甲',{crit:{c:.3,m:2}}]);
+
+// Orc: healers behind a melee line.
+unitLine('orc',1,'orc','前排',
+  ['orc_warrior','兽人步兵',45,590,22,1,36,'普通','重甲'],
+  ['blood_warrior','血斧勇士',150,1360,51,.9,40,'普通','重甲',{crit:{c:.15,m:1.8}}]);
+unitLine('orc',2,'warlock','控制',
+  ['orc_warlock','兽人术士',65,205,26,1.15,140,'魔法','轻甲',{slow:{p:.25,d:1.5}}],
+  ['blood_warlock','血色术士',190,460,60,1.05,150,'魔法','轻甲',{slow:{p:.35,d:2},splash:{p:.25,r:40}}]);
+unitLine('orc',3,'witch','治疗',
+  ['witch_doctor','巫医',100,290,23,1.2,135,'魔法','轻甲',{healAura:{hps:5,r:145}}],
+  ['elder_doctor','巫医长老',250,600,49,1.1,145,'魔法','中甲',{healAura:{hps:12,r:165}}]);
+unitLine('orc',4,'warchief','震击',
+  ['warchief','兽人酋长',285,1560,69,1.1,42,'普通','重甲',{splash:{p:.4,r:52}}],
+  ['thrall','萨尔',560,2550,122,1,44,'普通','重甲',{splash:{p:.5,r:60},chain:{n:2,f:.5}}]);
+
+// Undead: lifesteal, corpse artillery and plague.
+unitLine('undead',1,'acolyte','法术',
+  ['acolyte','侍僧',35,115,17,.9,135,'魔法','轻甲'],
+  ['revenant','亡魂',125,320,43,.8,145,'魔法','中甲']);
+unitLine('undead',2,'ghoul','吸血',
+  ['ghoul','食尸鬼',60,570,23,.85,36,'普通','无甲',{lifesteal:.15}],
+  ['frenzy_ghoul','狂暴食尸鬼',180,1200,50,.7,40,'普通','无甲',{lifesteal:.25}]);
+unitLine('undead',3,'wagon','攻城',
+  ['meat_wagon','绞肉车',85,280,35,1.35,165,'攻城','重甲',{splash:{p:.35,r:44}}],
+  ['war_machine','瘟疫战车',235,650,82,1.25,175,'攻城','重甲',{splash:{p:.55,r:58}}]);
+unitLine('undead',4,'necro','瘟疫',
+  ['necromancer','死灵法师',160,600,35,1.15,95,'魔法','轻甲',{burn:{dps:12,r:105}}],
+  ['necrolyte','死灵大法师',360,1200,78,1.05,110,'魔法','中甲',{burn:{dps:26,r:120},aura:{p:.12,r:145}}]);
 
 /* 兵种有效攻击距离：近战含索敌余量（可够到远程波敌人） */
 function effRange(def) { return def.range + (def.range <= 45 ? 18 : 0); }
@@ -49,7 +107,9 @@ function abilDesc(def) {
   const parts = [];
   if (a.splash) parts.push(`溅射${Math.round(a.splash.p * 100)}%`);
   if (a.slow)   parts.push(`减速${Math.round(a.slow.p * 100)}%/${a.slow.d}s`);
-  if (a.burn)   parts.push(`灼烧${a.burn.dps}/s`);
+  if (a.healAura) parts.push('治疗光环 '+a.healAura.hps+'/秒');
+  if (a.lifesteal) parts.push('吸血 '+Math.round(a.lifesteal*100)+'%');
+  if (a.burn)   parts.push(`${def.race === 'undead' ? '瘟疫' : '灼烧'}${a.burn.dps}/s`);
   if (a.aura)   parts.push(`光环+${Math.round(a.aura.p * 100)}%攻`);
   if (a.crit)   parts.push(`${Math.round(a.crit.c * 100)}%暴击×${a.crit.m}`);
   if (a.reinc)  parts.push('每波复活一次');
