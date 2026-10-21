@@ -11,11 +11,15 @@ function source341Details(def) {
 
 function buildShop() {
   const root = $('shop');
+  const locked=G?.online?localPlayer().race:null,races=locked?[locked]:SHOP_ORDER;
+  if(!races.includes(shopRace))shopRace=races[0];
+  root.dataset.raceScope=locked||'all';
   root.classList.toggle('catalog-view',shopCatalog);
   root.innerHTML = '';
+  if(locked){const info=document.createElement('p');info.className='race-lock';info.textContent=(G.raceMode==='random'?'随机种族':'自选种族')+' · 本局锁定 '+RACES[locked].name+'军团';root.appendChild(info);}
   const tabs = document.createElement('div'); tabs.className = 'race-tabs';
   tabs.setAttribute('role','group'); tabs.setAttribute('aria-label','兵种种族');
-  for (const id of SHOP_ORDER) {
+  for (const id of races) {
     const button = document.createElement('button'); button.className='btn race-tab';
     button.textContent=RACES[id].icon+' '+RACES[id].name; button.dataset.race=id;
     button.classList.toggle('active',shopRace===id); button.setAttribute('aria-pressed',String(shopRace===id));
@@ -107,6 +111,7 @@ function buildMercs() {
 function selectShop(uid) {
   if (!G) return;
   if(uid&&!canManageArmy())return;
+  if(uid&&G.online&&UNITS[uid]?.race!==localPlayer().race)return;
   G.selectedShop = (G.selectedShop === uid) ? null : uid;
   G.selectedFighter = null;
   if(G.selectedShop&&CommandUI.mobile){closeCommandPanel();setMapView('local');}
@@ -136,6 +141,7 @@ function buildAtkTable() {
 function updateUI(force) {
   if (!G) return;
   const me = localPlayer();
+  if($('shop').dataset.raceScope!==(G.online?me.race:'all'))buildShop();
   updateMines(me);
   $('stGold').textContent = Math.floor(me.gold);
   $('stIncome').textContent = me.income;

@@ -7,7 +7,7 @@ test('expanded grid accepts its far corner and server allows more than 36 perman
  assert.equal(run("buyFighter(G.players[0],'ent',11,15)"),true);
  assert.equal(run("buyFighter(G.players[0],'ent',12,15)"),false);
  assert.equal(run("buyFighter(G.players[0],'ent',11,16)"),false);
- const game=require('../server/game.cjs')([0,1,2,3].map(slot=>({slot,name:'P'+slot})));
+ const game=require('../server/game.cjs')([0,1,2,3].map(slot=>({slot,name:'P'+slot,race:'beast'})),{raceMode:'select'});
  // Earn the larger army's budget through the same mine actions as a real online player.
  for(let i=0;i<3;i++)assert.equal(game.action(0,{type:'mineBuy'}),true);
  for(let i=0;i<2000;i++)game.step(.05);

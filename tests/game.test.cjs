@@ -1,7 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const createGame = require('../server/game.cjs');
-const humans = [{ slot:0,name:'蓝方真人' }, { slot:2,name:'红方真人' }];
+const humans = [{ slot:0,name:'蓝方真人',race:'nature' }, { slot:2,name:'红方真人',race:'nature' }];
 test('king stats upgrade independently, share within the team and reject invalid choices', () => {
   const game=createGame([{slot:0,name:'A'},{slot:1,name:'B'},{slot:2,name:'C'}]);
   assert.equal(game.action(0,{type:'king',stat:'health'}),true);
@@ -39,7 +39,7 @@ test('king regeneration scales with elapsed time in prep and combat and clamps t
   assert.equal(run('G.kings[0].hp'),4000);
 });
 test('server owns economy, rejects malformed commands and isolates rooms', () => {
-  const a = createGame(humans), b = createGame(humans);
+  const a = createGame(humans,{raceMode:'select'}), b = createGame(humans,{raceMode:'select'});
   assert.equal(a.action(0,{type:'buy',uid:'ent',col:2,row:2}),true);
   assert.equal(a.snapshot().players[0].gold,280);
   assert.equal(b.snapshot().players[0].gold,300);
@@ -81,7 +81,7 @@ test('four routes move toward the middle and leaked monsters turn toward their k
   assert.ok(sawTop&&sawBottom&&sawTurn&&sawKing);
 });
 test('upgrades, sales, mercenaries and king upgrades settle on the correct seat', () => {
-  const game=createGame(humans);
+  const game=createGame(humans,{raceMode:'select'});
   assert.equal(game.action(0,{type:'buy',uid:'ent',col:0,row:0}),true);
   assert.equal(game.action(2,{type:'sell',col:0,row:0}),false);
   assert.equal(game.action(0,{type:'upgrade',col:0,row:0}),true);

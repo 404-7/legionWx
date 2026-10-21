@@ -119,11 +119,16 @@
     </div>
     <div id="onlineOptions" hidden>
       <div class="online-fields"><label>指挥官名称<input id="playerName" maxlength="16" placeholder="指挥官" autocomplete="nickname"></label><label>房间码<input id="joinCode" maxlength="6" placeholder="6 位房间码" autocomplete="off"></label></div>
+      <label class="room-setting" for="roomRaceMode">创建房间 · 对局模式<select id="roomRaceMode"><option value="random">随机种族 · 开局由服务器分配</option><option value="select">自选种族 · 每位玩家在大厅选择</option></select></label>
+      <p class="race-mode-help">开局后每人只能建造自己种族的兵种；加入房间时使用房主设置。</p>
       <div class="diffRow"><button id="createRoom" class="btn primary">创建房间</button><button id="joinRoom" class="btn">加入对战</button></div>
       <p class="foot">2–4 名真人 · 两队对抗 · 空位 AI 补齐 · 服务端同步战斗</p>
     </div>
     <div id="lobby" hidden>
       <div class="room-title">战备大厅 <strong id="roomCode"></strong></div>
+      <p id="roomMode" class="room-mode"></p>
+      <label id="lobbyRaceChoice" class="room-setting" for="playerRace" hidden>选择你的种族<select id="playerRace"><option value="">请选择种族</option></select></label>
+      <p id="lobbyRaceHelp" class="race-mode-help"></p>
       <div id="roomSeats"></div>
       <div class="diffRow"><button id="startOnline" class="btn primary" disabled>等待玩家</button><button id="copyInvite" class="btn">复制邀请</button><button id="leaveRoom" class="btn">离开</button></div>
     </div>

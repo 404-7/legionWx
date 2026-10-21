@@ -502,6 +502,7 @@ function cellFree(p, col, row) {
 function buyFighter(p, uid, col, row) {
   if(!canManageArmy())return false;
   const def = UNITS[uid];
+  if(G.online&&def?.race!==p.race)return false;
   if (!Object.hasOwn(UNITS,uid) || !def || def.elite || def.summonOnly || !Number.isInteger(col) || !Number.isInteger(row) || p.gold < def.purchaseCost || col < 0 || col >= CFG.COLS || row < 0 || row >= CFG.ROWS || !cellFree(p, col, row)) return false;
   p.gold -= def.purchaseCost;
   p.fighters.push({

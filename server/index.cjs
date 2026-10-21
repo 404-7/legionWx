@@ -13,8 +13,9 @@ function json(res, data, status = 200) {
   res.end(JSON.stringify(data));
 }
 function publicRoom(room) {
-  return { code: room.code, started: !!room.game, host: room.members[0]?.slot,
-    members: room.members.map(m => ({ slot: m.slot, name: m.name, connected: m.streams.size > 0 })),
+  return { code: room.code, started: !!room.game, host: room.members[0]?.slot,raceMode:room.raceMode,
+    raceReady:room.raceMode==='random'||room.members.every(m=>createGame.raceKeys.includes(m.race)),races:room.races||null,
+    members: room.members.map(m => ({ slot: m.slot, name: m.name, connected: m.streams.size > 0,race:room.races?.[m.slot]??m.race })),
     waiting: room.members.some(m => !m.streams.size) };
 }
 function broadcast(room) {
@@ -49,7 +50,9 @@ const server = http.createServer(async (req, res) => {
         let room;
         if (url.pathname === '/api/create') {
           if (rooms.size >= 100) throw fail('服务器房间已满', 503);
-          room = { code: id(3).toUpperCase(), members: [], game: null, touched: now };
+          const raceMode=b.raceMode??'random';
+          if(!['random','select'].includes(raceMode))throw fail('请选择随机种族或自选种族');
+          room = { code: id(3).toUpperCase(), members: [], game: null, touched: now,raceMode };
           rooms.set(room.code, room);
         } else {
           room = rooms.get(String(b.code || '').toUpperCase());
@@ -57,9 +60,9 @@ const server = http.createServer(async (req, res) => {
           if (room.game || room.members.length >= 4) throw fail('房间已开局或已满');
         }
         const slot = [0, 2, 1, 3].find(s => !room.members.some(m => m.slot === s));
-        const member = { slot, name, token: id(24), streams: new Set(), lastSeen: now };
+        const member = { slot, name, token: id(24), streams: new Set(), lastSeen: now,race:null };
         room.members.push(member); room.touched = now; broadcast(room);
-        return json(res, { code: room.code, token: member.token, slot });
+        return json(res, { code: room.code, token: member.token, slot,raceMode:room.raceMode });
       }
       const room = rooms.get(url.searchParams.get('room'));
       const token = req.headers.authorization?.replace(/^Bearer /, '') || url.searchParams.get('token');
@@ -76,10 +79,17 @@ const server = http.createServer(async (req, res) => {
       }
       if (req.method !== 'POST') throw fail('接口不存在', 404);
       const b = await body(req);
+      if(url.pathname==='/api/race'){
+        if(room.game)throw fail('对局已开始，种族已锁定');
+        if(room.raceMode!=='select')throw fail('随机种族模式不能手动选族');
+        if(!createGame.raceKeys.includes(b.race))throw fail('请选择有效种族');
+        member.race=b.race;broadcast(room);return json(res,{ok:true,race:member.race});
+      }
       if (url.pathname === '/api/start') {
         if (room.members[0] !== member || room.game) throw fail('仅房主可以开始未开局的房间', 403);
         if (room.members.length < 2 || room.members.some(m => !m.streams.size)) throw fail('需要至少两名已连接的真人');
-        room.game = createGame(room.members); broadcast(room); return json(res, { ok: true });
+        if(room.raceMode==='select'&&room.members.some(m=>!createGame.raceKeys.includes(m.race)))throw fail('所有真人玩家选择种族后才能开始');
+        room.game = createGame(room.members,{raceMode:room.raceMode});room.races=room.game.snapshot().players.map(p=>p.race); broadcast(room); return json(res, { ok: true });
       }
       if (url.pathname === '/api/action') {
         if (!member.streams.size || room.members.some(m => !m.streams.size)) throw fail('等待玩家重新连接');

@@ -1,5 +1,5 @@
 'use strict';
-const Net = { session: null, stream: null, ended: false, busy: false };
+const Net = { session: null, stream: null, ended: false, busy: false,room:null,raceBusy:false };
 function localPlayer() { return G.players[Net.session?.slot ?? 0]; }
 function notice(message) {
   if ($('netMessage')) $('netMessage').textContent = message;
@@ -32,6 +32,24 @@ function performAction(a) {
     case 'merc': return sendMerc(p,G.players[a.target],a.mid);
   }
 }
+function renderRoomLobby(room){
+  $('roomCode').textContent=room.code;
+  $('roomMode').textContent='本局模式：'+(room.raceMode==='random'?'随机种族':'自选种族');
+  const mine=room.members.find(m=>m.slot===Net.session.slot);
+  $('lobbyRaceChoice').hidden=room.raceMode!=='select'||room.started;
+  $('playerRace').disabled=Net.raceBusy||room.started;
+  if(!Net.raceBusy)$('playerRace').value=mine?.race||'';
+  $('lobbyRaceHelp').textContent=room.raceMode==='random'?'开局时每人随机获得一个种族，之后整局固定；AI 同样遵守单种族规则。':'每位真人选好种族后才能开始；允许同族，开局后不可更换，AI 空位自动分配。';
+  $('roomSeats').replaceChildren(...[0,1,2,3].map(slot=>{
+    const m=room.members.find(m=>m.slot===slot),item=document.createElement('div');item.className='seat '+(slot<2?'blue':'red');
+    const race=room.races?.[slot]||m?.race;
+    const faction=race?RACES[race].name:room.raceMode==='random'?'开局随机':m?'待选种族':'随机分配';
+    item.textContent=(slot<2?'苍岚':'赤焰')+' · '+(m?m.name+(slot===Net.session.slot?'（你）':'')+(m.connected?' · 已连接':' · 等待重连'):'AI 补位')+' · '+faction;
+    return item;
+  }));
+  $('startOnline').disabled=room.host!==Net.session.slot||room.members.length<2||room.waiting||!room.raceReady||room.started;
+  $('startOnline').textContent=room.host!==Net.session.slot?'等待房主开始':!room.raceReady?'等待玩家选择种族':'开始对战';
+}
 function connectRoom(session) {
   Net.session = session; Net.ended = false;
   $('btnRestart').textContent = '离开对局';
@@ -39,25 +57,18 @@ function connectRoom(session) {
   Net.stream?.close();
   $('lobby').hidden = false; $('soloOptions').hidden = true;
   $('onlineOptions').hidden = true;
+  $('menuPanel').classList.add('in-lobby');
   document.querySelector('.mode-tabs').hidden = true;
   const query = new URLSearchParams({ room:session.code,token:session.token });
   Net.stream = new EventSource('/api/events?' + query);
   Net.stream.onmessage = event => {
     const { room, state } = JSON.parse(event.data);
-    $('roomCode').textContent = room.code;
-    $('roomSeats').replaceChildren(...[0,1,2,3].map(slot => {
-      const m = room.members.find(m => m.slot === slot), item = document.createElement('div');
-      item.className = 'seat ' + (slot < 2 ? 'blue' : 'red');
-      item.textContent = (slot < 2 ? '苍岚' : '赤焰') + ' · ' + (m ? m.name + (slot === session.slot ? '（你）' : '') + (m.connected ? ' · 已连接' : ' · 等待重连') : 'AI 补位');
-      return item;
-    }));
-    $('startOnline').disabled = room.host !== session.slot || room.members.length < 2 || room.waiting;
-    $('startOnline').textContent = room.host === session.slot ? '开始对战' : '等待房主开始';
+    Net.room=room;renderRoomLobby(room);
     notice(room.waiting ? '玩家掉线 · 对局暂停，60 秒内可重连' : '在线 · 房间 ' + room.code);
     if (!state) return;
     const old = G;
     G = state;
-    G.selectedShop = old?.selectedShop || null; G.hover = old?.hover || null;
+    G.selectedShop = UNITS[old?.selectedShop]?.race===localPlayer().race?old.selectedShop:null; G.hover = old?.hover || null;
     G.selectedMine = old?.selectedMine ?? null;
     const selected = old?.selectedFighter;
     G.selectedFighter = selected ? localPlayer().fighters.find(f => f.col === selected.col && f.row === selected.row) : null;
@@ -82,6 +93,12 @@ function connectRoom(session) {
   };
 }
 function bindLobby() {
+  for(const [id,race] of Object.entries(RACES)){const option=document.createElement('option');option.value=id;option.textContent=race.icon+' '+race.name;option.title=race.desc;$('playerRace').appendChild(option);}
+  $('playerRace').addEventListener('change',async()=>{
+    Net.raceBusy=true;$('playerRace').disabled=true;
+    try{await api('race',{race:$('playerRace').value});}catch(e){notice(e.message);}
+    finally{Net.raceBusy=false;if(Net.room)renderRoomLobby(Net.room);}
+  });
   const setMode = online => {
     $('onlineOptions').hidden = !online; $('soloOptions').hidden = online;
     $('modeSolo').classList.toggle('active',!online); $('modeOnline').classList.toggle('active',online);
@@ -93,7 +110,7 @@ function bindLobby() {
     if (!/^https?:$/.test(location.protocol)) { notice('在线模式需要通过服务器地址打开；单机可以直接运行。'); return; }
     Net.busy = true;
     try {
-      const session = await api(route,{name:$('playerName').value,code:$('joinCode').value.trim().toUpperCase()});
+      const session = await api(route,{name:$('playerName').value,code:$('joinCode').value.trim().toUpperCase(),...(route==='create'?{raceMode:$('roomRaceMode').value}:{})});
       connectRoom(session);
     } catch(e) { notice(e.message); }
     finally { Net.busy = false; }
