@@ -16,6 +16,7 @@ function pointVisibleToTeam(state,team,x,y){
 }
 function visibleGameLogs(state,team){return state.logLines.filter(l=>l.team==null||l.team===team);}
 function arenaCountText(count){return count==null?'未知':count;}
+function incomeVisibleToTeam(state,team,player){return player.team===team||state.battleMode==='arena'||visionOpen(state);}
 function scopeBattleSnapshot(state,slot){
   const viewer=state.players[slot];if(!viewer)throw Error('无效视角');
   const team=viewer.team;state.vision={team,fog:!visionOpen(state)};
@@ -26,7 +27,7 @@ function scopeBattleSnapshot(state,slot){
   const publicUnit=u=>Object.fromEntries(Object.entries(u).filter(([key])=>!['col','row','spent','homeX','homeY','brain','route','routeIndex','laneX'].includes(key)));
   for(const p of state.players)if(p.team!==team){
     p.fighters=p.fighters.filter(visible).map(publicUnit);p.enemies=p.enemies.filter(visible).map(publicUnit);
-    p.mines=[];p.gold=null;p.income=null;p.paid=null;p.leakCount=null;p.aiT=null;
+    p.mines=[];p.gold=null;if(!incomeVisibleToTeam(state,team,p))p.income=null;p.paid=null;p.leakCount=null;p.aiT=null;
     p.spawnList=[];p.mercSpawnList=[];p.mercSpawnT=null;p.spawnT=null;
     p.mercQueue=p.mercQueue.map(()=>null);
   }

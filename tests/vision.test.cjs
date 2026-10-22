@@ -44,3 +44,23 @@ test('server player views are faction-specific without mutating the authoritativ
  assert.equal(game.snapshot(1).players[0].fighters.length,1);assert.equal(game.snapshot().players[2].fighters.length,1);
  assert.equal(game.snapshot().players[0].gold,280);
 });
+
+test('teammate income is always shared; PK reveals opposing income only until defense resumes',()=>{
+ const run=engine();run('G.players.forEach((p,i)=>p.income=10+i*7)');
+ for(const team of [0,1]){
+  run(`globalThis.viewerTeam=${team};globalThis.slot=${team*2};globalThis.scope=()=>scopeBattleSnapshot(JSON.parse(JSON.stringify(G)),slot)`);
+  for(const phase of ['prep','combat']){
+   run(`G.battleMode='defense';G.phase='${phase}'`);
+   assert.equal(run('scope().players.filter(p=>p.team===viewerTeam).every(p=>p.income===10+p.id*7)'),true);
+   assert.equal(run('scope().players.filter(p=>p.team!==viewerTeam).every(p=>p.income===null)'),true);
+  }
+  for(const stage of ['prep','march','fight','result']){
+   run(`G.battleMode='arena';G.phase='${stage==='prep'?'prep':'combat'}';G.arena={stage:'${stage}',counts:[0,0]}`);
+   assert.equal(run('scope().players.every(p=>p.income===10+p.id*7)'),true);
+   assert.equal(run('scope().players.filter(p=>p.team!==viewerTeam).every(p=>p.gold===null&&p.mines.length===0)'),true);
+  }
+  run("G.battleMode='defense';G.phase='prep';G.arena=null");
+  assert.equal(run('scope().players.filter(p=>p.team!==viewerTeam).every(p=>p.income===null)'),true);
+  assert.equal(run('G.players.every(p=>p.income===10+p.id*7)'),true);
+ }
+});

@@ -240,6 +240,23 @@ function buildAtkTable() {
 }
 
 /* ---------- 周期刷新 ---------- */
+function updateIncomeBoard(me){
+  const board=$('incomeBoard'),publicIncome=G.battleMode==='arena'||visionOpen(G);
+  board.classList.toggle('allied-only',!publicIncome);
+  const fragment=document.createDocumentFragment();
+  for(const team of publicIncome?[me.team,1-me.team]:[me.team]){
+    const group=document.createElement('div');group.className='income-team '+(team===me.team?'allied':'opposing');
+    const label=document.createElement('small');label.textContent=team===me.team?'我方收入':G.battleMode==='arena'?'敌方收入 · PK公开':'敌方收入';group.append(label);
+    for(const p of G.players.filter(p=>p.team===team)){
+      const chip=document.createElement('span');chip.className='income-player';chip.dataset.player=String(p.id);
+      const name=document.createElement('span');name.className='income-name';name.textContent=p.id===me.id?'你':p.name;name.title=p.name;
+      const value=document.createElement('b');value.textContent=incomeVisibleToTeam(G,me.team,p)&&Number.isFinite(p.income)?String(p.income):'未知';
+      chip.title=`${p.name} · 每波收入 ${value.textContent}`;chip.append(name,value);group.append(chip);
+    }
+    fragment.append(group);
+  }
+  board.replaceChildren(fragment);
+}
 function updateUI(force) {
   if (!G) return;
   const me = localPlayer();
@@ -247,6 +264,7 @@ function updateUI(force) {
   updateMines(me);
   $('stGold').textContent = Math.floor(me.gold);
   $('stIncome').textContent = me.income;
+  updateIncomeBoard(me);
   $('stValue').textContent = playerValue(me);
   $('stWave').textContent = (G.battleMode==='arena'?`第 ${G.wave} 波后 · 阵营 PK`:G.wave > CFG.TOTAL_WAVES ? `加时赛 第${G.wave}波` : `第 ${G.wave} / ${CFG.TOTAL_WAVES} 波`) +
     (G.phase === 'prep' ? ` · 准备 ${Math.ceil(G.timer)}s` : G.phase === 'combat' ? ' · 战斗中' : '');
