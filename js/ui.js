@@ -92,7 +92,7 @@ let shopRace = SHOP_ORDER[0], shopCatalog=false;
 const escape341 = text=>String(text??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function source341Details(def) {
   const text=(def.abil.sources||[]).map(id=>{const a=ABILITIES341[id];return '<p><b>'+escape341(skillValue(a,'anam',id))+'</b> '+escape341(skillText(a))+(def.abil.pending.includes(id)?' <em>触发效果待移植</em>':'')+'</p>';}).join('');
-  return '<details class="source-details"><summary>原版属性与技能</summary><div>'+escape341(def.english)+' · 原表第 '+(def.sourceRow??'地图')+' 行<br>攻击 '+def.min+'–'+def.max+' / '+def.aspd+' 秒 · 表列 DPS '+Number(def.sourceDps).toFixed(2)+'<br>生命 '+def.hp+' · 护甲值 '+def.armorPoints+' · 原始射程 '+def.rawRange+' · 人口 '+(def.food??'—')+'<br>法力 '+def.manaStart+'/'+def.manaMax+' · 回蓝 '+def.manaRegen+'/秒<br>本级费用 '+(def.purchaseCost??'召唤物')+' · 表列总价 '+def.cost+text+'</div></details>';
+  return '<details class="source-details"><summary>原版属性与技能</summary><div>'+(def.abil.refund?'当前出售统一按累计投入的 30% 向下取整，覆盖原版退款技能。<br>':'')+escape341(def.english)+' · 原表第 '+(def.sourceRow??'地图')+' 行<br>攻击 '+def.min+'–'+def.max+' / '+def.aspd+' 秒 · 表列 DPS '+Number(def.sourceDps).toFixed(2)+'<br>生命 '+def.hp+' · 护甲值 '+def.armorPoints+' · 原始射程 '+def.rawRange+' · 人口 '+(def.food??'—')+'<br>法力 '+def.manaStart+'/'+def.manaMax+' · 回蓝 '+def.manaRegen+'/秒<br>本级费用 '+(def.purchaseCost??'召唤物')+' · 表列总价 '+def.cost+text+'</div></details>';
 }
 
 function buildShop() {
@@ -274,7 +274,7 @@ function updateUI(force) {
   if(f&&me.fighters.includes(f)&&!f.temporary) {
     sb.style.display='';const def=f.def,signature=[f.uid,f.col,f.row,f.spent].join('|');
     if(sb.dataset.signature!==signature){sb.dataset.signature=signature;
-      $('selInfo').innerHTML=`<div class="selHead"><canvas id="selPortrait" width="64" height="64"></canvas><div><div class="sName">${def.name}</div><small>${def.english} · ${RACES[def.race].name}</small><div class="sStats" id="selLiveStats"></div><div>${def.atk} · ${def.armor}（${def.armorPoints}）</div></div></div><div class="sStats">${abilDesc(def)||'无特殊能力'}<br>已投入 ${f.spent} 金 · 阵亡后下波复活</div>${source341Details(def)}<div class="upgrade-options">${def.upgrades.map(id=>`<button class="btn" data-upgrade-uid="${id}">升级 → ${UNITS[id].name} · ${UNITS[id].purchaseCost} 金<small>❤${UNITS[id].hp} · ⚔${UNITS[id].min}–${UNITS[id].max}</small></button>`).join('')}${def.stances.map(id=>`<button class="btn" data-upgrade-uid="${id}">切换 → ${UNITS[id].name} · 免费</button>`).join('')}<button class="btn" id="btnSell">卖出 +${f.spent}金</button></div>`;
+      $('selInfo').innerHTML=`<div class="selHead"><canvas id="selPortrait" width="64" height="64"></canvas><div><div class="sName">${def.name}</div><small>${def.english} · ${RACES[def.race].name}</small><div class="sStats" id="selLiveStats"></div><div>${def.atk} · ${def.armor}（${def.armorPoints}）</div></div></div><div class="sStats">${abilDesc(def)||'无特殊能力'}<br>已投入 ${f.spent} 金 · 阵亡后下波复活</div>${source341Details(def)}<div class="upgrade-options">${def.upgrades.map(id=>`<button class="btn" data-upgrade-uid="${id}">升级 → ${UNITS[id].name} · ${UNITS[id].purchaseCost} 金<small>❤${UNITS[id].hp} · ⚔${UNITS[id].min}–${UNITS[id].max}</small></button>`).join('')}${def.stances.map(id=>`<button class="btn" data-upgrade-uid="${id}">切换 → ${UNITS[id].name} · 免费</button>`).join('')}<button class="btn" id="btnSell">卖出 · 3折返还 +${fighterSellValue(f)}金</button></div>`;
       drawPortrait($('selPortrait'),f.uid,64);
       sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>button.addEventListener('click',()=>{performAction({type:'upgrade',col:f.col,row:f.row,uid:button.dataset.upgradeUid});updateUI(true);}));
       $('btnSell').addEventListener('click',()=>{requestUnitSale(f);});
@@ -283,7 +283,7 @@ function updateUI(force) {
     $('selLiveStats').textContent=`❤${Math.max(0,Math.ceil(f.hp))}/${def.hp} · 法力 ${Math.floor(f.mana||0)}/${def.manaMax} · ${f.hp>0?behavior[f.brain?.state]||'在场':'等待下波复活'} · 移速 ${Math.round(def.speed*(f.slowF??1))}`;
     sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>{const id=button.dataset.upgradeUid;button.disabled=!canManageArmy()||me.gold<(def.stances.includes(id)?0:UNITS[id].purchaseCost);});
     $('btnSell').disabled=!canManageArmy();
-    const refund=Math.floor(f.spent*(def.abil.refund||1));$('btnSell').textContent=`卖出 +${refund}金`;
+    const refund=fighterSellValue(f);$('btnSell').textContent=`卖出 · 3折返还 +${refund}金`;
     $('btnSell').disabled=!canManageArmy();
     let steroid=$('btnSteroids');
     if(def.abil.steroids&&!steroid){steroid=document.createElement('button');steroid.id='btnSteroids';steroid.className='btn';sb.querySelector('.upgrade-options').prepend(steroid);

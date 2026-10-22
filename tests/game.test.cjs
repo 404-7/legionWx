@@ -87,14 +87,14 @@ test('upgrades, sales, mercenaries and king upgrades settle on the correct seat'
   assert.equal(game.action(0,{type:'upgrade',col:0,row:0}),true);
   assert.equal(game.snapshot().players[0].fighters[0].uid,'guardian');
   assert.equal(game.action(0,{type:'sell',col:0,row:0}),true);
-  assert.equal(game.snapshot().players[0].gold,300);
+  assert.equal(game.snapshot().players[0].gold,219);
   assert.equal(game.action(0,{type:'merc',mid:'militia',target:2}),true);
   assert.equal(game.snapshot().players[2].mercQueue[0],'militia');
   assert.equal(game.snapshot().players[0].income,7);
   assert.equal(game.action(0,{type:'king'}),true);
   assert.equal(game.snapshot().kings[0].lvl,1);
   assert.equal(game.snapshot().kings[1].lvl,0);
-  assert.equal(game.snapshot().players[0].gold,200);
+  assert.equal(game.snapshot().players[0].gold,119);
 });
 test('complete simulation remains serializable and produces a terminal result', () => {
   const game=createGame(humans);

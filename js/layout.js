@@ -139,8 +139,8 @@ function syncCommandUI() {
 function requestUnitSale(f) {
   if(!CommandUI.mobile){performAction({type:'sell',col:f.col,row:f.row});updateUI(true);return;}
   CommandUI.pendingSell={uid:f.uid,col:f.col,row:f.row};
-  const refund=Math.floor(f.spent*(f.def.abil.refund||1));
-  $('sellMessage').textContent=`出售「${f.def.name}」将返还 ${refund} 金。`;
+  const refund=fighterSellValue(f);
+  $('sellMessage').textContent=`出售「${f.def.name}」按累计投入 ${f.spent} 金的 30% 向下取整，返还 ${refund} 金。`;
   $('btnConfirmSell').textContent=`确认出售 · +${refund} 金`;$('sellDialog').showModal();
 }
 function bindCommandLayout() {

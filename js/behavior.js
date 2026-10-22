@@ -6,7 +6,7 @@ function combatAgent(unit){
   return unit.brain;
 }
 function resetCombatAgent(unit){
-  unit.brain={state:'guard',targetId:null,scan:0,lock:0,lost:0,chase:0,ignoreId:null,ignore:0,
+  unit.brain={state:'guard',targetId:null,scan:0,lock:0,lost:0,chase:0,blocked:0,ignoreId:null,ignore:0,
     returning:false,reacquire:0,threat:{},windup:null};
   unit.moving=false;
 }
@@ -28,18 +28,18 @@ function healingThreat(p,healer,patient,amount){
 }
 function forgetCombatTarget(unit,returning=false){
   const b=combatAgent(unit);b.ignoreId=b.targetId;b.ignore=COMBAT_AI.IGNORE;
-  b.targetId=null;b.windup=null;b.chase=0;b.lost=0;b.lock=0;b.scan=0;
+  b.targetId=null;b.windup=null;b.chase=0;b.blocked=0;b.lost=0;b.lock=0;b.scan=0;
   b.returning=returning;b.reacquire=returning?COMBAT_AI.REACQUIRE:0;
 }
 function chooseCombatTarget(unit,candidates,options,dt){
   const b=advanceCombatBrain(unit,dt),sense=options.sense,leash=options.leash??Infinity;
   const distance=e=>Math.hypot(e.x-unit.x,e.y-unit.y);
-  const eligible=e=>e!==unit&&e.hp>0&&!(e.deadT>0)&&Math.hypot(e.x-options.x,e.y-options.y)<=leash+60;
+  const eligible=e=>e!==unit&&e.hp>0&&!(e.deadT>0)&&(!options.canTarget||options.canTarget(e))&&Math.hypot(e.x-options.x,e.y-options.y)<=leash+60;
   let target=candidates.find(e=>{combatAgent(e);return e.entityId===b.targetId&&eligible(e);})||null;
   if(b.targetId&&!target){const escaped=candidates.some(e=>e.entityId===b.targetId&&e.hp>0);forgetCombatTarget(unit,!!options.returnHome&&escaped);if(!escaped)b.ignore=0;}
   if(target){
     b.lost=distance(target)>Math.max(sense*1.8,options.reach+80)?b.lost+dt:0;
-    if(b.lost>=COMBAT_AI.LOST||Math.hypot(unit.x-options.x,unit.y-options.y)>leash||(b.chase>=COMBAT_AI.CHASE&&distance(target)>options.reach)){forgetCombatTarget(unit,!!options.returnHome);target=null;}
+    if(b.lost>=COMBAT_AI.LOST||b.blocked>=COMBAT_AI.BLOCKED||Math.hypot(unit.x-options.x,unit.y-options.y)>leash||(b.chase>=COMBAT_AI.CHASE&&distance(target)>options.reach)){forgetCombatTarget(unit,!!options.returnHome);target=null;}
   }
   if(b.returning||b.reacquire>0)return null;
   if(target&&(b.lock>0||b.windup))return target;
@@ -56,7 +56,7 @@ function chooseCombatTarget(unit,candidates,options,dt){
     if(s>bestScore&&(!target||s>incumbentScore*COMBAT_AI.SWITCH_RATIO)){best=e;bestScore=s;}
   }
   if(best&&best.entityId!==b.targetId){
-    b.targetId=best.entityId;b.lock=COMBAT_AI.LOCK;b.chase=0;b.lost=0;b.windup=null;
+    b.targetId=best.entityId;b.lock=COMBAT_AI.LOCK;b.chase=0;b.blocked=0;b.lost=0;b.windup=null;
     b.anchorX=unit.x;b.anchorY=unit.y;
   }
   return best;
@@ -64,7 +64,7 @@ function chooseCombatTarget(unit,candidates,options,dt){
 function defenseTargets(p){return [...p.enemies,...G.kings[p.team].leaks.filter(e=>e.ownerId===p.id)];}
 function inDefenseField(p,x,y){return x>=p.fx&&x<=p.fx+CFG.FIELD_W&&y>=p.fy&&y<=p.fy+CFG.FIELD_H;}
 function defenseWalkable(p,x,y){
-  if(inDefenseField(p,x,y))return true;
+  if(G.players.some(ally=>ally.team===p.team&&inDefenseField(ally,x,y)))return true;
   const k=G.kings[p.team],r=38;
   return (Math.abs(x-p.exitX)<=r&&y>=12&&y<=CFG.H-12)||
     (Math.abs(y-CFG.ROAD_Y)<=r&&x>=Math.min(k.x,p.exitX)-r&&x<=Math.max(k.x,p.exitX)+r)||
@@ -98,7 +98,8 @@ function moveCombatUnit(p,unit,goal,speed,dt,stop=0){
   const waypoint=p.arenaView?goal:defenseWaypoint(p,unit,goal);
   const dx=waypoint.x-unit.x,dy=waypoint.y-unit.y,d=Math.hypot(dx,dy);
   const step=Math.min(Math.max(0,d-(waypoint===goal?stop:0)),speed*dt);
-  if(step<.01)return false;
+  if(step<.01){if(unit.brain?.targetId&&Math.hypot(goal.x-unit.x,goal.y-unit.y)>stop+.1)unit.brain.blocked=(unit.brain.blocked||0)+dt;return false;}
+  if(unit.brain)unit.brain.blocked=0;
   unit.x+=dx/d*step;unit.y+=dy/d*step;unit.moving=true;unit.facing=Math.atan2(dy,dx);return true;
 }
 function guardHome(p,f){const owner=G.players[f.ownerId]||p;return {x:f.homeX??owner.gx+(f.col+.5)*CFG.CELL,y:f.homeY??owner.gy+(f.row+.5)*CFG.CELL};}

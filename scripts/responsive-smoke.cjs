@@ -41,7 +41,9 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
    await page.locator('#panel-inspect').waitFor({state:'visible'});
    await press('[data-upgrade-uid="zeus"]');
    assert.equal(await page.evaluate(()=>localPlayer().fighters[0].uid),'zeus');
-   if(mobile){await press('#btnSell');assert.equal(await page.locator('#sellDialog').isVisible(),true);await press('#btnKeepUnit');assert.equal(await page.evaluate(()=>localPlayer().fighters.length),1);}
+   const previewRefund=await page.evaluate(()=>fighterSellValue(localPlayer().fighters[0]));
+   assert.match(await page.locator('#btnSell').textContent(),new RegExp('3折返还 \\+'+previewRefund+'金'));
+   if(mobile){await press('#btnSell');assert.equal(await page.locator('#sellDialog').isVisible(),true);assert.match(await page.locator('#sellMessage').textContent(),/30% 向下取整/);await press('#btnKeepUnit');assert.equal(await page.evaluate(()=>localPlayer().fighters.length),1);}
    await require('./mine-map-helper.cjs')(page,0,{mobile});
    await press('#btnMineAction');await press('#btnMineAction');
    assert.equal(await page.evaluate(()=>localPlayer().mines[0].level),2);
@@ -79,8 +81,10 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
    }
    if(mobile){
     await page.evaluate(()=>{G.selectedFighter=localPlayer().fighters[0];updateUI(true);});
+    const sale=await page.evaluate(()=>({gold:localPlayer().gold,refund:fighterSellValue(localPlayer().fighters[0])}));
     await press('#btnSell');await press('#btnConfirmSell');
     assert.equal(await page.evaluate(()=>localPlayer().fighters.length),0,'confirmed sale removes the unit');
+    assert.equal(await page.evaluate(()=>localPlayer().gold),sale.gold+sale.refund);
     assert.equal(await page.locator('#sellDialog').isVisible(),false);
    }
    assert.deepEqual(errors,[]);console.log('Responsive UI passed',viewport.width+'x'+viewport.height);await context.close();

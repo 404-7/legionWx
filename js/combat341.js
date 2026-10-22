@@ -1,7 +1,8 @@
 'use strict';
 // Mercenaries keep their enemy movement/king routes and share the same status system.
 function tickMerc341(p,dt){
- const units=p.enemies.filter(e=>e.hp>0&&e.mercId),friends=G.players.filter(q=>q.team===p.team).flatMap(defenseTargets).filter(e=>e.hp>0);
+ const owned=e=>!e.toKing||e.ownerId===p.id;
+ const units=p.enemies.filter(e=>e.hp>0&&e.mercId&&owned(e)),friends=G.players.filter(q=>q.team===p.team).flatMap(defenseTargets).filter(e=>e.hp>0);
  const foes=G.players.filter(q=>q.team===p.team).flatMap(q=>q.fighters).filter(f=>f.hp>0&&f.deadT<=0);
  for(const e of units){
   const m=MERCS[e.mercId],a=m.abil;
@@ -30,7 +31,7 @@ function tickMerc341(p,dt){
   if(a.burn)for(const f of foes)if(!f.def.air&&Math.hypot(f.x-e.x,f.y-e.y)<=a.burn.r)hitFighter(p,f,a.burn.dps*dt,'法术',e);
  }
  // Support auras also affect regular wave creeps, as in the source map.
- for(const e of p.enemies.filter(e=>e.hp>0&&!e.mercId)){
+ for(const e of p.enemies.filter(e=>e.hp>0&&!e.mercId&&owned(e))){
   let heal=0,armor=0,damage=0,move=0,vamp=0;
   for(const source of friends){const a=MERCS[source.mercId]?.abil;if(!a)continue;const d=Math.hypot(source.x-e.x,source.y-e.y);
    if(a.healAura&&d<=a.healAura.r)heal=Math.max(heal,a.healAura.hps);
@@ -88,7 +89,7 @@ function step341Enemy(e,dt) {
   }
 }
 function tick341(p,dt) {
-  for(const e of p.enemies)step341Enemy(e,dt);
+  for(const e of p.enemies)if(p.arenaView||!e.toKing||e.ownerId===p.id)step341Enemy(e,dt);
   if(!p.arenaView)for(const f of p.fighters)step341Enemy(f,dt);
   if(!p.arenaView)tickMerc341(p,dt);
   const alive=p.fighters.filter(f=>f.hp>0&&f.deadT<=0);

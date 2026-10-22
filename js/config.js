@@ -35,7 +35,7 @@ const CFG = {
 };
 
 // Browser equivalents for native Warcraft order/guard behavior, in seconds and world pixels.
-const COMBAT_AI={SCAN:.2,LOCK:.65,LOST:1.25,CHASE:8,LEASH:440,ENEMY_LEASH:280,
+const COMBAT_AI={SCAN:.2,LOCK:.65,LOST:1.25,CHASE:8,BLOCKED:1.25,RANGE_EPS:.1,LEASH:440,ENEMY_LEASH:280,
   REACQUIRE:.9,IGNORE:2,THREAT_LIFE:4,SWITCH_RATIO:1.45,ADVANCE:120,RETURN_EPS:6};
 
 const KING_UPGRADES = {

@@ -188,7 +188,8 @@ function fieldStep(p, dt) {
     p.mercSpawnT-=dt;
     if(p.mercSpawnT<=1e-9){for(const item of p.mercSpawnList)spawnEnemy(p,item);p.mercSpawnList=[];}
   }
-  const combat={...p,enemies:defenseTargets(p)};
+  // Both allied armies can defend their shared king; simulation ownership stays per lane.
+  const combat={...p,enemies:[...p.enemies,...G.kings[p.team].leaks]};
   tick341(combat, dt);
   // 战士（含复活倒计时）
   for (const f of p.fighters) {
@@ -261,14 +262,15 @@ function enemyAct(p, e, dt,engageOnly=false) {
 
   const b=combatAgent(e),reach=e.range+e.r;
   const tgt=chooseCombatTarget(e,p.fighters,{sense:Math.max(CFG.AGGRO,reach+20),reach,
+    canTarget:f=>defenseWalkable(p,f.x,f.y)||Math.hypot(f.x-e.x,f.y-e.y)<=reach,
     x:b.targetId?(b.anchorX??e.x):e.x,y:b.targetId?(b.anchorY??e.y):e.y,leash:COMBAT_AI.ENEMY_LEASH},dt);
   if (tgt) {
     const td=Math.hypot(tgt.x-e.x,tgt.y-e.y);
-    if (td <= reach) {
+    if (td <= reach+COMBAT_AI.RANGE_EPS) {
       b.state='attack';b.chase=0;
       if (e.cd <= 0) { e.cd = e.aspd/((1+(e.mercHaste||0))*Math.max(.05,1-(e.attackSlow||0)));mercAttack341(p,e,tgt);e.flash = 0.12; }
     } else {
-      b.state='chase';if(moveCombatUnit(p,e,tgt,sp,dt,reach))b.chase+=dt;
+      b.state='chase';moveCombatUnit(p,e,tgt,sp,dt,reach);b.chase+=dt;
     }
     return true;
   } else {
@@ -311,9 +313,9 @@ function fighterAct(p, f, dt) {
   const b=combatAgent(f);
   if(!tgt){idleGuard(p,f,dt);return;}
   const reach=R+(tgt.r||10)+12,d=Math.hypot(tgt.x-f.x,tgt.y-f.y);
-  if(d>reach){
+  if(d>reach+COMBAT_AI.RANGE_EPS){
     b.windup=null;b.state='chase';
-    if(moveCombatUnit(p,f,tgt,f.def.speed*(f.slowF??1),dt,reach))b.chase+=dt;
+    moveCombatUnit(p,f,tgt,f.def.speed*(f.slowF??1),dt,reach);b.chase+=dt;
     return;
   }
   b.state='attack';b.chase=0;
@@ -545,12 +547,13 @@ function upgradeFighter(p,f,targetId) {
   addFloater(f.x,f.y,stance?'切换形态':'升级!','#7ee08a');recalcAuras(p);return true;
 }
 
+function fighterSellValue(f){return Math.floor(f.spent*3/10);}
 function sellFighter(p, f) {
   if(!canManageArmy())return false;
   const i = p.fighters.indexOf(f);
   if (i < 0 || f.temporary) return false;
   p.fighters.splice(i, 1);
-  const refund=Math.floor(f.spent*(f.def.abil.refund||1));p.gold += refund;
+  const refund=fighterSellValue(f);p.gold += refund;
   addFloater(f.x, f.y, `+${refund}金`, '#f5c542');
   if (G.selectedFighter === f) G.selectedFighter = null;
   recalcAuras(p);
