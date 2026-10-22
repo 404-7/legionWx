@@ -64,7 +64,11 @@ function chooseCombatTarget(unit,candidates,options,dt){
 function defenseTargets(p){return [...p.enemies,...G.kings[p.team].leaks.filter(e=>e.ownerId===p.id)];}
 function inDefenseField(p,x,y){return x>=p.fx&&x<=p.fx+CFG.FIELD_W&&y>=p.fy&&y<=p.fy+CFG.FIELD_H;}
 function defenseWalkable(p,x,y){
- const area=nativeRect341(p.team===0?'LVision':'RVision');return x>=area.x&&x<=area.x+area.w&&y>=area.y&&y<=area.y+area.h;
+ return defenseRoads341().some(road=>road.team===p.team&&road.points.some((a,i)=>{
+   const b=road.points[i+1];if(!b)return false;const dx=b.x-a.x,dy=b.y-a.y,length=dx*dx+dy*dy;
+   const t=length?Math.max(0,Math.min(1,((x-a.x)*dx+(y-a.y)*dy)/length)):0;
+   return Math.hypot(x-a.x-t*dx,y-a.y-t*dy)<=road.width/2-12;
+ }));
 }
 
 function defenseLineClear(p,a,b){

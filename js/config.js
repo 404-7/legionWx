@@ -43,9 +43,10 @@ function scopeBattleSnapshot(state,slot){
 const CFG = {
   W: SOURCE341.rules.native.map.width, H: SOURCE341.rules.native.map.height,
 
-  COLS: 18, ROWS: 25, CELL: 32,
-  GRID_W: 18 * 32, GRID_H: 25 * 32,
-  FIELD_W: 608, FIELD_H: 832,
+  COLS: 18, ROWS: 25, CELL: 24,
+  GRID_W: 18 * 24, GRID_H: 25 * 24,
+  FIELD_W: 18 * 24, FIELD_H: 25 * 24,
+  ROAD_WIDTH: 464, ROAD_BRANCH_WIDTH: 192,
   ROAD_Y: 1124, GATE_LEFT: 1640, GATE_RIGHT: 1880,
   ARENA_WAVES: [10, 20], ARENA_PREP: SOURCE341.rules.timing.arenaPrepare,
 

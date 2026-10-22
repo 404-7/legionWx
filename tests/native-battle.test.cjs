@@ -1,18 +1,26 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),engine=require('./helpers/native-engine.cjs');
-test('eight defense areas and creep spawns use the extracted original rectangles, with four western and four eastern players',()=>{
+test('eight road-aligned defense areas retain 18 by 25 cells, exclude towns and stay outside the arena',()=>{
  const run=engine();assert.equal(run('G.players.every(p=>p.team===(p.id<4?0:1))'),true);
- assert.equal(run('G.players.every(p=>{const r=SOURCE341.rules.native.map.rects["P"+(p.id+1)+"BuildArea"],m=SOURCE341.rules.native.map;return p.gx===(r[0]-m.minX)*m.scale&&p.gy===(m.maxY-r[3])*m.scale})'),true);
+ assert.equal(run('CFG.COLS===18&&CFG.ROWS===25'),true);
+ assert.equal(run('G.players.every(p=>{const t=townPosition341(p);return !inDefenseField(p,t.x,t.y)&&!defenseWalkable(p,t.x,t.y)&&defenseWalkable(p,p.gx,p.gy)&&defenseWalkable(p,p.gx+CFG.GRID_W,p.gy+CFG.GRID_H)})'),true);
+ assert.equal(run('G.players.every(p=>{const a=nativeRect341("ArenaVision");return p.team===0?p.gx+CFG.GRID_W<a.x:p.gx>a.x+a.w})'),true);
+ assert.equal(run('G.players.every(p=>p.id%2?p.gy>CFG.ROAD_Y:p.gy+CFG.GRID_H<CFG.ROAD_Y)'),true);
  assert.equal(run('G.players.every(p=>p.team===0?p.spawnX<CFG.W/2:p.spawnX>CFG.W/2)'),true);
 });
 test('normal waves still spawn every 0.1 seconds, with 36 units in each of eight lanes after 3.6 seconds',()=>{
  const run=engine();run('startCombat();for(let i=0;i<36;i++)simStep(.1)');assert.equal(run('G.players.every(p=>p.enemies.length===36&&!p.spawnList.length)'),true);assert.equal(run('G.players.flatMap(p=>p.enemies).length'),288);
 });
-test('leaked creeps teleport to their source king-spawn rectangle and never use the removed central gate route',()=>{
- const run=engine();run('spawnEnemy(p,{type:"wave"});globalThis.e=p.enemies[0];leak(p,e);globalThis.area=nativeRect341("LKingSpawn")');assert.equal(run('p.enemies.length'),0);assert.equal(run('k.leaks[0]===e'),true);
- assert.equal(run('e.x>=area.x&&e.x<=area.x+area.w&&e.y>=area.y&&e.y<=area.y+area.h'),true);assert.equal(run('e.route.length'),1);assert.equal(run('e.route[0].x===k.x&&e.route[0].y===k.y'),true);
+test('leaked creeps keep their position and walk each junction before approaching the king in all eight lanes',()=>{
+ const run=engine();run(`for(const p of G.players){spawnEnemy(p,{type:'wave'});const e=p.enemies[0];e.x=p.exitX+50;e.y=p.exitY;const start={x:e.x,y:e.y};leak(p,e);if(e.x!==start.x||e.y!==start.y)throw Error('teleported');if(e.route.length!==3)throw Error('missing turn');let steps=0;while(e.routeIndex<2&&steps++<500){const before={x:e.x,y:e.y};walkRoute(e,10);if(Math.hypot(e.x-before.x,e.y-before.y)>10.001)throw Error('jump');if(!defenseWalkable(p,e.x,e.y))throw Error('off road');}const k=G.kings[p.team];if(e.routeIndex<2||e.x!==k.x)throw Error('skipped junction');}`);
+ assert.equal(run('G.kings.every(k=>k.leaks.length===4)'),true);
 });
+test('a creep crossing the defense exit does not move twice during the field-to-king transition frame',()=>{
+ const run=engine();run("G.phase='combat';spawnEnemy(p,{type:'wave'});globalThis.e=p.enemies[0];e.x=e.laneX=p.exitX;e.y=p.exitY-1;e.speed=100;globalThis.before={x:e.x,y:e.y};enemyAct(p,e,.05);kingStep(k,.05)");
+ assert.equal(run('k.leaks.includes(e)'),true);assert.ok(run('Math.hypot(e.x-before.x,e.y-before.y)')<=5.001);
+});
+
 test('dense leaks from all four allied lanes continue moving and attack each king without a shared T-junction deadlock',()=>{
- const run=engine();run("G.phase='combat';for(const k of G.kings){k.hp=k.max=1e9;k.cd=1e9;}for(const p of G.players)for(let i=0;i<12;i++){spawnEnemy(p,{type:'wave'});const e=p.enemies.at(-1);e.hp=e.max=10000;leak(p,e);}for(let i=0;i<250;i++){for(const k of G.kings)kingStep(k,.1);stepProjectiles341(.1)}");
+ const run=engine();run("G.phase='combat';for(const k of G.kings){k.hp=k.max=1e9;k.cd=1e9;}for(const p of G.players)for(let i=0;i<12;i++){spawnEnemy(p,{type:'wave'});const e=p.enemies.at(-1);e.x=p.exitX;e.y=p.exitY;e.hp=e.max=10000;e.speed=400;leak(p,e);}for(let i=0;i<250;i++){for(const k of G.kings)kingStep(k,.1);stepProjectiles341(.1)}");
  assert.equal(run('G.kings.every(k=>k.hp<k.max)'),true);assert.equal(run('G.kings.every(k=>k.leaks.every(e=>Number.isFinite(e.x)&&Number.isFinite(e.y)))'),true);
 });
 test('MM masks the entire opposing region including its king approach; PK/final survival reveals the battlefield',()=>{

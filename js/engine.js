@@ -1,12 +1,14 @@
 'use strict';
 /* ===== 战斗引擎：状态、波次流程、自动战斗、经济、国王 ===== */
 let G = null;
+const DEFENSE_ROAD_CACHE341=new WeakMap();
 
 function layoutFor(playerIndex) {
-  const native=SOURCE341.rules.native.map,rect=native.rects['P'+(playerIndex+1)+'BuildArea'];
-  const fx=(rect[0]-native.minX)*native.scale,fy=(native.maxY-rect[3])*native.scale;
   const spawn=nativeRect341('Creep_'+(playerIndex+1));
-  return {fx,fy,gx:fx,gy:fy,laneX:spawn.x+spawn.w/2,spawnY:spawn.y+spawn.h/2};
+  const arena=nativeRect341('ArenaVision'),half=CFG.ROAD_WIDTH/2;
+  const laneX=playerIndex<4?Math.min(spawn.x+spawn.w/2,arena.x-half-8):Math.max(spawn.x+spawn.w/2,arena.x+arena.w+half+8);
+  const fx=laneX-CFG.GRID_W/2,fy=playerIndex%2?CFG.ROAD_Y+CFG.ROAD_BRANCH_WIDTH/2:CFG.ROAD_Y-CFG.ROAD_BRANCH_WIDTH/2-CFG.GRID_H;
+  return {fx,fy,gx:fx,gy:fy,laneX,spawnY:spawn.y+spawn.h/2};
 }
 function nativeRect341(name){const m=SOURCE341.rules.native.map,r=m.rects[name];return {x:(r[0]-m.minX)*m.scale,y:(m.maxY-r[3])*m.scale,w:(r[2]-r[0])*m.scale,h:(r[3]-r[1])*m.scale};}
 function nativeCenter341(name){const r=nativeRect341(name);return {x:r.x+r.w/2,y:r.y+r.h/2};}
@@ -350,7 +352,7 @@ function enemyAct(p, e, dt,engageOnly=false) {
     e.attackWindup=null;
     e.y += p.direction * sp * dt;
     e.x += (e.laneX - e.x) * 0.5 * dt;
-    if ((e.y - p.exitY) * p.direction >= 0) leak(p, e);
+    if ((e.y - p.exitY) * p.direction >= 0) leak(p, e,true);
   }
 }
 
@@ -621,16 +623,15 @@ function stepSkillWaves341(dt){
     return w.distance<w.length&&w.remainingDamage>0;
   });
 }
-function leak(p, e) {
+function leak(p, e,advanced=false) {
   const i = p.enemies.indexOf(e);
   if (i >= 0) p.enemies.splice(i, 1);
   p.leakCount = (p.leakCount || 0) + 1;
   p.totalLeaks++;e.leakRewardFactor=p.leakGoldFactor;
   const k = G.kings[p.team];
   e.toKing = true;e.ownerId=p.id; e.routeX = p.exitX; e.turning = true;forgetCombatTarget(e);
-  const spawn=nativeRect341(p.team===0?'LKingSpawn':'RKingSpawn');
-  e.x=spawn.x+Math.random()*spawn.w;e.y=spawn.y+Math.random()*spawn.h;
-  e.route=[{x:k.x,y:k.y}];e.routeIndex=0;
+  e.route=[{x:p.exitX,y:p.exitY},{x:k.x,y:p.exitY},{x:k.x,y:k.y}];e.routeIndex=0;
+  e.roadEntryPending=advanced;
   k.leaks.push(e);
   addFloater(p.exitX - 20, e.y, '漏怪!', '#ff6a5e');
   if (p.isHuman) addLog(`${p.name} 第 ${G.wave} 波漏怪！国王受到威胁`, 'l-red',p.team);
@@ -645,6 +646,7 @@ function kingStep(k, dt) {
   if(k.skills.includes(burn.id))for(const e of k.leaks)if(!e.air&&e.hp>0&&Math.hypot(e.x-k.x,e.y-k.y)<=burn.radius+e.r)kingMagic341(k,e,burn.dps*dt);
   for (const e of k.leaks) {
     if(e.hp<=0)continue;
+    if(e.roadEntryPending){e.roadEntryPending=false;continue;}
     const owner=G.players[e.ownerId],defenders=G.players.filter(p=>p.team===k.team).flatMap(p=>p.fighters);
     if(owner&&enemyAct({...owner,fighters:defenders},e,dt,true))continue;
     if(e.routeIndex<e.route.length-1){
@@ -705,7 +707,18 @@ function minePosition(p, index) {
   return { x:zone.x+32+(index%2)*96,y:zone.y+100+Math.floor(index/2)*150 };
 }
 function mineZone(p){const at=townPosition341(p);return {x:at.x-100,y:at.y-100,w:200,h:200};}
-function townPosition341(p){const m=SOURCE341.rules.native.map,at=m.towns[p.id];return {x:(at[0]-m.minX)*m.scale,y:(m.maxY-at[1])*m.scale};}
+function townPosition341(p){
+  const at=nativePoint341(SOURCE341.rules.native.map.towns[p.id]),side=at.x<p.exitX?-1:1;
+  return {x:p.exitX+side*Math.max(Math.abs(at.x-p.exitX),CFG.ROAD_WIDTH/2+60),y:at.y};
+}
+function defenseRoads341(){
+  if(DEFENSE_ROAD_CACHE341.has(G))return DEFENSE_ROAD_CACHE341.get(G);
+  const roads=G.players.map(p=>({points:[{x:p.spawnX,y:p.spawnY},{x:p.exitX,y:p.exitY}],width:CFG.ROAD_WIDTH,team:p.team}));
+  for(const k of G.kings){const lanes=G.players.filter(p=>p.team===k.team);roads.push(
+    {points:[{x:Math.min(...lanes.map(p=>p.exitX)),y:CFG.ROAD_Y},{x:Math.max(...lanes.map(p=>p.exitX)),y:CFG.ROAD_Y}],width:CFG.ROAD_BRANCH_WIDTH,team:k.team},
+    {points:[{x:k.x,y:CFG.ROAD_Y},{x:k.x,y:k.y}],width:CFG.ROAD_BRANCH_WIDTH,team:k.team});}
+  DEFENSE_ROAD_CACHE341.set(G,roads);return roads;
+}
 
 function buyMine(){return false;}
 

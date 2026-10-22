@@ -51,10 +51,10 @@ function roundedRoad(c,points,radius=52){
 }
 function drawStoneRoads(c,roads){
   c.lineJoin='round';c.lineCap='round';
-  for(const [width,color] of [[102,'#08141088'],[90,'#384337'],[80,'#8a8b70'],[74,'#29372f'],[68,stonePattern(c)]]){
-    c.lineWidth=width;c.strokeStyle=color;
+  for(const [extra,color] of [[12,'#08141088'],[0,'#384337'],[-10,'#8a8b70'],[-16,'#29372f'],[-22,stonePattern(c)]]){
+    c.strokeStyle=color;
     // Each material layer covers the entire connected road network before the next layer.
-    for(const points of roads){roundedRoad(c,points);c.stroke();}
+    for(const road of roads){c.lineWidth=road.width+extra;roundedRoad(c,road.points.map(p=>[p.x,p.y]));c.stroke();}
   }
 }
 function drawRiver(c,t){
@@ -103,8 +103,7 @@ function drawBridge(c,t){
 
 function drawMap(c,t){
  c.fillStyle='#162c25';c.fillRect(0,0,CFG.W,CFG.H);
- const roads=G.players.map(p=>[[p.spawnX,p.spawnY],[p.exitX,p.exitY],[G.kings[p.team].x,p.exitY]]);
- for(const k of G.kings)roads.push([[k.x,CFG.ROAD_Y],[k.x,k.y]]);drawStoneRoads(c,roads);
+ drawStoneRoads(c,defenseRoads341());
  const arena=nativeRect341('ArenaVision');c.fillStyle='#17201c';c.fillRect(arena.x,arena.y,arena.w,arena.h);
  c.strokeStyle='#8b805c';c.lineWidth=3;c.strokeRect(arena.x+8,arena.y+8,arena.w-16,arena.h-16);
  const center=nativeCenter341('ArenaCenter');c.textAlign='center';c.fillStyle='#d5c493';c.font='bold 16px "Microsoft YaHei"';c.fillText('独立竞技场',center.x,center.y-80);c.textAlign='left';
