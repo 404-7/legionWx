@@ -26,7 +26,21 @@ const {chromium}=require(process.argv[2]||'playwright'),{server}=require('../ser
    });
    assert.equal(result.ordered,true);assert.equal(result.firstLabel,true);assert.equal(result.updated,true);assert.equal(result.coinRendered,true);assert.deepEqual(result.pixel,[111,220,124,255]);assert.equal(result.gold,result.bounty);assert.equal(result.coins,1);
    if(process.argv[3]){fs.mkdirSync(process.argv[3],{recursive:true});await page.screenshot({path:path.join(process.argv[3],`combat-feedback-${viewport.width}.png`)});}
-   assert.deepEqual(errors,[]);console.log('Crowded health overlay, live numbers and kill gold passed',viewport);await context.close();
+   const kingResult=await page.evaluate(()=>{
+    const k=G.kings[0];k.hp=1234;MapCamera.cx=k.x;MapCamera.cy=k.y;
+    for(const e of localPlayer().enemies){e.x=k.x;e.y=k.y-40;}
+    addPuff(k.x,k.y-40,'#ffffff',90);
+    const original=drawKingHealth,oldImage=CTX.drawImage,oldText=CTX.fillText;let order=0,lastSprite=0;const bars=[],labels=[];
+    CTX.drawImage=function(...args){if(args[0]!==FOG_SKIN.canvas)lastSprite=++order;return oldImage.apply(this,args);};
+    CTX.fillText=function(text,...args){labels.push(String(text));return oldText.call(this,text,...args);};
+    drawKingHealth=function(...args){bars.push(++order);return original(...args);};draw(1000);
+    const above=bars.length===2&&bars.every(n=>n>lastSprite),current=labels.some(s=>s.includes('1234/2600'));
+    labels.length=0;k.hp=987;draw(1000);const updated=labels.some(s=>s.includes('987/2600'));
+    drawKingHealth=original;CTX.drawImage=oldImage;CTX.fillText=oldText;draw(1000);return {above,current,updated};
+   });
+   assert.deepEqual(kingResult,{above:true,current:true,updated:true});
+   if(process.argv[3])await page.screenshot({path:path.join(process.argv[3],`king-health-${viewport.width}.png`)});
+   assert.deepEqual(errors,[]);console.log('Fighter and king health overlays, live numbers and kill gold passed',viewport);await context.close();
   }
  }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

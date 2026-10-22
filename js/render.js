@@ -232,6 +232,7 @@ function draw(now) {
   const ownTeam=localPlayer().team;
   for(const allied of [false,true])for(const p of G.players)if((p.team===ownTeam)===allied)
     for(const f of p.fighters)drawFighterHealth(c,f,p,view.scale);
+  for(const k of G.kings)drawKingHealth(c,k);
   drawWarFog(c);
   c.restore();
 }
@@ -461,8 +462,12 @@ function drawKing(k, t) {
     c.beginPath(); c.arc(k.x, k.y, 26, 0, 7); c.fill();
     c.globalAlpha = 1;
   }
-  // 血条
-  const bw = 100, ratio = Math.max(0, k.hp / k.max);
+}
+
+function drawKingHealth(c,k){
+  if(!visibleWorldPoint(k.x,k.y))return;
+  c.save();c.globalAlpha=1;
+  const bw = 100, ratio = Math.min(1,Math.max(0, k.hp / k.max));
   c.fillStyle = 'rgba(0,0,0,.75)';
   c.fillRect(k.x - bw / 2 - 1, k.y - 46, bw + 2, 9);
   const hb = c.createLinearGradient(k.x - bw / 2, 0, k.x + bw / 2, 0);
@@ -473,6 +478,8 @@ function drawKing(k, t) {
   c.fillStyle = '#c3d2e8';
   c.font = 'bold 11px "Microsoft YaHei"';
   c.textAlign = 'center';
-  c.fillText(`${k.team === 0 ? '蓝方国王' : '红方国王'} Lv${k.lvl} · ${Math.ceil(k.hp)}`, k.x, k.y - 51);
-  c.textAlign = 'left';
+  const label=`${k.team === 0 ? '蓝方国王' : '红方国王'} Lv${k.lvl} · ${Math.ceil(k.hp)}/${Math.ceil(k.max)}`;
+  c.strokeStyle='#06110f';c.lineWidth=3;c.lineJoin='round';
+  c.strokeText(label,k.x,k.y-51);c.fillText(label,k.x,k.y-51);
+  c.restore();
 }
