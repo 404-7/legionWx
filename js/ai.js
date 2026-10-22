@@ -100,7 +100,7 @@ function aiAct(p) {
     const enemiesOfAi = G.players.filter(q => q.team !== p.team);
     while (sends < 2) {
       if (p.gold < 300 || !enemiesOfAi.length) break;
-      const affordable = Object.keys(MERCS).filter(id => MERCS[id].cost <= p.gold - 150);
+      const affordable = Object.keys(MERCS).filter(id => MERCS[id].unlockWave<=G.wave && MERCS[id].cost <= p.gold - 150);
       if (!affordable.length) break;
       const mid = affordable[Math.floor(Math.random() * affordable.length)];
       const tgt = enemiesOfAi[Math.floor(Math.random() * enemiesOfAi.length)];

@@ -226,7 +226,9 @@ function spawnEnemy(p, item) {
   let e;
   if (item.type === 'merc') {
     const m = MERCS[item.id];
-    e = { hp: m.hp, max: m.hp, dmg: m.dmg, aspd: m.aspd, range: m.range, speed: m.speed, armor: m.armor, atk: m.atk, r: m.r, regen: 0, magicImmune: false, boss: false };
+    e = { hp:m.hp,max:m.hp,dmg:m.dmg,aspd:m.aspd,range:m.range,speed:m.speed,armor:m.armor,atk:m.atk,r:m.r,
+      armorPoints:m.armorPoints,regenFlat:m.regenFlat,regen:0,magicImmune:!!m.abil.magicImmune,air:m.air,boss:false,
+      mana:m.manaStart,bloodCD:0 };
     e.mercId = item.id;
   } else {
     const d = G.waveDef;
@@ -249,7 +251,7 @@ function enemyAct(p, e, dt,engageOnly=false) {
   if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowF = 1; }
   if (e.regen) e.hp = Math.min(e.max, e.hp + e.max * e.regen * dt);
   if(e.regenFlat)e.hp=Math.min(e.max,e.hp+e.regenFlat*dt);
-  const sp = e.speed * e.slowF;
+  const sp = e.speed * e.slowF * (e.mercMove||1);
 
   const b=combatAgent(e),reach=e.range+e.r;
   const tgt=chooseCombatTarget(e,p.fighters,{sense:Math.max(CFG.AGGRO,reach+20),reach,
@@ -258,7 +260,7 @@ function enemyAct(p, e, dt,engageOnly=false) {
     const td=Math.hypot(tgt.x-e.x,tgt.y-e.y);
     if (td <= reach) {
       b.state='attack';b.chase=0;
-      if (e.cd <= 0) { e.cd = e.aspd/Math.max(.05,1-(e.attackSlow||0)); hitFighter(p, tgt, e.dmg*(1-(e.damageWeak||0)), e.atk, e); e.flash = 0.12; }
+      if (e.cd <= 0) { e.cd = e.aspd/((1+(e.mercHaste||0))*Math.max(.05,1-(e.attackSlow||0)));mercAttack341(p,e,tgt);e.flash = 0.12; }
     } else {
       b.state='chase';if(moveCombatUnit(p,e,tgt,sp,dt,reach))b.chase+=dt;
     }
@@ -282,11 +284,13 @@ function hitFighter(p,f,dmg,atk,attacker) {
   if(atk==='穿刺'&&a.defend)amount*=a.defend;
   if(a.block&&Math.random()<a.block.chance)amount=Math.max(a.block.minimum,amount-a.block.amount);
   if(a.manaShield&&f.mana>0){const absorb=Math.min(amount*a.manaShield.ratio,f.mana*a.manaShield.perMana);amount-=absorb;f.mana-=absorb/a.manaShield.perMana;}
+  const dealt=Math.min(Math.max(0,f.hp),Math.max(0,amount));
   f.hp-=amount;f.flash=.15;
   recordCombatThreat(f,attacker,amount);
   if(f.hp<=0)resetCombatAgent(f);
   if(attacker&&a.reflect&&attacker.range<=45)dmgEnemy(attacker,amount*a.reflect.p,'法术');
   if(f.hp<=0&&a.reinc&&!f.reincUsed){f.reincUsed=true;f.deadT=2.2;}
+  return dealt;
 }
 
 function fighterAct(p, f, dt) {
@@ -342,7 +346,7 @@ function dmgEnemy(e, dmg, atk, attacker=null) {
   if(e.def){const before=e.hp;hitFighter(G.players[e.ownerId],e,dmg,atk,attacker);return Math.max(0,before-Math.max(0,e.hp));}
   let m = (ATK_ARMOR[atk] && ATK_ARMOR[atk][e.armor]) || 1;
   if(e.magicImmune && (atk==='魔法'||atk==='法术'))m=0;
-  if(atk!=='法术')m*=armorFactor((e.armorPoints||0)-(e.armorLoss||0));
+  if(atk!=='法术')m*=armorFactor((e.armorPoints||0)+(e.mercArmor||0)-(e.armorLoss||0));
   if(e.mark)m*=1+e.mark;
   const dealt = Math.min(e.hp, dmg * m);
   e.hp -= dmg * m;
@@ -412,21 +416,21 @@ function kingStep(k, dt) {
     const owner=G.players[e.ownerId],defenders=G.players.filter(p=>p.team===k.team).flatMap(p=>p.fighters);
     if(owner&&enemyAct({...owner,fighters:defenders},e,dt,true))continue;
     if(e.routeIndex<e.route.length-1){
-      walkRoute(e,e.speed*e.slowF*dt);
+      walkRoute(e,e.speed*e.slowF*(e.mercMove||1)*dt);
       e.turning=e.routeIndex===0;continue;
     }
     const dx = k.x - e.x, dy = k.y - e.y, d = Math.hypot(dx, dy);
     const reach = e.range + e.r + 26;
     if (d <= reach) {
       if (e.cd <= 0) {
-        e.cd = e.aspd;
+        e.cd = e.aspd/((1+(e.mercHaste||0))*Math.max(.05,1-(e.attackSlow||0)));
         let m = (ATK_ARMOR[e.atk] && ATK_ARMOR[e.atk]['无甲']) || 1; // 国王视为无甲
-        k.hp -= e.dmg * m;
+        k.hp -= e.dmg * (1+(e.mercDamage||0)) * (1-(e.damageWeak||0)) * m * (MERCS[e.mercId]?.abil.kingMult||1);
         e.flash = 0.12; k.flash = 0.15;
         if (k.hp <= 0) { k.hp = 0; gameOver(1 - k.team); return; }
       }
     } else {
-      const sp = e.speed * e.slowF;
+      const sp = e.speed * e.slowF * (e.mercMove||1);
       e.x += dx / d * sp * dt; e.y += dy / d * sp * dt;
     }
   }
@@ -580,8 +584,8 @@ function kingUpgrade(p, stat = 'health') {
 }
 
 function sendMerc(from, target, mercId) {
-  const m = MERCS[mercId];
-  if (!m || from.gold < m.cost || target.team === from.team) return false;
+  const m = Object.hasOwn(MERCS,mercId)?MERCS[mercId]:null;
+  if (!m || !['prep','combat'].includes(G.phase) || G.wave<m.unlockWave || from.gold < m.cost || !target || target.team === from.team || target.mercQueue.length>=40) return false;
   from.gold -= m.cost;
   from.income += m.income;
   target.mercQueue.push(mercId);

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>军团战争 · Legion Arena</title>
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/responsive.css?v=28">
+<link rel="stylesheet" href="css/responsive.css?v=29">
 </head>
 <body>
 <div id="app">
@@ -98,6 +98,11 @@
   <p id="mineDialogStatus" role="status" aria-live="polite"></p>
   <button id="btnMineAction" class="btn primary wide">建造金矿</button>
 </dialog>
+<dialog id="mercDialog" aria-labelledby="mercDetailName">
+  <div class="merc-detail-head"><canvas id="mercDetailPortrait" width="128" height="128"></canvas><div><small>ATTACK LEGION</small><h2 id="mercDetailName"></h2><p id="mercDetailEnglish"></p></div><button id="btnMercClose" class="btn" aria-label="关闭进攻单位详情">×</button></div>
+  <div class="merc-detail-body"><p id="mercDetailIntro"></p><div id="mercDetailStats"></div><h3>技能与特性</h3><div id="mercDetailSkills"></div><p id="mercDetailStatus" role="status" aria-live="polite"></p></div>
+  <div id="mercDetailActions"><button class="btn" data-merc-detail-send="0">派遣 → 敌军 Ⅰ</button><button class="btn" data-merc-detail-send="1">派遣 → 敌军 Ⅱ</button></div>
+</dialog>
 
 <div id="overlay">
   <div class="panel" id="menuPanel">
@@ -146,21 +151,21 @@
   </div>
 </div>
 
-<script src="js/source341.js?v=22"></script>
+<script src="js/source341.js?v=29"></script>
 <script src="js/config.js?v=22"></script>
 <script src="js/skills341.js?v=22"></script>
-<script src="js/data.js?v=22"></script>
-<script src="js/art-manifest.js?v=23"></script>
+<script src="js/data.js?v=29"></script>
+<script src="js/art-manifest.js?v=29"></script>
 <script src="js/unit-art.js?v=23"></script>
-<script src="js/sprites.js?v=23"></script>
+<script src="js/sprites.js?v=29"></script>
 <script src="js/behavior.js?v=26"></script>
-<script src="js/engine.js?v=28"></script>
-<script src="js/combat341.js?v=22"></script>
-<script src="js/ai.js?v=22"></script>
+<script src="js/engine.js?v=29"></script>
+<script src="js/combat341.js?v=29"></script>
+<script src="js/ai.js?v=29"></script>
 <script src="js/render.js?v=28"></script>
-<script src="js/ui.js?v=28"></script>
+<script src="js/ui.js?v=29"></script>
 <script src="js/network.js?v=28"></script>
-<script src="js/layout.js?v=28"></script>
+<script src="js/layout.js?v=29"></script>
 <script src="js/main.js?v=22"></script>
 </body>
 </html>

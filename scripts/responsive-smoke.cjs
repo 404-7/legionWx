@@ -48,7 +48,7 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
    await press('#btnMineClose');
    await press('#tab-king');await press('[data-king-stat="regen"]');
    assert.equal(await page.evaluate(()=>G.kings[localPlayer().team].upgrades.regen),1);
-   await press('#tab-attack');await press('.mrow:first-child button:first-of-type');
+   await press('#tab-attack');await press('[data-merc-id="militia"] [data-merc-send="0"]');
    assert.equal(await page.evaluate(()=>G.players.filter(p=>p.team!==localPlayer().team).reduce((n,p)=>n+p.mercQueue.length,0)),1);
    if(mobile){
     await press('#btnPanelClose');await press('#btnMapOverview');assert.equal(await page.evaluate(()=>MapCamera.mode),'overview');await press('#btnMapHome');

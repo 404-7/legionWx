@@ -488,6 +488,13 @@ function buildSprites() {
   mk('m_ancient', c => construct(c, { pal: { main: '#4e6e58', dark: '#274234', light: '#93b8a0', glow: '#a5d6a7' }, big: 1, helmet: 1, glowEye: '#a5d6a7' }));
 
   /* 国王 */
+  // Reuse local classic model families; native sprites remain available offline on asset failure.
+  const mercArt={militia:'militia',bowman:'archer',ghoul:'ghoul',warrior:'grunt',whelp:'dragon_aspect',hermit:'witch_doctor',dino:'komodo',commander:'raider',furbolg:'grizzly',wyvern:'wyvern',chariot:'meat_wagon',blood_orc:'blood_orc',frost_wolf:'frost_wolf',ice_troll:'ice_troll',warlock:'warlock',pandaren:'pandaren',ballista:'meat_wagon',shaman:'shaman',pudge:'butcher',gargoyle:'spirit',behemoth:'sea_giant',kraken:'abomination',infernal:'infernal',demon:'nightmare'};
+  for(const [id,m] of Object.entries(MERCS)){
+    const source=mercArt[id];
+    if(SPR[source])SPR['m_'+id]=SPR[source];
+    else mk('m_'+id,c=>monster(c,{pal:PAL.foe,body:m.air?'imp':'muscle',horns:1,wings:m.air?1:0}));
+  }
   mk('king_0', c => kingSpr(c, 0));
   mk('king_1', c => kingSpr(c, 1));
   if(typeof UNIT_ART!=='undefined')applyUnitArt();

@@ -1,4 +1,60 @@
 'use strict';
+// Mercenaries keep their enemy movement/king routes and share the same status system.
+function tickMerc341(p,dt){
+ const units=p.enemies.filter(e=>e.hp>0&&e.mercId),friends=G.players.filter(q=>q.team===p.team).flatMap(defenseTargets).filter(e=>e.hp>0);
+ const foes=G.players.filter(q=>q.team===p.team).flatMap(q=>q.fighters).filter(f=>f.hp>0&&f.deadT<=0);
+ for(const e of units){
+  const m=MERCS[e.mercId],a=m.abil;
+  e.mana=Math.min(m.manaMax,(e.mana||0)+m.manaRegen*dt);e.bloodCD=Math.max(0,(e.bloodCD||0)-dt);
+  if(e.bloodBuff){e.bloodBuff.time-=dt;if(e.bloodBuff.time<=0)e.bloodBuff=null;}
+  if(a.bloodRush&&e.stunT<=0&&e.bloodCD<=0&&e.mana>=a.bloodRush.mana){
+   const b=a.bloodRush,target=friends.find(g=>!g.bloodBuff&&Math.hypot(g.x-e.x,g.y-e.y)<=b.r);
+   if(target){target.bloodBuff={time:b.duration,haste:b.haste,move:b.move};e.mana-=b.mana;e.bloodCD=b.cd;}
+  }
+  let heal=0,armor=0,damage=0,move=0,vamp=0;
+  for(const source of friends){
+   const s=MERCS[source.mercId]?.abil;if(!s)continue;const d=Math.hypot(source.x-e.x,source.y-e.y);
+   if(s.healAura&&d<=s.healAura.r)heal=Math.max(heal,s.healAura.hps);
+   if(s.armorAura&&d<=s.armorAura.r)armor=Math.max(armor,s.armorAura.armor);
+   if(s.aura&&d<=s.aura.r)damage=Math.max(damage,s.aura.p);
+   if(s.moveAura&&d<=s.moveAura.r)move=Math.max(move,s.moveAura.p);
+   if(s.vampAura&&m.rawRange<=180&&d<=s.vampAura.r)vamp=Math.max(vamp,s.vampAura.p);
+  }
+  e.hp=Math.min(e.max,e.hp+heal*dt);e.mercArmor=armor;e.mercDamage=damage;e.mercVamp=vamp;
+  e.mercHaste=e.bloodBuff?.haste||0;e.mercMove=1+move+(e.bloodBuff?.move||0);
+  if(e.stunT>0)continue;
+  if(a.frostAura)for(const f of foes)if(Math.hypot(f.x-e.x,f.y-e.y)<=a.frostAura.r){
+   add341Status(f,'mercFrost',{time:.15,move:a.frostAura.move,attack:a.frostAura.attack});
+   if(!f.def.abil.magicImmune){f.slowF=Math.min(f.slowF,1-a.frostAura.move);f.attackSlow=Math.max(f.attackSlow,a.frostAura.attack);}
+  }
+  if(a.burn)for(const f of foes)if(!f.def.air&&Math.hypot(f.x-e.x,f.y-e.y)<=a.burn.r)hitFighter(p,f,a.burn.dps*dt,'法术',e);
+ }
+ // Support auras also affect regular wave creeps, as in the source map.
+ for(const e of p.enemies.filter(e=>e.hp>0&&!e.mercId)){
+  let heal=0,armor=0,damage=0,move=0,vamp=0;
+  for(const source of friends){const a=MERCS[source.mercId]?.abil;if(!a)continue;const d=Math.hypot(source.x-e.x,source.y-e.y);
+   if(a.healAura&&d<=a.healAura.r)heal=Math.max(heal,a.healAura.hps);
+   if(a.armorAura&&d<=a.armorAura.r)armor=Math.max(armor,a.armorAura.armor);
+   if(a.aura&&d<=a.aura.r)damage=Math.max(damage,a.aura.p);
+   if(a.moveAura&&d<=a.moveAura.r)move=Math.max(move,a.moveAura.p);
+   if(a.vampAura&&e.range<=45&&d<=a.vampAura.r)vamp=Math.max(vamp,a.vampAura.p);
+  }
+  if(e.bloodBuff){e.bloodBuff.time-=dt;if(e.bloodBuff.time<=0)e.bloodBuff=null;}
+  e.hp=Math.min(e.max,e.hp+heal*dt);e.mercArmor=armor;e.mercDamage=damage;e.mercMove=1+move+(e.bloodBuff?.move||0);e.mercHaste=e.bloodBuff?.haste||0;e.mercVamp=vamp;
+ }
+}
+function mercAttack341(p,e,target){
+ const a=MERCS[e.mercId]?.abil||{};
+ const bash=a.bash&&Math.random()<a.bash.chance;
+ const dealt=hitFighter(p,target,(e.dmg*(1+(e.mercDamage||0))+(bash?a.bash.damage:0))*(1-(e.damageWeak||0)),e.atk,e)||0;
+ if(dealt<=0)return;
+ if(e.mercVamp)e.hp=Math.min(e.max,e.hp+dealt*e.mercVamp);
+ if(target.hp<=0||target.def.abil.magicImmune)return;
+ if(bash)add341Status(target,'mercBash',{time:a.bash.duration,stun:true});
+ if(a.corrupt)add341Status(target,'mercCorruption',{time:a.corrupt.duration,armor:a.corrupt.armor});
+ if(a.cold)add341Status(target,'mercCold',{time:a.cold.duration,move:a.cold.move});
+ if(a.poison)add341Status(target,'mercPoison',{time:a.poison.duration,dps:a.poison.dps,move:a.poison.move,attack:a.poison.attack});
+}
 // Stateful combat adapters for the supplied 3.41 unit/ability records.
 function armorFactor(points=0) { return points>=0 ? 1/(1+.06*points) : 2-Math.pow(.94,-points); }
 function init341Fighter(f) {
@@ -13,6 +69,7 @@ function spell341Targets(p,f,r) {
     .sort((a,b)=>Math.hypot(a.x-f.x,a.y-f.y)-Math.hypot(b.x-f.x,b.y-f.y));
 }
 function add341Status(e,key,data) {
+  if(e.magicImmune||e.def?.abil.magicImmune)return;
   e.statuses ||= {};
   e.statuses[key]={...data};
 }
@@ -33,6 +90,7 @@ function step341Enemy(e,dt) {
 function tick341(p,dt) {
   for(const e of p.enemies)step341Enemy(e,dt);
   if(!p.arenaView)for(const f of p.fighters)step341Enemy(f,dt);
+  if(!p.arenaView)tickMerc341(p,dt);
   const alive=p.fighters.filter(f=>f.hp>0&&f.deadT<=0);
   for(const f of alive) {
     if(!f.buffs)init341Fighter(f);

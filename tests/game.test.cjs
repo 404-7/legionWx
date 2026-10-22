@@ -49,7 +49,7 @@ test('server owns economy, rejects malformed commands and isolates rooms', () =>
     {type:'buy',uid:'ent',col:12,row:0},
     {type:'buy',uid:'__proto__',col:0,row:0},
     {type:'merc',mid:'constructor',target:2},
-    {type:'merc',mid:'imp',target:0},
+    {type:'merc',mid:'militia',target:0},
     {type:'pause'}, {type:'speed',speed:10}
   ]) assert.equal(!!a.action(0,action),false);
   assert.equal(!!a.action(1,{type:'king'}),false);
@@ -88,13 +88,13 @@ test('upgrades, sales, mercenaries and king upgrades settle on the correct seat'
   assert.equal(game.snapshot().players[0].fighters[0].uid,'guardian');
   assert.equal(game.action(0,{type:'sell',col:0,row:0}),true);
   assert.equal(game.snapshot().players[0].gold,300);
-  assert.equal(game.action(0,{type:'merc',mid:'imp',target:2}),true);
-  assert.equal(game.snapshot().players[2].mercQueue[0],'imp');
+  assert.equal(game.action(0,{type:'merc',mid:'militia',target:2}),true);
+  assert.equal(game.snapshot().players[2].mercQueue[0],'militia');
   assert.equal(game.snapshot().players[0].income,7);
   assert.equal(game.action(0,{type:'king'}),true);
   assert.equal(game.snapshot().kings[0].lvl,1);
   assert.equal(game.snapshot().kings[1].lvl,0);
-  assert.equal(game.snapshot().players[0].gold,195);
+  assert.equal(game.snapshot().players[0].gold,200);
 });
 test('complete simulation remains serializable and produces a terminal result', () => {
   const game=createGame(humans);

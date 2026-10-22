@@ -73,6 +73,7 @@ test('all imported units and extra summons have drawable native sprites',()=>{
  const {run}=engine({document:{createElement:()=>({getContext:()=>drawing})}});
  run(fs.readFileSync(path.join(__dirname,'../js/sprites.js'),'utf8'));
  assert.doesNotThrow(()=>run('buildSprites()'));assert.equal(run('Object.keys(UNITS).every(id=>SPR[id])'),true);
+ assert.equal(run('Object.keys(MERCS).every(id=>SPR["m_"+id])'),true);
 });
 test('every imported fighter can run its skills without NaN, deadlocks or unserializable state',()=>{
  const {run}=engine();

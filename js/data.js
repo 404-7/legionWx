@@ -50,14 +50,7 @@ function abilDesc(def) {
 }
 
 /* ---- 雇佣兵：送给敌方施加压力，同时提高收入 ---- */
-const MERCS = {
-  imp:     { name: '小恶魔',   cost: 25,  income: 1, hp: 180,  dmg: 14,  aspd: 1.1,  range: 30,  speed: 58, armor: '无甲', atk: '普通', r: 9 },
-  bandit:  { name: '强盗',     cost: 40,  income: 2, hp: 300,  dmg: 22,  aspd: 1.0,  range: 30,  speed: 55, armor: '轻甲', atk: '普通', r: 10 },
-  stone:   { name: '石魔',     cost: 65,  income: 3, hp: 700,  dmg: 26,  aspd: 1.1,  range: 30,  speed: 48, armor: '重甲', atk: '普通', r: 11 },
-  wyvern:  { name: '双足飞龙', cost: 95,  income: 4, hp: 520,  dmg: 40,  aspd: 1.0,  range: 100, speed: 62, armor: '轻甲', atk: '穿刺', r: 10 },
-  abyss:   { name: '深渊兽',   cost: 140, income: 6, hp: 1500, dmg: 75,  aspd: 1.1,  range: 32,  speed: 50, armor: '中甲', atk: '普通', r: 13 },
-  ancient: { name: '远古凶兽', cost: 210, income: 9, hp: 3200, dmg: 130, aspd: 1.2,  range: 34,  speed: 44, armor: '重甲', atk: '攻城', r: 16 },
-};
+const MERCS = Object.fromEntries(SOURCE341.mercs.map(m=>[m.id,m]));
 
 /* ---- 波次表（原表全部31波）---- */
 

@@ -178,6 +178,6 @@ function bindCommandLayout() {
     const pending=CommandUI.pendingSell,f=G&&localPlayer().fighters.find(f=>!f.temporary&&f.uid===pending?.uid&&f.col===pending.col&&f.row===pending.row);
     if(f)performAction({type:'sell',col:f.col,row:f.row});$('sellDialog').close();CommandUI.pendingSell=null;if(G)updateUI(true);
   });
-  document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeCommandPanel();$('quickMenu').hidden=true;}});
+  document.addEventListener('keydown',event=>{if(document.querySelector('dialog[open]'))return;if(event.key==='Escape'){closeCommandPanel();$('quickMenu').hidden=true;}});
   bindMapGestures();
 }

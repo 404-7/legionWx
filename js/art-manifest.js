@@ -2251,7 +2251,8 @@ const CLASSIC_ART_FRAMES = {
       255,
       255
     ],
-    "scale": 1
+    "scale": 1,
+    "match": "closest-classic"
   },
   "m_abyss": {
     "file": "neutral-creeps-facelessone.png",
@@ -2270,5 +2271,235 @@ const CLASSIC_ART_FRAMES = {
       255
     ],
     "scale": 1
+  },
+  "m_militia": {
+    "file": "human-units-animations-militia.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_bowman": {
+    "file": "nightelf-units-animations-archer.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_ghoul": {
+    "file": "undead-units-animations-ghoul.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_warrior": {
+    "file": "orc-units-animations-grunt.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_whelp": {
+    "file": "neutral-creeps-reddragon.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_hermit": {
+    "file": "orc-units-animations-witchdoctor.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_dino": {
+    "file": "neutral-creeps-salamander.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_commander": {
+    "file": "orc-units-animations-wolfrider.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_furbolg": {
+    "file": "neutral-units-animations-bear.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_chariot": {
+    "file": "undead-units-animations-meatwagon.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_blood_orc": {
+    "file": "orc-units-animations-grunt.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_frost_wolf": {
+    "file": "neutral-creeps-whitewolf.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_ice_troll": {
+    "file": "neutral-creeps-foresttroll.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_warlock": {
+    "file": "neutral-creeps-stormreaver.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_pandaren": {
+    "file": "neutral-units-animations-pandarenbrewmaster.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_ballista": {
+    "file": "undead-units-animations-meatwagon.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_shaman": {
+    "file": "orc-units-animations-shaman.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_pudge": {
+    "file": "undead-units-animations-abomination.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_gargoyle": {
+    "file": "undead-units-animations-destroyer.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_behemoth": {
+    "file": "neutral-creeps-seagiant.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_kraken": {
+    "file": "neutral-creeps-facelessone.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_infernal": {
+    "file": "undead-units-animations-infernal.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
+  },
+  "m_demon": {
+    "file": "nightelf-units-animations-demonhunter.png",
+    "tint": [
+      255,
+      255,
+      255
+    ],
+    "scale": 1,
+    "match": "closest-classic"
   }
 };

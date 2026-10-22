@@ -2,6 +2,37 @@
 /* ===== UI：商店 / 波次预览 / 选中单位 / 国王 / 雇佣兵 / 日志 / 弹窗 ===== */
 const $ = id => document.getElementById(id);
 const MineUI={slot:null,pending:null,error:''};
+const MercUI={mid:null};
+function sendMercUI(mid,index){
+  if(!G||!['prep','combat'].includes(G.phase))return;
+  const target=G.players.filter(p=>p.team!==localPlayer().team)[index];
+  if(target)performAction({type:'merc',target:target.id,mid});
+  updateUI(true);
+}
+function openMercDetails(mid){
+  const m=MERCS[mid];if(!m||!G||!['prep','combat'].includes(G.phase))return;MercUI.mid=mid;
+  $('mercDetailName').textContent=m.name;$('mercDetailEnglish').textContent=m.english;
+  drawPortrait($('mercDetailPortrait'),'m_'+mid,128);
+  $('mercDetailIntro').textContent=`${m.description} 派往指定敌军防线，随下一波怪物来袭。花费 ${m.cost} 金，永久增加 ${m.income} 点每波收入。`;
+  const stats=[['生命',m.hp],['攻击',`${m.min}–${m.max} · ${m.atk}`],['攻击间隔',m.aspd+' 秒'],['攻击距离',m.rawRange],['护甲',m.armor+' · '+m.armorPoints],['移动速度',m.rawSpeed],['生命恢复',m.regenFlat+' / 秒'],['法力 / 回蓝',m.manaMax+' / '+m.manaRegen+' 每秒']];
+  $('mercDetailStats').innerHTML=stats.map(([label,value])=>`<div><small>${label}</small><b>${value}</b></div>`).join('');
+  $('mercDetailSkills').innerHTML=m.skills.length?m.skills.map(s=>`<article><b>${escape341(s.name)}</b><p>${escape341(s.description)}</p></article>`).join(''):'<p class="merc-no-skill">无主动或光环技能，依靠普通攻击作战。</p>';
+  updateMercUI(localPlayer());$('mercDialog').showModal();
+}
+function updateMercUI(me){
+  const active=['prep','combat'].includes(G.phase),targets=G.players.filter(p=>p.team!==me.team);
+  for(const row of document.querySelectorAll('[data-merc-id]')){
+    const m=MERCS[row.dataset.mercId],locked=G.wave<m.unlockWave;
+    row.classList.toggle('merc-locked',locked);
+    row.querySelector('.merc-unlock').textContent=locked?`第 ${m.unlockWave} 波解锁`:'点击查看属性与技能';
+    row.querySelectorAll('[data-merc-send]').forEach(b=>{b.disabled=!active||locked||me.gold<m.cost||!targets[+b.dataset.mercSend]||targets[+b.dataset.mercSend].mercQueue.length>=40;});
+  }
+  const m=MERCS[MercUI.mid];if(!m)return;
+  if(!active){if($('mercDialog').open)$('mercDialog').close();return;}
+  const locked=G.wave<m.unlockWave;
+  $('mercDetailStatus').textContent=locked?`第 ${m.unlockWave} 波解锁 · 当前第 ${G.wave} 波`:me.gold<m.cost?`金币不足，还需 ${Math.ceil(m.cost-me.gold)} 金`:`${m.cost} 金 / 次 · 收入 +${m.income} · 当前 ${Math.floor(me.gold)} 金`;
+  document.querySelectorAll('[data-merc-detail-send]').forEach(b=>{const target=targets[+b.dataset.mercDetailSend];b.disabled=locked||me.gold<m.cost||!target||target.mercQueue.length>=40;b.textContent=target?`派遣 → ${target.name} (${target.mercQueue.length}/40)`:'无目标';});
+}
 function mineAtSlot(p,slot){return p.mines.find(m=>(m.slot??m.id)===slot);}
 function openMineDialog(slot){
   MineUI.slot=slot;MineUI.pending=null;MineUI.error='';
@@ -98,33 +129,38 @@ function isBaseUnit(uid) {
 
 function buildMercs() {
   const root = $('mercs');
-  root.innerHTML = '';
+  root.innerHTML = '<p class="merc-shop-hint">24 类进攻单位 · 点击卡片查看属性和技能<br>派遣增加每波收入，单位随下一波进攻指定敌军</p>';
+  const groups=new Map();
+  for(const wave of [1,10,15]){
+    const section=document.createElement('section');section.className='merc-group';
+    section.innerHTML=`<h4>${wave===1?'基础军团':wave===10?'进阶军团':'精锐军团'}<small>第 ${wave} 波开放</small></h4><div class="merc-grid"></div>`;
+    root.appendChild(section);groups.set(wave,section.querySelector('.merc-grid'));
+  }
   for (const [mid, m] of Object.entries(MERCS)) {
     const row = document.createElement('div');
-    row.className = 'mrow';
+    row.className = 'mrow merc-card';row.dataset.mercId=mid;
+    const detail=document.createElement('button');detail.className='merc-info';detail.setAttribute('aria-label',`查看${m.name}的属性和技能`);detail.setAttribute('aria-haspopup','dialog');
     const portrait = document.createElement('canvas');
     portrait.className = 'mPortrait';
-    portrait.width = 36; portrait.height = 36;
-    drawPortrait(portrait, 'm_' + mid, 36);
-    row.appendChild(portrait);
+    portrait.width = 96; portrait.height = 96;
+    drawPortrait(portrait, 'm_' + mid, 96);
+    detail.appendChild(portrait);
     const info = document.createElement('div');
     info.className = 'mname';
-    info.innerHTML = `<b>${m.name}</b><br><span class="mcost">${m.cost}金</span> <span class="minc">+${m.income}收入</span>`;
-    row.appendChild(info);
+    info.innerHTML = `<b>${m.name}</b><span class="merc-prices"><span class="mcost">${m.cost}金</span> <span class="minc">+${m.income}收入</span></span><small>${m.air?'空中':m.rawRange<=180?'近战':'远程'} · ${m.atk} / ${m.armor}</small><small>生命 ${m.hp} · 攻击 ${m.min}–${m.max}</small><span class="merc-unlock"></span>`;
+    detail.appendChild(info);detail.addEventListener('click',()=>openMercDetails(mid));row.appendChild(detail);
+    const actions=document.createElement('div');actions.className='merc-card-actions';
     const b1 = document.createElement('button');
-    b1.className = 'btn'; b1.textContent = '敌军 Ⅰ'; b1.dataset.enemy = '0';
+    b1.className = 'btn'; b1.textContent = '敌军 Ⅰ'; b1.dataset.mercSend = '0';
     const b2 = document.createElement('button');
-    b2.className = 'btn'; b2.textContent = '敌军 Ⅱ'; b2.dataset.enemy = '1';
+    b2.className = 'btn'; b2.textContent = '敌军 Ⅱ'; b2.dataset.mercSend = '1';
     [b1, b2].forEach(btn => {
       btn.addEventListener('click', () => {
-        if (!G || G.phase === 'over' || G.phase === 'menu') return;
-        const tgt = G.players.filter(p => p.team !== localPlayer().team)[+btn.dataset.enemy];
-        performAction({ type:'merc', target:tgt.id, mid });
-        updateUI(true);
+        sendMercUI(mid,+btn.dataset.mercSend);
       });
-      row.appendChild(btn);
+      actions.appendChild(btn);
     });
-    root.appendChild(row);
+    row.appendChild(actions);groups.get(m.unlockWave).appendChild(row);
   }
 }
 
@@ -237,10 +273,7 @@ function updateUI(force) {
   });
 
   // 雇佣兵可用性
-  document.querySelectorAll('.mrow').forEach(row => {
-    const name = row.querySelector('.mcost').textContent.replace('金', '');
-    row.querySelectorAll('button').forEach(b => b.disabled = me.gold < +name || G.phase === 'over');
-  });
+  updateMercUI(me);
 
   // 日志
   const lg = $('log');
@@ -355,6 +388,9 @@ function bindEvents() {
   });
 
   $('btnMineClose').addEventListener('click',()=>$('mineDialog').close());
+  $('btnMercClose').addEventListener('click',()=>$('mercDialog').close());
+  $('mercDialog').addEventListener('close',()=>{MercUI.mid=null;});
+  document.querySelectorAll('[data-merc-detail-send]').forEach(b=>b.addEventListener('click',()=>sendMercUI(MercUI.mid,+b.dataset.mercDetailSend)));
   $('btnMineAction').addEventListener('click',submitMineAction);
   $('mineDialog').addEventListener('close',()=>{MineUI.slot=null;MineUI.pending=null;MineUI.error='';if(G)G.selectedMine=null;});
 
