@@ -87,7 +87,7 @@ test('creep aggro sticks to a defender, responds to threat, and healing contribu
 
 test('leaked creeps can retaliate against guards on the king road instead of ignoring them',()=>{
  const run=engine();run(`leak(p,e);const k=G.kings[p.team];f.x=k.x;f.y=k.y-40;e.x=k.x+5;e.y=k.y-45;e.cd=0;
- globalThis.kingHP=k.hp;globalThis.guardHP=f.hp;kingStep(k,.1);`);
+ globalThis.kingHP=k.hp;globalThis.guardHP=f.hp;kingStep(k,.1);kingStep(k,e.attackPoint+.01);`);
  assert.ok(run('f.hp<guardHP'));assert.equal(run('G.kings[p.team].hp'),run('kingHP'));
 });
 

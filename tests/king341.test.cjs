@@ -17,10 +17,10 @@ test('king fires a delayed single-target hero missile without free splash and ca
  run('k.cd=0;k.windup=null;G.projectiles=[];kingStep(k,.01);e.hp=0;other.hp=0;kingStep(k,1)');assert.equal(run('G.projectiles.length'),0);assert.equal(run('k.windup'),null);
 });
 test('hero armor and automatic four-wave growth reduce incoming damage and shorten attack intervals once',()=>{
- const run=engine();leaks(run);run('e.x=k.x;e.range=30;e.dmg=100;e.atk="穿刺";e.cd=0;k.cd=100;kingStep(k,.01)');assert.equal(run('k.hp'),2500);
+ const run=engine();leaks(run);run('e.x=k.x;e.range=30;e.attackBase=100;e.attackDice=0;e.atk="穿刺";e.cd=0;k.cd=100;kingStep(k,.01)');assert.equal(run('k.hp'),2600);run('kingStep(k,e.attackPoint+.01)');assert.equal(run('k.hp'),2500);
  run('growKing341(k,4)');assert.equal(run('k.armorPoints'),4);assert.ok(Math.abs(run('kingInterval341(k)')-.9/1.1)<1e-8);assert.equal(run('k.skills.length'),1);
  const skill=run('k.skills[0]');run('growKing341(k,4)');assert.equal(run('k.skills[0]'),skill);assert.equal(run('k.skills.length'),1);
- run('k.hp=2600;k.skills=[];e.cd=0;kingStep(k,.01)');assert.ok(Math.abs(run('2600-k.hp')-100/1.24)<1e-8);
+ run('k.hp=2600;k.skills=[];e.cd=0;kingStep(k,.01);kingStep(k,e.attackPoint+.01)');assert.ok(Math.abs(run('2600-k.hp')-100/1.24)<1e-8);
 });
 test('learned stomp respects mana, cooldown, stun and magic immunity; immolation hits only ground',()=>{
  const run=engine();leaks(run);run("k.skills=['A022'];e.x=k.x+35;other.x=k.x+45;other.magicImmune=true;kingSpell341(k,e)");

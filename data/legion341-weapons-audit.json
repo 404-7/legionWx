@@ -1,0 +1,4287 @@
+{
+  "policy": "Spreadsheet fighter damage bounds retained; compatible object dice preserve independent-roll distribution. Object overrides win for windup and missile speed. Missing native defaults remain explicitly unverified.",
+  "units": [
+    {
+      "id": "gnoll_warrior",
+      "name": "Gnoll Warrior",
+      "rawId": "h02L",
+      "base": "hfoo",
+      "damage": {
+        "min": 6,
+        "max": 8,
+        "base": 5,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 5,
+        "dice": 1,
+        "sides": 3
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "gnoll_savage",
+      "name": "Gnoll Savage",
+      "rawId": "h02M",
+      "base": "hfoo",
+      "damage": {
+        "min": 34,
+        "max": 38,
+        "base": 33,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 33,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "ogre_basher",
+      "name": "Ogre Basher",
+      "rawId": "h02N",
+      "base": "hfoo",
+      "damage": {
+        "min": 11,
+        "max": 13,
+        "base": 10,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 10,
+        "dice": 1,
+        "sides": 3
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "ogre_pulverizer",
+      "name": "Ogre Pulverizer",
+      "rawId": "h02O",
+      "base": "hfoo",
+      "damage": {
+        "min": 41,
+        "max": 61,
+        "base": 39,
+        "dice": 2,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 39,
+        "dice": 2,
+        "sides": 11
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "harpy",
+      "name": "Harpy",
+      "rawId": "h02P",
+      "base": "hdhw",
+      "damage": {
+        "min": 25,
+        "max": 28,
+        "base": 24,
+        "dice": 1,
+        "sides": 4
+      },
+      "sourceDamage": {
+        "base": 24,
+        "dice": null,
+        "sides": 4
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "medusa",
+      "name": "Medusa",
+      "rawId": "h02Q",
+      "base": "hdhw",
+      "damage": {
+        "min": 56,
+        "max": 63,
+        "base": 55,
+        "dice": 1,
+        "sides": 8
+      },
+      "sourceDamage": {
+        "base": 55,
+        "dice": null,
+        "sides": 8
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "troll_fighter",
+      "name": "Troll Fighter",
+      "rawId": "h02R",
+      "base": "hrif",
+      "damage": {
+        "min": 63,
+        "max": 72,
+        "base": 62,
+        "dice": 1,
+        "sides": 10
+      },
+      "sourceDamage": {
+        "base": 62,
+        "dice": 1,
+        "sides": 10
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "troll_champion",
+      "name": "Troll Champion",
+      "rawId": "h02S",
+      "base": "hrif",
+      "damage": {
+        "min": 105,
+        "max": 117,
+        "base": 103,
+        "dice": 2,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 103,
+        "dice": 2,
+        "sides": 7
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "grizzly",
+      "name": "Grizzly",
+      "rawId": "h02T",
+      "base": "hfoo",
+      "damage": {
+        "min": 99,
+        "max": 115,
+        "base": 97,
+        "dice": 2,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 97,
+        "dice": 2,
+        "sides": 9
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "greymane",
+      "name": "Greymane",
+      "rawId": "h02U",
+      "base": "hfoo",
+      "damage": {
+        "min": 142,
+        "max": 154,
+        "base": 140,
+        "dice": 2,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 140,
+        "dice": 2,
+        "sides": 14
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "spawn_of_dragon",
+      "name": "Spawn of Dragon",
+      "rawId": "h02V",
+      "base": "hrif",
+      "damage": {
+        "min": 141,
+        "max": 159,
+        "base": 139,
+        "dice": 2,
+        "sides": 10
+      },
+      "sourceDamage": {
+        "base": 139,
+        "dice": 2,
+        "sides": 10
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "dragon_aspect",
+      "name": "Dragon Aspect",
+      "rawId": "h02W",
+      "base": "hdhw",
+      "damage": {
+        "min": 232,
+        "max": 247,
+        "base": 229,
+        "dice": 3,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 229,
+        "dice": 3,
+        "sides": 6
+      },
+      "windup": 0.3400000035762787,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "peewee",
+      "name": "Peewee",
+      "rawId": "h00L",
+      "base": "hfoo",
+      "damage": {
+        "min": 17,
+        "max": 19,
+        "base": 16,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 16,
+        "dice": 1,
+        "sides": 3
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "veteran",
+      "name": "Veteran",
+      "rawId": "h028",
+      "base": "hfoo",
+      "damage": {
+        "min": 83,
+        "max": 94,
+        "base": 82,
+        "dice": 1,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 82,
+        "dice": 1,
+        "sides": 12
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "infantry",
+      "name": "Infantry",
+      "rawId": "h02B",
+      "base": "hrif",
+      "damage": {
+        "min": 16,
+        "max": 20,
+        "base": 15,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 15,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.17,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 475,
+      "projectileSource": "inherited-default"
+    },
+    {
+      "id": "pyro",
+      "name": "Pyro",
+      "rawId": "h02C",
+      "base": "hrif",
+      "damage": {
+        "min": 48,
+        "max": 52,
+        "base": 47,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 47,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.17,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 750,
+      "projectileSource": "map"
+    },
+    {
+      "id": "zeus",
+      "name": "Zeus",
+      "rawId": "h02D",
+      "base": "hrif",
+      "damage": {
+        "min": 16,
+        "max": 18,
+        "base": 15,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 15,
+        "dice": 1,
+        "sides": 3
+      },
+      "windup": 0.11999999731779099,
+      "windupSource": "map",
+      "projectileSpeed": 1000,
+      "projectileSource": "map"
+    },
+    {
+      "id": "captain",
+      "name": "Captain",
+      "rawId": "h029",
+      "base": "hfoo",
+      "damage": {
+        "min": 60,
+        "max": 72,
+        "base": 59,
+        "dice": 1,
+        "sides": 13
+      },
+      "sourceDamage": {
+        "base": 59,
+        "dice": 1,
+        "sides": 13
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "admiral",
+      "name": "Admiral",
+      "rawId": "h02A",
+      "base": "hfoo",
+      "damage": {
+        "min": 153,
+        "max": 173,
+        "base": 152,
+        "dice": 1,
+        "sides": 21
+      },
+      "sourceDamage": {
+        "base": 152,
+        "dice": 1,
+        "sides": 21
+      },
+      "windup": 0.6600000262260437,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "tempest",
+      "name": "Tempest",
+      "rawId": "h02G",
+      "base": "hdhw",
+      "damage": {
+        "min": 30,
+        "max": 44,
+        "base": 29,
+        "dice": 1,
+        "sides": 15
+      },
+      "sourceDamage": {
+        "base": 29,
+        "dice": null,
+        "sides": 15
+      },
+      "windup": 0.17000000178813934,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "leviathan",
+      "name": "Leviathan",
+      "rawId": "h02H",
+      "base": "hdhw",
+      "damage": {
+        "min": 263,
+        "max": 305,
+        "base": 260,
+        "dice": 3,
+        "sides": 15
+      },
+      "sourceDamage": {
+        "base": 260,
+        "dice": 3,
+        "sides": 15
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "cyborg",
+      "name": "Cyborg",
+      "rawId": "h02I",
+      "base": "hrif",
+      "damage": {
+        "min": 121,
+        "max": 135,
+        "base": 119,
+        "dice": 2,
+        "sides": 8
+      },
+      "sourceDamage": {
+        "base": 119,
+        "dice": 2,
+        "sides": 8
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "krogoth",
+      "name": "Krogoth",
+      "rawId": "h02J",
+      "base": "hrif",
+      "damage": {
+        "min": 156,
+        "max": 164,
+        "base": 154,
+        "dice": 2,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 154,
+        "dice": 2,
+        "sides": 5
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "neotank",
+      "name": "Neotank",
+      "rawId": "h02E",
+      "base": "hrif",
+      "damage": {
+        "min": 143,
+        "max": 159,
+        "base": 141,
+        "dice": 2,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 141,
+        "dice": 2,
+        "sides": 9
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 750,
+      "projectileSource": "map"
+    },
+    {
+      "id": "doomsday_machine",
+      "name": "Doomsday Machine",
+      "rawId": "h02F",
+      "base": "hrif",
+      "damage": {
+        "min": 303,
+        "max": 353,
+        "base": 298,
+        "dice": 5,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 298,
+        "dice": 5,
+        "sides": 11
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 750,
+      "projectileSource": "map"
+    },
+    {
+      "id": "ent",
+      "name": "Ent",
+      "rawId": "h02X",
+      "base": "hfoo",
+      "damage": {
+        "min": 11,
+        "max": 13,
+        "base": 10,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 10,
+        "dice": 1,
+        "sides": 3
+      },
+      "windup": 0.46700000762939453,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "guardian",
+      "name": "Guardian",
+      "rawId": "h02Y",
+      "base": "hfoo",
+      "damage": {
+        "min": 53,
+        "max": 64,
+        "base": 52,
+        "dice": 1,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 52,
+        "dice": 1,
+        "sides": 12
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "ranger",
+      "name": "Ranger",
+      "rawId": "h02Z",
+      "base": "hrif",
+      "damage": {
+        "min": 15,
+        "max": 18,
+        "base": 14,
+        "dice": 1,
+        "sides": 4
+      },
+      "sourceDamage": {
+        "base": 14,
+        "dice": 1,
+        "sides": 4
+      },
+      "windup": 0.7200000286102295,
+      "windupSource": "map",
+      "projectileSpeed": 450,
+      "projectileSource": "map"
+    },
+    {
+      "id": "meliai",
+      "name": "Meliai",
+      "rawId": "h030",
+      "base": "hrif",
+      "damage": {
+        "min": 40,
+        "max": 43,
+        "base": 39,
+        "dice": 1,
+        "sides": 4
+      },
+      "sourceDamage": {
+        "base": 39,
+        "dice": 1,
+        "sides": 4
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 450,
+      "projectileSource": "map"
+    },
+    {
+      "id": "sprite",
+      "name": "Sprite",
+      "rawId": "h031",
+      "base": "hdhw",
+      "damage": {
+        "min": 22,
+        "max": 27,
+        "base": 21,
+        "dice": 1,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 21,
+        "dice": null,
+        "sides": 6
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "thunderbird",
+      "name": "Thunderbird",
+      "rawId": "h032",
+      "base": "hdhw",
+      "damage": {
+        "min": 120,
+        "max": 132,
+        "base": 118,
+        "dice": 2,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 118,
+        "dice": 2,
+        "sides": 7
+      },
+      "windup": 0.699999988079071,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "tree_of_travel",
+      "name": "Tree of Travel",
+      "rawId": "h033",
+      "base": "hrif",
+      "damage": {
+        "min": 74,
+        "max": 82,
+        "base": 73,
+        "dice": 1,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 73,
+        "dice": 1,
+        "sides": 9
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "tree_of_time",
+      "name": "Tree of Time",
+      "rawId": "h034",
+      "base": "hrif",
+      "damage": {
+        "min": 138,
+        "max": 144,
+        "base": 135,
+        "dice": 3,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 135,
+        "dice": 3,
+        "sides": 3
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "halfbreed",
+      "name": "Halfbreed",
+      "rawId": "h035",
+      "base": "hrif",
+      "damage": {
+        "min": 86,
+        "max": 90,
+        "base": 85,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 85,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "goliath",
+      "name": "Goliath",
+      "rawId": "h036",
+      "base": "hrif",
+      "damage": {
+        "min": 246,
+        "max": 278,
+        "base": 245,
+        "dice": 1,
+        "sides": 33
+      },
+      "sourceDamage": {
+        "base": 245,
+        "dice": 1,
+        "sides": 33
+      },
+      "windup": 0.49000000953674316,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "yggdrasil",
+      "name": "Yggdrasil",
+      "rawId": "h037",
+      "base": "hrif",
+      "damage": {
+        "min": 91,
+        "max": 102,
+        "base": 90,
+        "dice": 1,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 90,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "tree_of_life",
+      "name": "Tree of Life",
+      "rawId": "h038",
+      "base": "hrif",
+      "damage": {
+        "min": 301,
+        "max": 334,
+        "base": 298,
+        "dice": 3,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 298,
+        "dice": 3,
+        "sides": 12
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "tree_of_knowledge",
+      "name": "Tree of Knowledge",
+      "rawId": "h039",
+      "base": "hrif",
+      "damage": {
+        "min": 201,
+        "max": 221,
+        "base": 199,
+        "dice": 2,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 199,
+        "dice": 2,
+        "sides": 11
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "bone_warrior",
+      "name": "Bone Warrior",
+      "rawId": "h03A",
+      "base": "hrif",
+      "damage": {
+        "min": 4,
+        "max": 5,
+        "base": 3,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 3,
+        "dice": 1,
+        "sides": 2
+      },
+      "windup": 0.5600000023841858,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "skeletor",
+      "name": "Skeletor",
+      "rawId": "h03B",
+      "base": "hrif",
+      "damage": {
+        "min": 33,
+        "max": 39,
+        "base": 32,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 32,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.5600000023841858,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "fire_archer",
+      "name": "Fire Archer",
+      "rawId": "h03C",
+      "base": "hrif",
+      "damage": {
+        "min": 12,
+        "max": 14,
+        "base": 11,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 11,
+        "dice": 1,
+        "sides": 3
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 500,
+      "projectileSource": "map"
+    },
+    {
+      "id": "dark_mage",
+      "name": "Dark Mage",
+      "rawId": "h03D",
+      "base": "hrif",
+      "damage": {
+        "min": 27,
+        "max": 31,
+        "base": 26,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 26,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "carrion_spitter",
+      "name": "Carrion Spitter",
+      "rawId": "h03E",
+      "base": "hrif",
+      "damage": {
+        "min": 12,
+        "max": 17,
+        "base": 11,
+        "dice": 1,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 11,
+        "dice": 1,
+        "sides": 6
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 200,
+      "projectileSource": "map"
+    },
+    {
+      "id": "nightcrawler",
+      "name": "Nightcrawler",
+      "rawId": "h03F",
+      "base": "hrif",
+      "damage": {
+        "min": 28,
+        "max": 34,
+        "base": 27,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 27,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.23999999463558197,
+      "windupSource": "map",
+      "projectileSpeed": 375,
+      "projectileSource": "map"
+    },
+    {
+      "id": "gateguard",
+      "name": "Gateguard",
+      "rawId": "h03G",
+      "base": "hfoo",
+      "damage": {
+        "min": 24,
+        "max": 37,
+        "base": 23,
+        "dice": 1,
+        "sides": 14
+      },
+      "sourceDamage": {
+        "base": 23,
+        "dice": 1,
+        "sides": 14
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "fiend",
+      "name": "Fiend",
+      "rawId": "n001",
+      "base": "nfel",
+      "damage": {
+        "min": 14,
+        "max": 17,
+        "base": 13,
+        "dice": 1,
+        "sides": 4
+      },
+      "sourceDamage": {
+        "base": 13,
+        "dice": null,
+        "sides": null
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "harbinger",
+      "name": "Harbinger",
+      "rawId": "h03H",
+      "base": "hfoo",
+      "damage": {
+        "min": 72,
+        "max": 96,
+        "base": 69,
+        "dice": 3,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 69,
+        "dice": 3,
+        "sides": 9
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "fanatic",
+      "name": "Fanatic",
+      "rawId": "n002",
+      "base": "npfm",
+      "damage": {
+        "min": 40,
+        "max": 47,
+        "base": 39,
+        "dice": 1,
+        "sides": 8
+      },
+      "sourceDamage": {
+        "base": 39,
+        "dice": null,
+        "sides": 8
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "overseer",
+      "name": "Overseer",
+      "rawId": "h03I",
+      "base": "hrif",
+      "damage": {
+        "min": 64,
+        "max": 76,
+        "base": 63,
+        "dice": 1,
+        "sides": 13
+      },
+      "sourceDamage": {
+        "base": 63,
+        "dice": 1,
+        "sides": 13
+      },
+      "windup": 0.5300000309944153,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "keeper_of_souls",
+      "name": "Keeper of Souls",
+      "rawId": "h03J",
+      "base": "hdhw",
+      "damage": {
+        "min": 120,
+        "max": 132,
+        "base": 117,
+        "dice": 3,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 117,
+        "dice": 3,
+        "sides": 5
+      },
+      "windup": 0.6330000162124634,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "nightmare",
+      "name": "Nightmare",
+      "rawId": "h03K",
+      "base": "hfoo",
+      "damage": {
+        "min": 15,
+        "max": 45,
+        "base": 12,
+        "dice": 3,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 12,
+        "dice": 3,
+        "sides": 11
+      },
+      "windup": 0.11999999731779099,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "doppelganger",
+      "name": "Doppelganger",
+      "rawId": "h03L",
+      "base": "hfoo",
+      "damage": {
+        "min": 15,
+        "max": 37,
+        "base": 13,
+        "dice": 2,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 13,
+        "dice": 2,
+        "sides": 12
+      },
+      "windup": 0.07000000029802322,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "lord_of_death",
+      "name": "Lord of Death",
+      "rawId": "h03M",
+      "base": "hrif",
+      "damage": {
+        "min": 35,
+        "max": 45,
+        "base": 34,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 34,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "infernal",
+      "name": "Infernal",
+      "rawId": "h05A",
+      "base": "hfoo",
+      "damage": {
+        "min": 55,
+        "max": 66,
+        "base": 54,
+        "dice": 1,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 154,
+        "dice": 1,
+        "sides": 19
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "hades",
+      "name": "Hades",
+      "rawId": "h03N",
+      "base": "hrif",
+      "damage": {
+        "min": 70,
+        "max": 80,
+        "base": 69,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 69,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "diablotic",
+      "name": "Diablotic",
+      "rawId": "u005",
+      "base": "uktn",
+      "damage": {
+        "min": 51,
+        "max": 58,
+        "base": 50,
+        "dice": 1,
+        "sides": 8
+      },
+      "sourceDamage": {
+        "base": 50,
+        "dice": null,
+        "sides": 8
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "proton",
+      "name": "Proton",
+      "rawId": "h04C",
+      "base": "hrif",
+      "damage": {
+        "min": 13,
+        "max": 13,
+        "base": 12,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": 12,
+        "dice": 1,
+        "sides": 1
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 475,
+      "projectileSource": "inherited-default"
+    },
+    {
+      "id": "adept",
+      "name": "Adept",
+      "rawId": "h04D",
+      "base": "hrif",
+      "damage": {
+        "min": 100,
+        "max": 100,
+        "base": 99,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": 99,
+        "dice": 1,
+        "sides": 1
+      },
+      "windup": 0.33000001311302185,
+      "windupSource": "map",
+      "projectileSpeed": 475,
+      "projectileSource": "inherited-default"
+    },
+    {
+      "id": "aqua_spirit",
+      "name": "Aqua Spirit",
+      "rawId": "h04E",
+      "base": "hrif",
+      "damage": {
+        "min": 13,
+        "max": 18,
+        "base": 12,
+        "dice": 1,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 12,
+        "dice": 1,
+        "sides": 6
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 250,
+      "projectileSource": "map"
+    },
+    {
+      "id": "oceanus",
+      "name": "Oceanus",
+      "rawId": "h04F",
+      "base": "hrif",
+      "damage": {
+        "min": 49,
+        "max": 54,
+        "base": 48,
+        "dice": 1,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 48,
+        "dice": 1,
+        "sides": 6
+      },
+      "windup": 0.5299999713897705,
+      "windupSource": "map",
+      "projectileSpeed": 250,
+      "projectileSource": "map"
+    },
+    {
+      "id": "watcher",
+      "name": "Watcher",
+      "rawId": "h04G",
+      "base": "hdhw",
+      "damage": {
+        "min": 36,
+        "max": 42,
+        "base": 35,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 35,
+        "dice": null,
+        "sides": 7
+      },
+      "windup": 0.6000000238418579,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "violet",
+      "name": "Violet",
+      "rawId": "h04H",
+      "base": "hdhw",
+      "damage": {
+        "min": 51,
+        "max": 61,
+        "base": 50,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 50,
+        "dice": null,
+        "sides": 11
+      },
+      "windup": 0.6000000238418579,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "mudman",
+      "name": "Mudman",
+      "rawId": "h04I",
+      "base": "hfoo",
+      "damage": {
+        "min": 75,
+        "max": 81,
+        "base": 74,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 74,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "golem",
+      "name": "Golem",
+      "rawId": "h04J",
+      "base": "hfoo",
+      "damage": {
+        "min": 166,
+        "max": 180,
+        "base": 164,
+        "dice": 2,
+        "sides": 8
+      },
+      "sourceDamage": {
+        "base": 164,
+        "dice": 2,
+        "sides": 8
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "disciple",
+      "name": "Disciple",
+      "rawId": "h04K",
+      "base": "hrif",
+      "damage": {
+        "min": 57,
+        "max": 71,
+        "base": 55,
+        "dice": 2,
+        "sides": 8
+      },
+      "sourceDamage": {
+        "base": 55,
+        "dice": 2,
+        "sides": 8
+      },
+      "windup": 0.5899999737739563,
+      "windupSource": "map",
+      "projectileSpeed": 375,
+      "projectileSource": "map"
+    },
+    {
+      "id": "messiah",
+      "name": "Messiah",
+      "rawId": "h04L",
+      "base": "hrif",
+      "damage": {
+        "min": 119,
+        "max": 125,
+        "base": 117,
+        "dice": 2,
+        "sides": 4
+      },
+      "sourceDamage": {
+        "base": 117,
+        "dice": 2,
+        "sides": 4
+      },
+      "windup": 0.550000011920929,
+      "windupSource": "map",
+      "projectileSpeed": 375,
+      "projectileSource": "map"
+    },
+    {
+      "id": "seer_of_darkness",
+      "name": "Seer of Darkness",
+      "rawId": "h04M",
+      "base": "hdhw",
+      "damage": {
+        "min": 142,
+        "max": 156,
+        "base": 140,
+        "dice": 2,
+        "sides": 8
+      },
+      "sourceDamage": {
+        "base": 140,
+        "dice": 2,
+        "sides": 8
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "fenix",
+      "name": "Fenix",
+      "rawId": "h04N",
+      "base": "hdhw",
+      "damage": {
+        "min": 193,
+        "max": 205,
+        "base": 190,
+        "dice": 3,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 190,
+        "dice": 3,
+        "sides": 5
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "specter",
+      "name": "Specter",
+      "rawId": "h061",
+      "base": "hrif",
+      "damage": {
+        "min": 4,
+        "max": 5,
+        "base": 3,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 3,
+        "dice": 1,
+        "sides": 2
+      },
+      "windup": 0.18000000715255737,
+      "windupSource": "map",
+      "projectileSpeed": 450,
+      "projectileSource": "map"
+    },
+    {
+      "id": "wraith",
+      "name": "Wraith",
+      "rawId": "h063",
+      "base": "hrif",
+      "damage": {
+        "min": 14,
+        "max": 20,
+        "base": 13,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 13,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.18000000715255737,
+      "windupSource": "map",
+      "projectileSpeed": 450,
+      "projectileSource": "map"
+    },
+    {
+      "id": "mercurial",
+      "name": "Mercurial",
+      "rawId": "h064",
+      "base": "hrif",
+      "damage": {
+        "min": 35,
+        "max": 40,
+        "base": 34,
+        "dice": 1,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 34,
+        "dice": 1,
+        "sides": 6
+      },
+      "windup": 0.18000000715255737,
+      "windupSource": "map",
+      "projectileSpeed": 450,
+      "projectileSource": "map"
+    },
+    {
+      "id": "wanderer",
+      "name": "Wanderer",
+      "rawId": "h065",
+      "base": "hrif",
+      "damage": {
+        "min": 16,
+        "max": 20,
+        "base": 15,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 15,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.23999999463558197,
+      "windupSource": "map",
+      "projectileSpeed": 450,
+      "projectileSource": "map"
+    },
+    {
+      "id": "soul_of_hero_atk",
+      "name": "Soul of Hero (atk)",
+      "rawId": "h066",
+      "base": "hrif",
+      "damage": {
+        "min": 78,
+        "max": 90,
+        "base": 77,
+        "dice": 1,
+        "sides": 13
+      },
+      "sourceDamage": {
+        "base": 77,
+        "dice": 1,
+        "sides": 13
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "soul_of_hero_def",
+      "name": "Soul of Hero (def)",
+      "rawId": "h067",
+      "base": "hrif",
+      "damage": {
+        "min": 67,
+        "max": 71,
+        "base": 66,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 66,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "soul_of_villain",
+      "name": "Soul of Villain",
+      "rawId": "h068",
+      "base": "hrif",
+      "damage": {
+        "min": 74,
+        "max": 80,
+        "base": 73,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 73,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.6000000238418579,
+      "windupSource": "map",
+      "projectileSpeed": 350,
+      "projectileSource": "map"
+    },
+    {
+      "id": "phantom",
+      "name": "Phantom",
+      "rawId": "h069",
+      "base": "hrif",
+      "damage": {
+        "min": 0,
+        "max": 0,
+        "base": -1,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": -1,
+        "dice": 1,
+        "sides": 1
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "hell_raiser",
+      "name": "Hell Raiser",
+      "rawId": "h06A",
+      "base": "hrif",
+      "damage": {
+        "min": 0,
+        "max": 0,
+        "base": -1,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": -1,
+        "dice": 1,
+        "sides": 1
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "outcast",
+      "name": "Outcast",
+      "rawId": "h06B",
+      "base": "hrif",
+      "damage": {
+        "min": 73,
+        "max": 80,
+        "base": 72,
+        "dice": 1,
+        "sides": 8
+      },
+      "sourceDamage": {
+        "base": 72,
+        "dice": 1,
+        "sides": 8
+      },
+      "windup": 0.6000000238418579,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "forsaken_one",
+      "name": "Forsaken One",
+      "rawId": "h06C",
+      "base": "hrif",
+      "damage": {
+        "min": 105,
+        "max": 119,
+        "base": 104,
+        "dice": 1,
+        "sides": 15
+      },
+      "sourceDamage": {
+        "base": 104,
+        "dice": 1,
+        "sides": 15
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "apparition",
+      "name": "Apparition",
+      "rawId": "h06D",
+      "base": "hdhw",
+      "damage": {
+        "min": 118,
+        "max": 130,
+        "base": 116,
+        "dice": 2,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 116,
+        "dice": 2,
+        "sides": 7
+      },
+      "windup": 0.6000000238418579,
+      "windupSource": "map",
+      "projectileSpeed": 325,
+      "projectileSource": "map"
+    },
+    {
+      "id": "gravekeeper",
+      "name": "Gravekeeper",
+      "rawId": "h06E",
+      "base": "hdhw",
+      "damage": {
+        "min": 209,
+        "max": 219,
+        "base": 208,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 208,
+        "dice": null,
+        "sides": 11
+      },
+      "windup": 0.6000000238418579,
+      "windupSource": "map",
+      "projectileSpeed": 325,
+      "projectileSource": "map"
+    },
+    {
+      "id": "dark_priest",
+      "name": "Dark Priest",
+      "rawId": "h06F",
+      "base": "hrif",
+      "damage": {
+        "min": 100,
+        "max": 121,
+        "base": 97,
+        "dice": 3,
+        "sides": 8
+      },
+      "sourceDamage": {
+        "base": 97,
+        "dice": 3,
+        "sides": 8
+      },
+      "windup": 0.49000000953674316,
+      "windupSource": "map",
+      "projectileSpeed": 450,
+      "projectileSource": "map"
+    },
+    {
+      "id": "meridian",
+      "name": "Meridian",
+      "rawId": "h06G",
+      "base": "hrif",
+      "damage": {
+        "min": 196,
+        "max": 224,
+        "base": 192,
+        "dice": 4,
+        "sides": 8
+      },
+      "sourceDamage": {
+        "base": 192,
+        "dice": 4,
+        "sides": 8
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "goblin_scientist",
+      "name": "Goblin Scientist",
+      "rawId": "h06U",
+      "base": "hrif",
+      "damage": {
+        "min": 10,
+        "max": 11,
+        "base": 9,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 9,
+        "dice": 1,
+        "sides": 2
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 350,
+      "projectileSource": "map"
+    },
+    {
+      "id": "dwarven_engineer",
+      "name": "Dwarven Engineer",
+      "rawId": "h079",
+      "base": "hrif",
+      "damage": {
+        "min": 21,
+        "max": 27,
+        "base": 20,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 20,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 350,
+      "projectileSource": "map"
+    },
+    {
+      "id": "mutant",
+      "name": "Mutant",
+      "rawId": "h06W",
+      "base": "hfoo",
+      "damage": {
+        "min": 209,
+        "max": 220,
+        "base": 208,
+        "dice": 1,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 208,
+        "dice": 1,
+        "sides": 12
+      },
+      "windup": 0.3499999940395355,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "servant",
+      "name": "Servant",
+      "rawId": "h06X",
+      "base": "hfoo",
+      "damage": {
+        "min": 25,
+        "max": 35,
+        "base": 24,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 24,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "slavemaster",
+      "name": "Slavemaster",
+      "rawId": "h06Y",
+      "base": "hfoo",
+      "damage": {
+        "min": 65,
+        "max": 75,
+        "base": 64,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 64,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "tribesman",
+      "name": "Tribesman",
+      "rawId": "h06V",
+      "base": "hrif",
+      "damage": {
+        "min": 26,
+        "max": 35,
+        "base": 25,
+        "dice": 1,
+        "sides": 10
+      },
+      "sourceDamage": {
+        "base": 25,
+        "dice": 1,
+        "sides": 10
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "alpha_male",
+      "name": "Alpha Male",
+      "rawId": "h06Z",
+      "base": "hrif",
+      "damage": {
+        "min": 56,
+        "max": 67,
+        "base": 55,
+        "dice": 1,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 55,
+        "dice": 1,
+        "sides": 12
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "medicine_man",
+      "name": "Medicine Man",
+      "rawId": "h070",
+      "base": "hrif",
+      "damage": {
+        "min": 39,
+        "max": 55,
+        "base": 37,
+        "dice": 2,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 37,
+        "dice": 2,
+        "sides": 9
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 225,
+      "projectileSource": "map"
+    },
+    {
+      "id": "oracle",
+      "name": "Oracle",
+      "rawId": "h071",
+      "base": "hrif",
+      "damage": {
+        "min": 87,
+        "max": 109,
+        "base": 85,
+        "dice": 2,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 85,
+        "dice": 2,
+        "sides": 12
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 275,
+      "projectileSource": "map"
+    },
+    {
+      "id": "harlot",
+      "name": "Harlot",
+      "rawId": "h072",
+      "base": "hfoo",
+      "damage": {
+        "min": 100,
+        "max": 108,
+        "base": 99,
+        "dice": 1,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 99,
+        "dice": 1,
+        "sides": 9
+      },
+      "windup": 0.33000001311302185,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "mistress",
+      "name": "Mistress",
+      "rawId": "h073",
+      "base": "hfoo",
+      "damage": {
+        "min": 153,
+        "max": 169,
+        "base": 151,
+        "dice": 2,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 151,
+        "dice": 2,
+        "sides": 9
+      },
+      "windup": 0.33000001311302185,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "minotaur",
+      "name": "Minotaur",
+      "rawId": "h074",
+      "base": "hrif",
+      "damage": {
+        "min": 128,
+        "max": 152,
+        "base": 126,
+        "dice": 2,
+        "sides": 13
+      },
+      "sourceDamage": {
+        "base": 126,
+        "dice": 2,
+        "sides": 13
+      },
+      "windup": 0.46700000762939453,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "bigfoot",
+      "name": "Bigfoot",
+      "rawId": "h075",
+      "base": "hrif",
+      "damage": {
+        "min": 233,
+        "max": 257,
+        "base": 230,
+        "dice": 3,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 230,
+        "dice": 3,
+        "sides": 9
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "hatchling",
+      "name": "Hatchling",
+      "rawId": "h07K",
+      "base": "hfoo",
+      "damage": {
+        "min": 9,
+        "max": 10,
+        "base": 8,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 8,
+        "dice": 1,
+        "sides": 2
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "swamprunner",
+      "name": "Swamprunner",
+      "rawId": "h07Z",
+      "base": "hfoo",
+      "damage": {
+        "min": 24,
+        "max": 30,
+        "base": 23,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 23,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "fangtooth",
+      "name": "Fangtooth",
+      "rawId": "h081",
+      "base": "hfoo",
+      "damage": {
+        "min": 51,
+        "max": 57,
+        "base": 50,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 50,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "defiler",
+      "name": "Defiler",
+      "rawId": "h080",
+      "base": "hfoo",
+      "damage": {
+        "min": 65,
+        "max": 69,
+        "base": 64,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 64,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "egg_sack",
+      "name": "Egg Sack",
+      "rawId": "h082",
+      "base": "hrif",
+      "damage": {
+        "min": 16,
+        "max": 18,
+        "base": 15,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 15,
+        "dice": 1,
+        "sides": 3
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "sky_dragon",
+      "name": "Sky Dragon",
+      "rawId": "h083",
+      "base": "hdhw",
+      "damage": {
+        "min": 62,
+        "max": 72,
+        "base": 61,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 61,
+        "dice": null,
+        "sides": 11
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "bottom_feeder",
+      "name": "Bottom Feeder",
+      "rawId": "h084",
+      "base": "hrif",
+      "damage": {
+        "min": 41,
+        "max": 46,
+        "base": 40,
+        "dice": 1,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 40,
+        "dice": 1,
+        "sides": 6
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "king_claw",
+      "name": "King Claw",
+      "rawId": "h085",
+      "base": "hrif",
+      "damage": {
+        "min": 102,
+        "max": 118,
+        "base": 100,
+        "dice": 2,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 100,
+        "dice": 2,
+        "sides": 9
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "mermaid",
+      "name": "Mermaid",
+      "rawId": "h086",
+      "base": "hrif",
+      "damage": {
+        "min": 43,
+        "max": 54,
+        "base": 42,
+        "dice": 1,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 42,
+        "dice": 1,
+        "sides": 12
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 225,
+      "projectileSource": "map"
+    },
+    {
+      "id": "highborne",
+      "name": "Highborne",
+      "rawId": "h087",
+      "base": "hrif",
+      "damage": {
+        "min": 90,
+        "max": 101,
+        "base": 89,
+        "dice": 1,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 89,
+        "dice": 1,
+        "sides": 12
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 225,
+      "projectileSource": "map"
+    },
+    {
+      "id": "komodo",
+      "name": "Komodo",
+      "rawId": "h08B",
+      "base": "hfoo",
+      "damage": {
+        "min": 63,
+        "max": 74,
+        "base": 62,
+        "dice": 1,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 62,
+        "dice": 1,
+        "sides": 12
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "trident",
+      "name": "Trident",
+      "rawId": "h088",
+      "base": "hfoo",
+      "damage": {
+        "min": 140,
+        "max": 160,
+        "base": 138,
+        "dice": 2,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 138,
+        "dice": 2,
+        "sides": 11
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "sea_giant",
+      "name": "Sea Giant",
+      "rawId": "h089",
+      "base": "hrif",
+      "damage": {
+        "min": 119,
+        "max": 131,
+        "base": 117,
+        "dice": 2,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 117,
+        "dice": 2,
+        "sides": 7
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "hydra",
+      "name": "Hydra",
+      "rawId": "h08A",
+      "base": "hrif",
+      "damage": {
+        "min": 178,
+        "max": 275,
+        "base": 177,
+        "dice": 1,
+        "sides": 98
+      },
+      "sourceDamage": {
+        "base": 175,
+        "dice": 3,
+        "sides": 10
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "mini_hydra",
+      "name": "Mini Hydra",
+      "rawId": "h07Y",
+      "base": "hrif",
+      "damage": {
+        "min": 55,
+        "max": 65,
+        "base": 54,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 54,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "colt",
+      "name": "Colt",
+      "rawId": "h08E",
+      "base": "hdhw",
+      "damage": {
+        "min": 10,
+        "max": 12,
+        "base": 9,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 9,
+        "dice": null,
+        "sides": null
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "rider",
+      "name": "Rider",
+      "rawId": "h08J",
+      "base": "hdhw",
+      "damage": {
+        "min": 66,
+        "max": 70,
+        "base": 65,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 65,
+        "dice": null,
+        "sides": 5
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "novice",
+      "name": "Novice",
+      "rawId": "h08G",
+      "base": "hfoo",
+      "damage": {
+        "min": 18,
+        "max": 20,
+        "base": 17,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 17,
+        "dice": 1,
+        "sides": 3
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "crusader",
+      "name": "Crusader",
+      "rawId": "h08K",
+      "base": "hfoo",
+      "damage": {
+        "min": 52,
+        "max": 60,
+        "base": 51,
+        "dice": 1,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 51,
+        "dice": 1,
+        "sides": 9
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "sentry",
+      "name": "Sentry",
+      "rawId": "h08M",
+      "base": "hrif",
+      "damage": {
+        "min": 16,
+        "max": 24,
+        "base": 15,
+        "dice": 1,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 15,
+        "dice": 1,
+        "sides": 9
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "nightsaber",
+      "name": "Nightsaber",
+      "rawId": "h08O",
+      "base": "hrif",
+      "damage": {
+        "min": 50,
+        "max": 54,
+        "base": 49,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 49,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 225,
+      "projectileSource": "map"
+    },
+    {
+      "id": "prisoner",
+      "name": "Prisoner",
+      "rawId": "h08R",
+      "base": "hrif",
+      "damage": {
+        "min": 41,
+        "max": 47,
+        "base": 40,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 40,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "maverick",
+      "name": "Maverick",
+      "rawId": "h08T",
+      "base": "hdhw",
+      "damage": {
+        "min": 95,
+        "max": 101,
+        "base": 94,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 94,
+        "dice": null,
+        "sides": 7
+      },
+      "windup": 0.17000000178813934,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "druid",
+      "name": "Druid",
+      "rawId": "h092",
+      "base": "hrif",
+      "damage": {
+        "min": 76,
+        "max": 84,
+        "base": 75,
+        "dice": 1,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 75,
+        "dice": 1,
+        "sides": 9
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 250,
+      "projectileSource": "map"
+    },
+    {
+      "id": "ascendant",
+      "name": "Ascendant",
+      "rawId": "h08X",
+      "base": "hrif",
+      "damage": {
+        "min": 111,
+        "max": 121,
+        "base": 110,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 110,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "sword_mage",
+      "name": "Sword Mage",
+      "rawId": "h08W",
+      "base": "hrif",
+      "damage": {
+        "min": 120,
+        "max": 130,
+        "base": 119,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 119,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "moon_guard",
+      "name": "Moon Guard",
+      "rawId": "h091",
+      "base": "hfoo",
+      "damage": {
+        "min": 79,
+        "max": 89,
+        "base": 78,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 78,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "warden",
+      "name": "Warden",
+      "rawId": "h094",
+      "base": "hfoo",
+      "damage": {
+        "min": 70,
+        "max": 80,
+        "base": 69,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 69,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "tuskarr",
+      "name": "Tuskarr",
+      "rawId": "n00B",
+      "base": "ntkf",
+      "damage": {
+        "min": 16,
+        "max": 17,
+        "base": 15,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 15,
+        "dice": null,
+        "sides": null
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "tuskarr_spearman",
+      "name": "Tuskarr Spearman",
+      "rawId": "n00C",
+      "base": "ntka",
+      "damage": {
+        "min": 16,
+        "max": 17,
+        "base": 15,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 15,
+        "dice": null,
+        "sides": 2
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 225,
+      "projectileSource": "map"
+    },
+    {
+      "id": "frost_wolf",
+      "name": "Frost Wolf",
+      "rawId": "n00D",
+      "base": "nwwf",
+      "damage": {
+        "min": 21,
+        "max": 22,
+        "base": 20,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 20,
+        "dice": null,
+        "sides": 11
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "pandaren",
+      "name": "Pandaren",
+      "rawId": "n00K",
+      "base": "nfrp",
+      "damage": {
+        "min": 49,
+        "max": 52,
+        "base": 48,
+        "dice": 1,
+        "sides": 4
+      },
+      "sourceDamage": {
+        "base": 48,
+        "dice": null,
+        "sides": null
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "ice_troll",
+      "name": "Ice Troll",
+      "rawId": "o001",
+      "base": "odoc",
+      "damage": {
+        "min": 36,
+        "max": 37,
+        "base": 35,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 35,
+        "dice": null,
+        "sides": 2
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "ice_troll_shaman",
+      "name": "Ice Troll Shaman",
+      "rawId": "n00E",
+      "base": "nitp",
+      "damage": {
+        "min": 51,
+        "max": 53,
+        "base": 50,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 50,
+        "dice": null,
+        "sides": 3
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "polar_bear",
+      "name": "Polar Bear",
+      "rawId": "n00F",
+      "base": "nplb",
+      "damage": {
+        "min": 45,
+        "max": 47,
+        "base": 44,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 44,
+        "dice": null,
+        "sides": 3
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "magnataur",
+      "name": "Magnataur",
+      "rawId": "n00G",
+      "base": "nmgd",
+      "damage": {
+        "min": 115,
+        "max": 118,
+        "base": 114,
+        "dice": 1,
+        "sides": 4
+      },
+      "sourceDamage": {
+        "base": 114,
+        "dice": null,
+        "sides": 4
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "wandigoo",
+      "name": "Wandigoo",
+      "rawId": "n00I",
+      "base": "nwen",
+      "damage": {
+        "min": 90,
+        "max": 100,
+        "base": 89,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 89,
+        "dice": null,
+        "sides": 11
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "ancient_wandigoo",
+      "name": "Ancient Wandigoo",
+      "rawId": "n00H",
+      "base": "nwns",
+      "damage": {
+        "min": 173,
+        "max": 187,
+        "base": 172,
+        "dice": 1,
+        "sides": 15
+      },
+      "sourceDamage": {
+        "base": 172,
+        "dice": null,
+        "sides": 15
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "young_frost_dragon",
+      "name": "Young Frost Dragon",
+      "rawId": "h0BN",
+      "base": "hdhw",
+      "damage": {
+        "min": 140,
+        "max": 145,
+        "base": 139,
+        "dice": 1,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 139,
+        "dice": null,
+        "sides": 6
+      },
+      "windup": 0.5600000023841858,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "azure_dragon",
+      "name": "Azure Dragon",
+      "rawId": "n00J",
+      "base": "nadk",
+      "damage": {
+        "min": 232,
+        "max": 247,
+        "base": 229,
+        "dice": 3,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 229,
+        "dice": 3,
+        "sides": 6
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "small_land_mine",
+      "name": "Small Land Mine",
+      "rawId": "h0A7",
+      "base": "hhou",
+      "damage": {
+        "min": 1,
+        "max": 1,
+        "base": 0,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": null,
+        "dice": 1,
+        "sides": 1
+      },
+      "windup": 0.7200000286102295,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "medium_land_mine",
+      "name": "Medium Land Mine",
+      "rawId": "h0AV",
+      "base": "hhou",
+      "damage": {
+        "min": 1,
+        "max": 1,
+        "base": 0,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": null,
+        "dice": 1,
+        "sides": 1
+      },
+      "windup": 0.7200000286102295,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "ultra_land_mine",
+      "name": "Ultra Land Mine",
+      "rawId": "h0AW",
+      "base": "hhou",
+      "damage": {
+        "min": 1,
+        "max": 1,
+        "base": 0,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": null,
+        "dice": 1,
+        "sides": 1
+      },
+      "windup": 0.7200000286102295,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "geomancer",
+      "name": "Geomancer",
+      "rawId": "h0AD",
+      "base": "hfoo",
+      "damage": {
+        "min": 15,
+        "max": 17,
+        "base": 14,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 14,
+        "dice": 1,
+        "sides": 3
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "clockwreck",
+      "name": "Clockwreck",
+      "rawId": "h0AG",
+      "base": "hfoo",
+      "damage": {
+        "min": 76,
+        "max": 84,
+        "base": 75,
+        "dice": 1,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 75,
+        "dice": 1,
+        "sides": 9
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "machine_turrent",
+      "name": "Machine Turrent",
+      "rawId": "h0AC",
+      "base": "hrif",
+      "damage": {
+        "min": 23,
+        "max": 27,
+        "base": 22,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 22,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 500,
+      "projectileSource": "map"
+    },
+    {
+      "id": "machine_robot",
+      "name": "Machine Robot",
+      "rawId": "h0A9",
+      "base": "hrif",
+      "damage": {
+        "min": 66,
+        "max": 68,
+        "base": 65,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 61,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 375,
+      "projectileSource": "map"
+    },
+    {
+      "id": "flying_machine",
+      "name": "Flying Machine",
+      "rawId": "h0AI",
+      "base": "hrif",
+      "damage": {
+        "min": 50,
+        "max": 60,
+        "base": 49,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 49,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 225,
+      "projectileSource": "map"
+    },
+    {
+      "id": "helicopter",
+      "name": "Helicopter",
+      "rawId": "h0AK",
+      "base": "hrif",
+      "damage": {
+        "min": 100,
+        "max": 140,
+        "base": 99,
+        "dice": 1,
+        "sides": 41
+      },
+      "sourceDamage": {
+        "base": 99,
+        "dice": 1,
+        "sides": 41
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 375,
+      "projectileSource": "map"
+    },
+    {
+      "id": "goblin_alchemist",
+      "name": "Goblin Alchemist",
+      "rawId": "h0AM",
+      "base": "hrif",
+      "damage": {
+        "min": 40,
+        "max": 45,
+        "base": 39,
+        "dice": 1,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 39,
+        "dice": 1,
+        "sides": 6
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "goblin_blaster",
+      "name": "Goblin Blaster",
+      "rawId": "h0AN",
+      "base": "hrif",
+      "damage": {
+        "min": 140,
+        "max": 160,
+        "base": 139,
+        "dice": 1,
+        "sides": 21
+      },
+      "sourceDamage": {
+        "base": 139,
+        "dice": 1,
+        "sides": 21
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "steamroller",
+      "name": "Steamroller",
+      "rawId": "h0AS",
+      "base": "hrif",
+      "damage": {
+        "min": 130,
+        "max": 150,
+        "base": 129,
+        "dice": 1,
+        "sides": 21
+      },
+      "sourceDamage": {
+        "base": 129,
+        "dice": 1,
+        "sides": 21
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "assault_tank",
+      "name": "Assault Tank",
+      "rawId": "h0AP",
+      "base": "hrif",
+      "damage": {
+        "min": 252,
+        "max": 268,
+        "base": 251,
+        "dice": 1,
+        "sides": 17
+      },
+      "sourceDamage": {
+        "base": 251,
+        "dice": 1,
+        "sides": 17
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 750,
+      "projectileSource": "map"
+    },
+    {
+      "id": "peasant",
+      "name": "Peasant",
+      "rawId": "h09F",
+      "base": "hfoo",
+      "damage": {
+        "min": 6,
+        "max": 9,
+        "base": 5,
+        "dice": 1,
+        "sides": 4
+      },
+      "sourceDamage": {
+        "base": 5,
+        "dice": 1,
+        "sides": 4
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "militia",
+      "name": "Militia",
+      "rawId": "h09K",
+      "base": "hfoo",
+      "damage": {
+        "min": 50,
+        "max": 54,
+        "base": 49,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 49,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.5,
+      "windupSource": "inherited-default",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "archer",
+      "name": "Archer",
+      "rawId": "h09Y",
+      "base": "hrif",
+      "damage": {
+        "min": 12,
+        "max": 13,
+        "base": 11,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 11,
+        "dice": 1,
+        "sides": 2
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 500,
+      "projectileSource": "map"
+    },
+    {
+      "id": "elite_archer",
+      "name": "Elite Archer",
+      "rawId": "h09G",
+      "base": "hrif",
+      "damage": {
+        "min": 13,
+        "max": 13,
+        "base": 12,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": 12,
+        "dice": 1,
+        "sides": 1
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 500,
+      "projectileSource": "map"
+    },
+    {
+      "id": "footman",
+      "name": "Footman",
+      "rawId": "h09V",
+      "base": "hfoo",
+      "damage": {
+        "min": 55,
+        "max": 59,
+        "base": 54,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 54,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "guard",
+      "name": "Guard",
+      "rawId": "h09P",
+      "base": "hfoo",
+      "damage": {
+        "min": 60,
+        "max": 66,
+        "base": 59,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 59,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "priest",
+      "name": "Priest",
+      "rawId": "h09Q",
+      "base": "hrif",
+      "damage": {
+        "min": 53,
+        "max": 63,
+        "base": 51,
+        "dice": 2,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 51,
+        "dice": 2,
+        "sides": 6
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 225,
+      "projectileSource": "map"
+    },
+    {
+      "id": "high_priest",
+      "name": "High Priest",
+      "rawId": "h09Z",
+      "base": "hrif",
+      "damage": {
+        "min": 118,
+        "max": 136,
+        "base": 115,
+        "dice": 3,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 115,
+        "dice": 3,
+        "sides": 7
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 275,
+      "projectileSource": "map"
+    },
+    {
+      "id": "knight",
+      "name": "Knight",
+      "rawId": "h09D",
+      "base": "hrif",
+      "damage": {
+        "min": 70,
+        "max": 80,
+        "base": 69,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 69,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "cavalier",
+      "name": "Cavalier",
+      "rawId": "h09X",
+      "base": "hrif",
+      "damage": {
+        "min": 180,
+        "max": 191,
+        "base": 179,
+        "dice": 1,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 179,
+        "dice": 1,
+        "sides": 12
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "dragon_hawk",
+      "name": "Dragon Hawk",
+      "rawId": "h0A2",
+      "base": "hdhw",
+      "damage": {
+        "min": 120,
+        "max": 128,
+        "base": 116,
+        "dice": 4,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 116,
+        "dice": 4,
+        "sides": null
+      },
+      "windup": 0.17000000178813934,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "royal_griffin",
+      "name": "Royal Griffin",
+      "rawId": "h09I",
+      "base": "hdhw",
+      "damage": {
+        "min": 300,
+        "max": 300,
+        "base": 299,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": 299,
+        "dice": null,
+        "sides": 1
+      },
+      "windup": 0.6000000238418579,
+      "windupSource": "map",
+      "projectileSpeed": 150,
+      "projectileSource": "map"
+    },
+    {
+      "id": "orc_warrior",
+      "name": "Orc Warrior",
+      "rawId": "h0AY",
+      "base": "hfoo",
+      "damage": {
+        "min": 10,
+        "max": 10,
+        "base": 9,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": 9,
+        "dice": 1,
+        "sides": 1
+      },
+      "windup": 0.46700000762939453,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "blood_orc_warrior",
+      "name": "Blood Orc Warrior",
+      "rawId": "h0BT",
+      "base": "hfoo",
+      "damage": {
+        "min": 50,
+        "max": 50,
+        "base": 49,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": 49,
+        "dice": 1,
+        "sides": 1
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "wolverine",
+      "name": "Wolverine",
+      "rawId": "h0CD",
+      "base": "hfoo",
+      "damage": {
+        "min": 54,
+        "max": 66,
+        "base": 53,
+        "dice": 1,
+        "sides": 13
+      },
+      "sourceDamage": {
+        "base": 53,
+        "dice": 1,
+        "sides": 13
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "orc_warlock",
+      "name": "Orc Warlock",
+      "rawId": "o002",
+      "base": "odoc",
+      "damage": {
+        "min": 42,
+        "max": 46,
+        "base": 41,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 41,
+        "dice": null,
+        "sides": null
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "blood_orc_warlock",
+      "name": "Blood Orc Warlock",
+      "rawId": "n00P",
+      "base": "nitp",
+      "damage": {
+        "min": 116,
+        "max": 124,
+        "base": 115,
+        "dice": 1,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 115,
+        "dice": null,
+        "sides": 9
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "raider",
+      "name": "Raider",
+      "rawId": "h0BY",
+      "base": "hfoo",
+      "damage": {
+        "min": 24,
+        "max": 37,
+        "base": 23,
+        "dice": 1,
+        "sides": 14
+      },
+      "sourceDamage": {
+        "base": 23,
+        "dice": 1,
+        "sides": 14
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "blood_raider",
+      "name": "Blood Raider",
+      "rawId": "h0BZ",
+      "base": "hfoo",
+      "damage": {
+        "min": 72,
+        "max": 96,
+        "base": 69,
+        "dice": 3,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 69,
+        "dice": 3,
+        "sides": 9
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "young_witch_doctor",
+      "name": "Young Witch Doctor",
+      "rawId": "h0C3",
+      "base": "hrif",
+      "damage": {
+        "min": 40,
+        "max": 40,
+        "base": 39,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": 39,
+        "dice": 1,
+        "sides": 1
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 225,
+      "projectileSource": "map"
+    },
+    {
+      "id": "elder_witch_doctor",
+      "name": "Elder Witch Doctor",
+      "rawId": "h0C1",
+      "base": "hrif",
+      "damage": {
+        "min": 106,
+        "max": 114,
+        "base": 105,
+        "dice": 1,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 105,
+        "dice": 1,
+        "sides": 9
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 375,
+      "projectileSource": "map"
+    },
+    {
+      "id": "wyvern",
+      "name": "Wyvern",
+      "rawId": "h0C6",
+      "base": "hrif",
+      "damage": {
+        "min": 82,
+        "max": 98,
+        "base": 81,
+        "dice": 1,
+        "sides": 17
+      },
+      "sourceDamage": {
+        "base": 81,
+        "dice": 1,
+        "sides": 17
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 375,
+      "projectileSource": "map"
+    },
+    {
+      "id": "wind_rider",
+      "name": "Wind Rider",
+      "rawId": "h0C7",
+      "base": "hrif",
+      "damage": {
+        "min": 104,
+        "max": 120,
+        "base": 103,
+        "dice": 1,
+        "sides": 17
+      },
+      "sourceDamage": {
+        "base": 103,
+        "dice": 1,
+        "sides": 17
+      },
+      "windup": 0.20000000298023224,
+      "windupSource": "map",
+      "projectileSpeed": 375,
+      "projectileSource": "map"
+    },
+    {
+      "id": "orc_warchief",
+      "name": "Orc Warchief",
+      "rawId": "h0CA",
+      "base": "hrif",
+      "damage": {
+        "min": 190,
+        "max": 200,
+        "base": 189,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 189,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "thrall",
+      "name": "Thrall",
+      "rawId": "h0CB",
+      "base": "hrif",
+      "damage": {
+        "min": 252,
+        "max": 268,
+        "base": 251,
+        "dice": 1,
+        "sides": 17
+      },
+      "sourceDamage": {
+        "base": 251,
+        "dice": 1,
+        "sides": 17
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 300,
+      "projectileSource": "map"
+    },
+    {
+      "id": "acolyte",
+      "name": "Acolyte",
+      "rawId": "h0CE",
+      "base": "hrif",
+      "damage": {
+        "min": 8,
+        "max": 9,
+        "base": 7,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 7,
+        "dice": 1,
+        "sides": 2
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 475,
+      "projectileSource": "inherited-default"
+    },
+    {
+      "id": "revenant",
+      "name": "Revenant",
+      "rawId": "h0CG",
+      "base": "hrif",
+      "damage": {
+        "min": 28,
+        "max": 32,
+        "base": 27,
+        "dice": 1,
+        "sides": 5
+      },
+      "sourceDamage": {
+        "base": 27,
+        "dice": 1,
+        "sides": 5
+      },
+      "windup": 0.33000001311302185,
+      "windupSource": "map",
+      "projectileSpeed": 2499.75,
+      "projectileSource": "map"
+    },
+    {
+      "id": "ghoul",
+      "name": "Ghoul",
+      "rawId": "h0CJ",
+      "base": "hfoo",
+      "damage": {
+        "min": 24,
+        "max": 30,
+        "base": 23,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 23,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "frenzy_ghoul",
+      "name": "Frenzy Ghoul",
+      "rawId": "h0CL",
+      "base": "hfoo",
+      "damage": {
+        "min": 51,
+        "max": 53,
+        "base": 50,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 50,
+        "dice": 1,
+        "sides": 3
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "meat_wagon",
+      "name": "Meat Wagon",
+      "rawId": "h0CM",
+      "base": "hrif",
+      "damage": {
+        "min": 31,
+        "max": 37,
+        "base": 30,
+        "dice": 1,
+        "sides": 7
+      },
+      "sourceDamage": {
+        "base": 30,
+        "dice": 1,
+        "sides": 7
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 350,
+      "projectileSource": "map"
+    },
+    {
+      "id": "war_machine",
+      "name": "War Machine",
+      "rawId": "h0CN",
+      "base": "hrif",
+      "damage": {
+        "min": 92,
+        "max": 106,
+        "base": 91,
+        "dice": 1,
+        "sides": 15
+      },
+      "sourceDamage": {
+        "base": 91,
+        "dice": 1,
+        "sides": 15
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 175,
+      "projectileSource": "map"
+    },
+    {
+      "id": "necromancer",
+      "name": "Necromancer",
+      "rawId": "h0CR",
+      "base": "hrif",
+      "damage": {
+        "min": 31,
+        "max": 42,
+        "base": 30,
+        "dice": 1,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 30,
+        "dice": 1,
+        "sides": 12
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 225,
+      "projectileSource": "map"
+    },
+    {
+      "id": "necrolyte",
+      "name": "Necrolyte",
+      "rawId": "h0CT",
+      "base": "hrif",
+      "damage": {
+        "min": 77,
+        "max": 88,
+        "base": 76,
+        "dice": 1,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 76,
+        "dice": 1,
+        "sides": 12
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 225,
+      "projectileSource": "map"
+    },
+    {
+      "id": "ghost",
+      "name": "Ghost",
+      "rawId": "h0CU",
+      "base": "hrif",
+      "damage": {
+        "min": 105,
+        "max": 115,
+        "base": 104,
+        "dice": 1,
+        "sides": 11
+      },
+      "sourceDamage": {
+        "base": 104,
+        "dice": 1,
+        "sides": 11
+      },
+      "windup": 0.4000000059604645,
+      "windupSource": "map",
+      "projectileSpeed": 225,
+      "projectileSource": "map"
+    },
+    {
+      "id": "zombie",
+      "name": "Zombie",
+      "rawId": "h0CX",
+      "base": "hrif",
+      "damage": {
+        "min": 59,
+        "max": 64,
+        "base": 58,
+        "dice": 1,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 58,
+        "dice": 1,
+        "sides": 6
+      },
+      "windup": 0.5,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "the_butcher",
+      "name": "The Butcher",
+      "rawId": "h0CZ",
+      "base": "hrif",
+      "damage": {
+        "min": 237,
+        "max": 275,
+        "base": 235,
+        "dice": 2,
+        "sides": 20
+      },
+      "sourceDamage": {
+        "base": 235,
+        "dice": 2,
+        "sides": 20
+      },
+      "windup": 0.49000000953674316,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "guardian_of_death",
+      "name": "Guardian of Death",
+      "rawId": "h0D1",
+      "base": "hrif",
+      "damage": {
+        "min": 121,
+        "max": 143,
+        "base": 119,
+        "dice": 2,
+        "sides": 12
+      },
+      "sourceDamage": {
+        "base": 119,
+        "dice": 2,
+        "sides": 12
+      },
+      "windup": 0.30000001192092896,
+      "windupSource": "map",
+      "projectileSpeed": 0,
+      "projectileSource": "map"
+    },
+    {
+      "id": "death_dragon",
+      "name": "Death Dragon",
+      "rawId": "h0D3",
+      "base": "hdhw",
+      "damage": {
+        "min": 313,
+        "max": 328,
+        "base": 310,
+        "dice": 3,
+        "sides": 6
+      },
+      "sourceDamage": {
+        "base": 310,
+        "dice": 3,
+        "sides": 6
+      },
+      "windup": 0.3400000035762787,
+      "windupSource": "map",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "summon_h0AX",
+      "name": "Clockwreck",
+      "rawId": "h0AX",
+      "damage": {
+        "min": 76,
+        "max": 84,
+        "base": 75,
+        "dice": 1,
+        "sides": 9
+      },
+      "sourceDamage": {
+        "base": 75,
+        "dice": null,
+        "sides": 9
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "summon_h0D5",
+      "name": "Geomancer",
+      "rawId": "h0D5",
+      "damage": {
+        "min": 15,
+        "max": 17,
+        "base": 14,
+        "dice": 1,
+        "sides": 3
+      },
+      "sourceDamage": {
+        "base": 14,
+        "dice": null,
+        "sides": 3
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "summon_n003",
+      "name": "n003",
+      "rawId": "n003",
+      "damage": {
+        "min": 55,
+        "max": 56,
+        "base": 54,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 54,
+        "dice": null,
+        "sides": null
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "summon_n007",
+      "name": "Storm Geyser",
+      "rawId": "n007",
+      "damage": {
+        "min": 0,
+        "max": 0,
+        "base": -1,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": -1,
+        "dice": null,
+        "sides": 1
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "summon_n00Q",
+      "name": "Wolf",
+      "rawId": "n00Q",
+      "damage": {
+        "min": 14,
+        "max": 15,
+        "base": 13,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 13,
+        "dice": null,
+        "sides": null
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "summon_n00R",
+      "name": "Blood Wolf",
+      "rawId": "n00R",
+      "damage": {
+        "min": 40,
+        "max": 47,
+        "base": 39,
+        "dice": 1,
+        "sides": 8
+      },
+      "sourceDamage": {
+        "base": 39,
+        "dice": null,
+        "sides": 8
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    },
+    {
+      "id": "summon_u011",
+      "name": "Fire Archer",
+      "rawId": "u011",
+      "damage": {
+        "min": 10,
+        "max": 10,
+        "base": 9,
+        "dice": 1,
+        "sides": 1
+      },
+      "sourceDamage": {
+        "base": 9,
+        "dice": null,
+        "sides": 1
+      },
+      "windup": 0.10000000149011612,
+      "windupSource": "map",
+      "projectileSpeed": 375,
+      "projectileSource": "map"
+    },
+    {
+      "id": "summon_n004",
+      "name": "Imp",
+      "rawId": "n004",
+      "damage": {
+        "min": 30,
+        "max": 31,
+        "base": 29,
+        "dice": 1,
+        "sides": 2
+      },
+      "sourceDamage": {
+        "base": 29,
+        "dice": null,
+        "sides": null
+      },
+      "windup": 0.3,
+      "windupSource": "web-fallback",
+      "projectileSpeed": 340,
+      "projectileSource": "web-fallback"
+    }
+  ]
+}

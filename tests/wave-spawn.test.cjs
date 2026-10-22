@@ -30,7 +30,7 @@ test('pending mercenaries prevent premature clears; timeout does not drop pendin
 });
 test('online authority emits ten creeps per lane after one second and 36 after 3.6 seconds',()=>{
  const game=createGame([0,1,2,3].map(slot=>({slot,name:'p'+slot})));
- for(let i=0;i<640;i++)game.step(.05);
+ for(let i=0;i<1600;i++)game.step(.05);
  // Floating-point prep countdown can cross zero on the following simulation step.
  if(game.snapshot().phase==='prep')game.step(.05);
  for(let i=0;i<20;i++)game.step(.05);

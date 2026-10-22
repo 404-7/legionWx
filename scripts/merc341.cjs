@@ -28,9 +28,10 @@ module.exports=function merc341(byId,clean,rules){
  const attack={normal:'普通',pierce:'穿刺',magic:'魔法',siege:'攻城',chaos:'混乱'};
  return ids.map((rawId,i)=>{
   const f=byId[rawId].fields,english=clean(f.unam),tooltip=clean(f.utub),id=keys[i];
-  const dice=f.ua1d??1,sides=f.ua1s??2,min=(f.ua1b??0)+dice,max=(f.ua1b??0)+dice*sides;
+  const inherited=rules.inherited[byId[rawId].base]||{};
+  const dice=f.ua1d??inherited.attackDice??1,sides=f.ua1s??inherited.attackSides??2,min=(f.ua1b??0)+dice,max=(f.ua1b??0)+dice*sides;
   const rawRange=f.ua1r??(byId[rawId].base==='hrif'?400:100),list=skills[id]||[];
-  return {id,name:names[i],english,description:introductions[i],rawId,sourceShop:i<12?'h05C':i<20?'h0AZ':'h0B0',
+  return {id,name:names[i],english,description:introductions[i],rawId,base:byId[rawId].base,sourceShop:i<12?'h05C':i<20?'h0AZ':'h0B0',
    unlockWave:i<12?1:i<20?10:15,cost:f.ulum,income:f.upoi,hp:f.uhpm,min,max,dmg:(min+max)/2,
    aspd:Math.round(f.ua1c*1000)/1000,rawRange,range:rawRange*.25,rawSpeed:f.umvs??270,speed:(f.umvs??270)*.25,
    armor:armor[f.udty]||armorText[tooltip.match(/(Light|Medium|Heavy|Fortified|Unarmored)(?: armor|\.)/)?.[1]]||'重甲',armorPoints:f.udef??0,

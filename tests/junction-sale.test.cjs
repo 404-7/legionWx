@@ -47,7 +47,7 @@ test('crowd separation has one per-unit displacement budget and never pushes mar
 
 test('subpixel attack-range rounding cannot leave a creep standing just outside its target forever',()=>{
  const run=engine();run("G.phase='combat';const p=G.players[2];buyFighter(p,'ent',0,0);const f=p.fighters[0];f.x=p.exitX;f.y=CFG.ROAD_Y;spawnEnemy(p,{type:'wave'});const e=p.enemies[0];e.x=f.x+e.range+e.r+1e-10;e.y=f.y;e.cd=0;const hp=f.hp;enemyAct(p,e,.05);");
- assert.ok(run('f.hp')<run('hp'));assert.equal(run('e.brain.state'),'attack');
+ assert.equal(run('f.hp'),run('hp'));run('enemyAct(p,e,e.attackPoint+.01)');assert.ok(run('f.hp')<run('hp'));assert.equal(run('e.brain.state'),'attack');
 });
 
 test('a blocked route forgets its target after the no-progress deadline',()=>{

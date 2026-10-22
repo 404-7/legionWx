@@ -120,7 +120,7 @@ function drawBridge(c,t){
   c.textAlign='center';c.font='bold 14px "Microsoft YaHei"';c.fillStyle='#e0d2ad';c.fillText('王 庭 石 桥',x,y-122);
   c.fillStyle='#0b1c17d9';roundRect(c,x-123,y+111,246,31,9);c.fill();c.font='12px "Microsoft YaHei"';
   c.fillStyle=open?'#a4d7ad':'#bebc9b';
-  const label=G.battleMode==='arena'?G.phase==='prep'?`${Math.ceil(G.timer)} 秒后开门 · 准备 PK`:G.arena.stage==='result'?'PK 已结算 · 即将继续守关':`苍岚 ${arenaCountText(G.arena.counts[0])}   ⚔   赤焰 ${arenaCountText(G.arena.counts[1])}`:'关隘封闭 · 第 10 / 20 波后开启';
+  const label=G.battleMode==='arena'?G.phase==='prep'?`${Math.ceil(G.timer)} 秒后开门 · 准备 PK`:G.arena.stage==='result'?arenaResultText341():`苍岚 ${arenaCountText(G.arena.counts[0])}   ⚔   赤焰 ${arenaCountText(G.arena.counts[1])}`:'关隘封闭 · 第 10 / 20 波后开启';
   c.fillText(label,x,y+131);c.textAlign='left';
 }
 

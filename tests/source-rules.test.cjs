@@ -41,7 +41,7 @@ test('Magnataur uses source mana, periodic acquisition, cooldown and a travellin
 });
 test('dragon-turtle native bounce hits a second defender with 30 percent damage loss',()=>{
  const run=engine();run("G.wave=20;G.waveDef=waveDefFor(20);spawnEnemy(p,{type:'wave'});globalThis.turtle=p.enemies[0];buyFighter(p,'ent',0,0);buyFighter(p,'ent',1,0);for(const f of p.fighters){f.hp=f.max=10000;f.effArmor=0;}p.fighters[1].x=p.fighters[0].x+30;p.fighters[1].y=p.fighters[0].y;mercAttack341(p,turtle,p.fighters[0])");
- near(run('10000-p.fighters[0].hp'),run('turtle.dmg'));near(run('10000-p.fighters[1].hp'),run('turtle.dmg*.7'));
+ const primary=run('10000-p.fighters[0].hp');assert.ok(primary>=run('turtle.attackBase+turtle.attackDice')&&primary<=run('turtle.attackBase+turtle.attackDice*turtle.attackSides'));assert.equal(run('p.fighters[1].hp'),10000);run('G.projectiles=G.projectiles.filter(pr=>projStep(pr,1))');near(run('10000-p.fighters[1].hp'),primary*.7);
 });
 test('ice-troll frost reads both 10 percent slow constants from the map instead of the former guessed 25 percent',()=>{
  const run=engine();near(run('MERCS.ice_troll.abil.cold.move'),.1);near(run('MERCS.ice_troll.abil.cold.attack'),.1);

@@ -6,6 +6,26 @@
    aura{p,r} 攻击光环  crit{c,m} 暴击  reinc 复活  chain{n,f} 连锁  regen{p} 自愈 */
 // Full 3.41 roster: spreadsheet stats, real map upgrade object IDs and ability parameters.
 const UNITS = {};
+// Keep the supplied spreadsheet's damage bounds. Object dice preserve the native
+// distribution when compatible; disagreements remain explicit instead of hidden.
+function attackDice341(min,max,fields={}) {
+  const inferred=min-(fields.ua1b??min-1);
+  const count=fields.ua1d??(inferred>0&&Number.isInteger(inferred)?inferred:1);
+  const dice=count>0&&Number.isInteger((max-min)/count)?count:1;
+  return {attackBase:min-dice,attackDice:dice,attackSides:(max-min)/dice+1};
+}
+function rollAttack341(weapon,random=Math.random) {
+  const count=weapon.attackDice??0,sides=weapon.attackSides??1;
+  let damage=weapon.attackBase??weapon.dmg??0;
+  for(let i=0;i<count;i++)damage+=1+Math.min(sides-1,Math.floor(random()*sides));
+  return damage;
+}
+function weapon341(fields,base,melee) {
+  const inherited=SOURCE341.rules.inherited[base]||{};
+  return {weapon:fields.ua1w??inherited.weapon??(melee?'normal':'missile'),
+    attackPoint:fields.udp1??inherited.attackPoint??.3,
+    projectileSpeed:(fields.ua1z??inherited.projectileSpeed??1360)*SOURCE341.rangeScale};
+}
 for (const row of [...SOURCE341.units,...SOURCE341.summons]) {
   const abil = compile341Skills(row);
   const rawRange = row.rawRange;
@@ -15,7 +35,8 @@ for (const row of [...SOURCE341.units,...SOURCE341.summons]) {
     rawRange,melee:rawRange<=180,atk:row.atk,armor:row.armor,food:row.food,
     armorPoints:row.map.armorPoints,regenFlat:row.map.regen,speed:(row.map.moveSpeed??270)*SOURCE341.rangeScale,
     acquireRange:(row.map.fields.uacq??(rawRange<=180?500:650))*SOURCE341.rangeScale,
-    attackPoint:row.map.fields.udp1??.3,air:row.map.fields.utar==='air'||(row.map.fields.umvt??(['hdhw','nadk'].includes(row.map.base)?'fly':'foot'))==='fly',
+    ...attackDice341(row.min,row.max,row.map.fields),...weapon341(row.map.fields,row.map.base,rawRange<=180),
+    air:row.map.fields.utar==='air'||(row.map.fields.umvt??(['hdhw','nadk'].includes(row.map.base)?'fly':'foot'))==='fly',
     targets:row.map.fields.ua1g||'enemies',
     manaMax:row.map.manaMax,manaStart:row.map.manaStart,manaRegen:row.map.manaRegen,
     upgrades:row.upgrades,up:row.upgrades[0],stances:row.stances||[],elite:row.elite,summonOnly:row.summonOnly,
@@ -60,14 +81,16 @@ const WAVES = SOURCE341.waves.map((w,i)=>{
   const ranged=w.rawRange>180;
   const attacks={normal:'普通',pierce:'穿刺',magic:'魔法',siege:'攻城',chaos:'混乱'};
   const armorTypes={none:'无甲',small:'轻甲',medium:'中甲',large:'重甲',normal:'城甲',fort:'城甲',hero:'英雄甲'};
-  const dice=m.ua1d||1,sides=m.ua1s||2,base=m.ua1b||0;
+  const inherited=SOURCE341.rules.inherited[w.base];
+  const dice=m.ua1d??inherited.attackDice??1,sides=m.ua1s??inherited.attackSides??2,base=m.ua1b??0;
   return {w:w.level,name:m.unam,count:w.qty,spawnInterval:w.spawnInterval,mercDelay:w.mercDelay,bounty:w.bounty,bonus:w.bonus,value:w.value,
     hp:m.uhpm*(String(m.upgr||'').split(',').includes(SOURCE341.rules.creepHp.tech)?1+SOURCE341.rules.creepHp.percent:1),dmg:base+dice*(1+sides)/2,aspd:m.ua1c||1.25,
     attackBase:base,attackDice:dice,attackSides:sides,rawId:w.mapId,targets:m.ua1g||'enemies',
     speed:(m.umvs||270)*SOURCE341.rangeScale,range:w.rawRange*SOURCE341.rangeScale,
     spellIds:String(m.uabi||'').split(',').filter(Boolean),manaMax:m.umpm||0,manaStart:m.umpi||0,manaRegen:m.umpr||0,
-    weapon:m.ua1w||SOURCE341.rules.inherited[w.base].weapon,bounce:m.ua1w==='mbounce'?{count:(m.utc1||1)-1,r:(m.ua1f||300)*.25,loss:m.udl1??.3}:null,
+    ...weapon341(m,w.base,!ranged),bounce:m.ua1w==='mbounce'?{count:(m.utc1||1)-1,r:(m.ua1f||300)*.25,loss:m.udl1??.3}:null,
     armor:armorTypes[m.udty??SOURCE341.rules.inherited[w.base].armor],armorPoints:m.udef||0,atk:attacks[m.ua1t??SOURCE341.rules.inherited[w.base].attack]||'英雄',
     air:m.utar==='air'||m.umvt==='fly',r:boss?17:9,regen:0,regenFlat:m.uhpr||0,
     magicImmune:false,boss,trait:boss?'boss':ranged?'ranged':null};
 });
+for(const m of Object.values(MERCS))Object.assign(m,attackDice341(m.min,m.max,m.sourceFields),weapon341(m.sourceFields,m.base,m.rawRange<=180));

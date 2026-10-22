@@ -36,24 +36,25 @@ test('PK follows team roads, fights real opposing units, settles once and restor
  assert.equal(run("upgradeFighter(G.players[2],G.players[2].fighters[0],'guardian')"),false);
  run('globalThis.initialGold=G.players.map(p=>p.gold);globalThis.kingHP=G.kings.map(k=>k.hp);for(let i=0;i<2200&&G.arena.stage!=="result";i++)arenaStep(.1)');
  assert.equal(run('G.arena.stage'),'result');assert.equal(run('G.arena.winner'),0);
+ assert.equal(run('G.players[0].gold-initialGold[0]'),0);run('arenaStep(1.99)');assert.equal(run('G.players[0].gold-initialGold[0]'),0);run('arenaStep(.01)');
  assert.equal(run('G.players[0].gold-initialGold[0]'),100);assert.equal(run('G.players[1].gold-initialGold[1]'),100);
  assert.equal(run('G.players[2].gold-initialGold[2]'),0);
  assert.equal(run('JSON.stringify(G.kings.map(k=>k.hp))===JSON.stringify(kingHP)'),true);
  assert.equal(run('G.result'),null);assert.equal(run('G.arenaHistory.length'),1);
  run('finishArena(0)');assert.equal(run('G.players[0].gold-initialGold[0]'),100);
- run('simStep(5)');assert.equal(run('G.phase'),'prep');assert.equal(run('G.wave'),11);assert.equal(run('G.battleMode'),'defense');
+ run('simStep(20)');assert.equal(run('G.phase'),'prep');assert.equal(run('G.wave'),11);assert.equal(run('G.battleMode'),'defense');assert.equal(run('G.timer'),30);
  assert.equal(run('G.players.every(p=>p.fighters.every(f=>f.hp===f.max&&f.x===p.gx+(f.col+.5)*CFG.CELL&&f.y===p.gy+(f.row+.5)*CFG.CELL))'),true);
  assert.equal(run('G.players[2].fighters.length'),1);assert.doesNotThrow(()=>JSON.parse(run('JSON.stringify(G)')));
 });
 
-test('PK resolves empty teams, simultaneous elimination and timeout as round results',()=>{
- for(const scenario of ['empty','both','timeout']){
+test('PK resolves empty teams and simultaneous elimination after the source reward delay',()=>{
+ for(const scenario of ['empty','both']){
   const run=engine();run("buyFighter(G.players[0],'ent',0,0);buyFighter(G.players[2],'ent',0,0);G.wave=20;startArenaPrep();startCombat();globalThis.before=G.players.map(p=>p.gold)");
   if(scenario==='empty')run('G.players[2].fighters[0].hp=0');
   if(scenario==='both')run('G.players.forEach(p=>p.fighters.forEach(f=>f.hp=0))');
-  if(scenario==='timeout')run('G.arena.elapsed=CFG.ARENA_LIMIT');
   run('arenaStep(.01)');assert.equal(run('G.arena.stage'),'result');assert.equal(run('G.result'),null);
   assert.equal(run('G.arena.winner'),scenario==='empty'?0:null);
+  run('arenaStep(2)');
   assert.equal(run('G.players[0].gold-before[0]'),scenario==='empty'?200:100);
  }
 });

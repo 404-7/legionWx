@@ -44,12 +44,12 @@ function tickMerc341(p,dt){
   e.hp=Math.min(e.max,e.hp+heal*dt);e.mercArmor=armor;e.mercDamage=damage;e.mercMove=1+move+(e.bloodBuff?.move||0);e.mercHaste=e.bloodBuff?.haste||0;e.mercVamp=vamp;
  }
 }
-function mercAttack341(p,e,target){
+function enemyDamage341(e){return rollAttack341(e)*(e.attackScale??1)*(1+(e.mercDamage||0))*(1-(e.damageWeak||0));}
+function mercAttack341(p,e,target,damage=enemyDamage341(e),bounce=true){
  const a=MERCS[e.mercId]?.abil||{};
  const bash=a.bash&&Math.random()<a.bash.chance;
- const dealt=hitFighter(p,target,(e.dmg*(1+(e.mercDamage||0))+(bash?a.bash.damage:0))*(1-(e.damageWeak||0)),e.atk,e)||0;
- if(e.bounce){const b=e.bounce;const others=G.players.filter(q=>q.team===p.team).flatMap(q=>q.fighters).filter(f=>f!==target&&f.hp>0&&Math.hypot(f.x-target.x,f.y-target.y)<=b.r).slice(0,b.count);
-  others.forEach((f,i)=>hitFighter(p,f,e.dmg*Math.pow(1-b.loss,i+1),e.atk,e));}
+ const dealt=hitFighter(p,target,damage+(bash?a.bash.damage*(1-(e.damageWeak||0)):0),e.atk,e)||0;
+ if(bounce&&e.bounce)launchBounce341(p,e,target,damage,e.atk,{remaining:e.bounce.count,radius:e.bounce.r,factor:1-e.bounce.loss,visited:[target.entityId]},true);
  if(dealt<=0)return;
  if(e.mercVamp)e.hp=Math.min(e.max,e.hp+dealt*e.mercVamp);
  if(target.hp<=0||target.def.abil.magicImmune)return;

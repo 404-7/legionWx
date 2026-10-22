@@ -35,7 +35,7 @@ function newGame(diffKey) {
     });
   }
   G.kings = [0, 1].map(t => ({
-    team: t,royalTeam:t, x: t === 0 ? CFG.GATE_RIGHT : CFG.GATE_LEFT, y: t===0?1260:180,
+    team: t,royalTeam:t,r:26, x: t === 0 ? CFG.GATE_RIGHT : CFG.GATE_LEFT, y: t===0?1260:180,
     hp: CFG.KING_HP, max: CFG.KING_HP, lvl: 0, cd: 0, flash: 0, leaks: [],
     dmg: CFG.KING_DMG, aspd: CFG.KING_ASPD, regen: CFG.KING_REGEN,
     min:SOURCE341.king.min,maxDamage:SOURCE341.king.max,armorPoints:SOURCE341.king.armorPoints,
@@ -54,7 +54,7 @@ function gainMult(p) {
   return p.team === 0 ? G.diff.allyMult : G.diff.aiMult;
 }
 
-function startPrep() {
+function startPrep(afterArena=false) {
   G.battleMode='defense';G.arena=null;
   G.wave++;
   G.waveDef = waveDefFor(G.wave);
@@ -65,7 +65,8 @@ function startPrep() {
     p.enemies = []; p.spawnList = [];p.mercSpawnList=[];p.mercSpawnT=0;
     if (p.isHuman && G.wave > 1) addLog(`${p.name} 收入结算 +${inc} 金`, 'l-gold',p.team);
   }
-  G.timerMax = G.wave === 1 ? CFG.FIRST_PREP : CFG.PREP_TIME;
+  const timing=SOURCE341.rules.timing;
+  G.timerMax = G.wave === 1 ? CFG.FIRST_PREP : afterArena?timing.afterArena:timing.prepareBase+Math.floor(G.wave/timing.prepareDivisor);
   G.timer = G.timerMax;
   G.phase = 'prep';
   G.players.forEach((p, i) => { if (p.ai) p.aiT = 0.5 + i * 0.4; });
@@ -199,8 +200,8 @@ function simStep(dt) {
     for (const p of G.players) fieldStep(p, dt);
     for (const k of G.kings) { kingStep(k, dt); if (G.phase === 'over') return; }
     stepSkillWaves341(dt);
-    G.projectiles = G.projectiles.filter(pr => projStep(pr, dt));
-    if (!G.bonus&&G.combatT > CFG.COMBAT_TIMEOUT) forceLeakAll();
+    stepProjectiles341(dt);
+    if(G.phase==='over')return;
     if (G.players.every(p => p.paid) && G.kings.every(k => k.leaks.length === 0)) endWave();
   }
   if (G.phase !== 'over' && checkOver()) return;
@@ -278,6 +279,7 @@ function spawnEnemy(p, item) {
     const m = MERCS[item.id];
     e = { hp:m.hp,max:m.hp,dmg:m.dmg,aspd:m.aspd,range:m.range,speed:m.speed,armor:m.armor,atk:m.atk,r:m.r,
       armorPoints:m.armorPoints,regenFlat:m.regenFlat,regen:0,magicImmune:!!m.abil.magicImmune,air:m.air,boss:false,
+      attackBase:m.attackBase,attackDice:m.attackDice,attackSides:m.attackSides,weapon:m.weapon,attackPoint:m.attackPoint,projectileSpeed:m.projectileSpeed,
       mana:m.manaStart,bloodCD:0 };
     e.mercId = item.id;
   } else {
@@ -285,19 +287,20 @@ function spawnEnemy(p, item) {
     e = { hp: d.hp, max: d.hp, dmg: d.dmg, aspd: d.aspd, range: d.range, speed: d.speed, armor: d.armor, atk: d.atk, r: d.r, regen: d.regen, magicImmune: d.magicImmune, boss: d.boss };
     e.trait = d.trait; e.bounty=d.bounty; e.armorPoints=d.armorPoints; e.regenFlat=d.regenFlat; e.air=d.air;
     e.rawId=d.rawId;e.targets=d.targets;e.attackBase=d.attackBase;e.attackDice=d.attackDice;e.attackSides=d.attackSides;
+    e.attackScale=G.diff.emult;e.attackPoint=d.attackPoint;e.projectileSpeed=d.projectileSpeed;
     e.mana=d.manaStart;e.manaMax=d.manaMax;e.manaRegen=d.manaRegen;e.spellCD={};e.bossScan=0;e.weapon=d.weapon;e.bounce=d.bounce;
   }
   e.laneX = p.gx + 16 + Math.random() * (CFG.GRID_W - 32);
   e.ownerId=p.id;combatAgent(e);
   e.x = e.laneX;
   e.y = p.spawnY;
-  e.cd = 0.6 + Math.random() * 0.5;
+  e.cd = 0;
   e.slowT = 0; e.slowF = 1; e.flash = 0;
   p.enemies.push(e);
 }
 
 function enemyAct(p, e, dt,engageOnly=false) {
-  if (e.hp <= 0 || e.stunT>0) return engageOnly;
+  if (e.hp <= 0 || e.stunT>0) {e.attackWindup=null;return engageOnly;}
   e.cd -= dt;
   if (e.flash > 0) e.flash -= dt;
   if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowF = 1; }
@@ -313,18 +316,41 @@ function enemyAct(p, e, dt,engageOnly=false) {
     const td=Math.hypot(tgt.x-e.x,tgt.y-e.y);
     if (td <= reach+COMBAT_AI.RANGE_EPS) {
       b.state='attack';b.chase=0;
-      if (e.cd <= 0) { e.cd = e.aspd/((1+(e.mercHaste||0))*Math.max(.05,1-(e.attackSlow||0)));mercAttack341(p,e,tgt);e.flash = 0.12; }
+      enemyAttack341(p,e,tgt,dt);
     } else {
-      b.state='chase';moveCombatUnit(p,e,tgt,sp,dt,reach);b.chase+=dt;
+      e.attackWindup=null;b.state='chase';moveCombatUnit(p,e,tgt,sp,dt,reach);b.chase+=dt;
     }
     return true;
   } else {
     b.state='advance';
     if(engageOnly)return false;
+    e.attackWindup=null;
     e.y += p.direction * sp * dt;
     e.x += (e.laneX - e.x) * 0.5 * dt;
     if ((e.y - p.exitY) * p.direction >= 0) leak(p, e);
   }
+}
+
+function enemyAttack341(p,e,target,dt){
+  const id=target.royalTeam!==undefined?'king:'+target.team:target.entityId;
+  if(e.attackWindup&&e.attackWindup.targetId!==id)e.attackWindup=null;
+  if(e.attackWindup){
+    e.attackWindup.time-=dt;if(e.attackWindup.time>1e-9)return;
+    e.attackWindup=null;e.flash=.12;
+    const damage=enemyDamage341(e);
+    if(e.weapon==='normal'||e.weapon==='instant'||e.projectileSpeed===0)resolveEnemyAttack341(p,e,target,damage);
+    else G.projectiles.push({p,source:e,enemyShot:true,x:e.x,y:e.y,px:e.x,py:e.y,tgt:target,sp:e.projectileSpeed||CFG.PROJ_SPEED,dmg:damage,atk:e.atk,ab:{},t:Math.max(3,Math.hypot(target.x-e.x,target.y-e.y)/(e.projectileSpeed||CFG.PROJ_SPEED)+2)});
+    return;
+  }
+  if(e.cd>0)return;
+  const rate=(1+(e.mercHaste||0))*Math.max(.05,1-(e.attackSlow||0));
+  e.cd=e.aspd/rate;e.attackWindup={targetId:id,time:(e.attackPoint??.3)/rate};
+}
+function resolveEnemyAttack341(p,e,target,damage,bounceOnly=false){
+  if(target.royalTeam===undefined){if(bounceOnly)hitFighter(p,target,damage,e.atk,e);else mercAttack341(p,e,target,damage);return;}
+  const k=target,m=ATK_ARMOR[e.atk]?.['英雄甲']??1;
+  k.hp=Math.max(0,k.hp-damage*m*armorFactor(k.armorPoints+kingAura341(k.team,k).armor)*(MERCS[e.mercId]?.abil.kingMult||1));k.flash=.15;
+  if(k.hp<=0)gameOver(1-k.team);
 }
 
 function hitFighter(p,f,dmg,atk,attacker) {
@@ -374,12 +400,12 @@ function fighterAct(p, f, dt) {
   if(f.cd>0)return;
   const rate=(1+(f.effHaste||0))*Math.max(.05,1-(f.attackSlow||0));
   f.cd=f.def.aspd/rate;
-  b.windup={targetId:tgt.entityId,time:Math.min(f.def.attackPoint??.3,f.def.aspd*.6)/rate};
+  b.windup={targetId:tgt.entityId,time:(f.def.attackPoint??.3)/rate};
 }
 function executeFighterAttack(p,f,tgt,R){
   f.attacks=(f.attacks||0)+1;
   const ab=f.def.abil||{};
-  let dmg=(f.def.min+Math.random()*(f.def.max-f.def.min))*(f.def.dmg ? f.effDmg/f.def.dmg : 1)+(ab.flatDamage||0);
+  let dmg=rollAttack341(f.def)*(f.def.dmg ? f.effDmg/f.def.dmg : 1)+(ab.flatDamage||0);
   for(const b of Object.values(f.buffs||{}))dmg*=1+(b.damage||0);
   if(ab.crit&&(!ab.crit.airOnly||tgt.air)&&Math.random()<ab.crit.c)dmg*=ab.crit.m;
   if(ab.attackMana)f.mana=Math.min(f.def.manaMax,f.mana+ab.attackMana);
@@ -391,7 +417,8 @@ function executeFighterAttack(p,f,tgt,R){
   const targets=[tgt,...p.enemies.filter(e=>e!==tgt&&e.hp>0&&Math.hypot(e.x-f.x,e.y-f.y)-e.r-12<=R).slice(0,(ab.multishot||1)-1)];
   for(const target of targets){
     if(f.def.melee){const dealt=dmgEnemy(target,dmg,f.def.atk,f);hit341(p,f,target,dealt,dmg);afterHits(p,target,dmg,f.def.atk,ab,f);f.flash=.12;}
-    else G.projectiles.push({p,source:f,x:f.x,y:f.y,px:f.x,py:f.y,tgt:target,sp:CFG.PROJ_SPEED,dmg,atk:f.def.atk,ab,t:3});
+    else if(f.def.weapon==='normal'||f.def.weapon==='instant'||f.def.projectileSpeed===0){const dealt=dmgEnemy(target,dmg,f.def.atk,f);hit341(p,f,target,dealt,dmg);afterHits(p,target,dmg,f.def.atk,ab,f);}
+    else G.projectiles.push({p,source:f,x:f.x,y:f.y,px:f.x,py:f.y,tgt:target,sp:f.def.projectileSpeed,dmg,atk:f.def.atk,ab,t:Math.max(3,Math.hypot(target.x-f.x,target.y-f.y)/f.def.projectileSpeed+2)});
   }
 }
 
@@ -425,7 +452,7 @@ function afterHits(p, tgt, dmg, atk, ab,attacker=null) {
     }
   }
   if (ab.chain) {
-    chainTargets341(tgt,p.enemies,ab.chain.n+1,ab.chain.r||140).slice(1).forEach((e,i)=>dmgEnemy(e,dmg*Math.pow(ab.chain.f,i+1),atk,attacker));
+    launchBounce341(p,attacker,tgt,dmg,atk,{remaining:ab.chain.n,radius:ab.chain.r||140,factor:ab.chain.f,visited:[tgt.entityId]});
   }
   if (ab.slow && tgt.hp > 0) {
     tgt.slowT = Math.max(tgt.slowT, ab.slow.d);
@@ -434,15 +461,33 @@ function afterHits(p, tgt, dmg, atk, ab,attacker=null) {
   }
 }
 
+function launchBounce341(p,source,from,damage,atk,bounce,enemyShot=false){
+  if(bounce.remaining<=0||!source)return;
+  const candidates=enemyShot?G.players.filter(q=>q.team===p.team).flatMap(q=>q.fighters):p.enemies;
+  const target=candidates.filter(t=>t.hp>0&&!(t.deadT>0)&&!bounce.visited.includes(t.entityId)&&allowedTarget341(source.def?.targets||source.targets,t)&&Math.hypot(t.x-from.x,t.y-from.y)<=bounce.radius)
+    .sort((a,b)=>Math.hypot(a.x-from.x,a.y-from.y)-Math.hypot(b.x-from.x,b.y-from.y))[0];
+  if(!target)return;
+  const speed=source.def?.projectileSpeed||source.projectileSpeed||CFG.PROJ_SPEED;
+  G.projectiles.push({p,source,enemyShot,bounceOnly:enemyShot,chainOnly:!enemyShot,x:from.x,y:from.y,px:from.x,py:from.y,tgt:target,sp:speed,dmg:damage*bounce.factor,atk,ab:{},t:Math.max(3,bounce.radius/speed+2),
+    bounce:{...bounce,remaining:bounce.remaining-1,visited:[...bounce.visited,target.entityId]}});
+}
+
+function stepProjectiles341(dt){
+  const pending=G.projectiles;G.projectiles=[];
+  for(const pr of pending)if(projStep(pr,dt))G.projectiles.push(pr);
+}
 function projStep(pr, dt) {
+  if(pr.delay>0){const wait=Math.min(pr.delay,dt);pr.delay-=wait;dt-=wait;if(dt<=0)return true;}
   pr.t -= dt;
   const t = pr.tgt;
   if (!t || t.hp <= 0 || pr.t <= 0) return false;
   pr.px = pr.x; pr.py = pr.y;
   const dx = t.x - pr.x, dy = t.y - pr.y, d = Math.hypot(dx, dy);
   const step = pr.sp * dt;
-  if (d <= step + t.r) {
+  if (d <= step + (t.r||0)) {
+    if(pr.enemyShot){resolveEnemyAttack341(pr.p,pr.source,t,pr.dmg,pr.bounceOnly);if(pr.bounce)launchBounce341(pr.p,pr.source,t,pr.dmg,pr.atk,pr.bounce,true);return false;}
     const dealt=dmgEnemy(t,pr.dmg,pr.atk,pr.source);
+    if(pr.chainOnly){launchBounce341(pr.p,pr.source,t,pr.dmg,pr.atk,pr.bounce);return false;}
     if(pr.source?.def)hit341(pr.p,pr.source,t,dealt,pr.dmg);
     afterHits(pr.p, t, pr.dmg, pr.atk, pr.ab,pr.source);
     return false;
@@ -565,15 +610,10 @@ function kingStep(k, dt) {
     const dx = k.x - e.x, dy = k.y - e.y, d = Math.hypot(dx, dy);
     const reach = e.range + e.r + 26;
     if (d <= reach) {
-      if (e.cd <= 0) {
-        e.cd = e.aspd/((1+(e.mercHaste||0))*Math.max(.05,1-(e.attackSlow||0)));
-        const m=ATK_ARMOR[e.atk]?.['英雄甲']??1;
-        k.hp -= e.dmg * (1+(e.mercDamage||0)) * (1-(e.damageWeak||0)) * m * armorFactor(k.armorPoints+kingAura341(k.team,k).armor) * (MERCS[e.mercId]?.abil.kingMult||1);
-        e.flash = 0.12; k.flash = 0.15;
-        if (k.hp <= 0) { k.hp = 0; gameOver(1 - k.team); return; }
-      }
+      enemyAttack341(owner,e,k,dt);
+      if(G.phase==='over')return;
     } else {
-      const sp = e.speed * e.slowF * (e.mercMove||1);
+      e.attackWindup=null;const sp = e.speed * e.slowF * (e.mercMove||1);
       e.x += dx / d * sp * dt; e.y += dy / d * sp * dt;
     }
   }
@@ -584,7 +624,7 @@ function kingStep(k, dt) {
     if(!target||Math.hypot(target.x-k.x,target.y-k.y)>CFG.KING_RANGE+target.r)k.windup=null;
     else if(k.windup.time<=1e-9){
       G.projectiles.push({source:k,x:k.x,y:k.y,px:k.x,py:k.y,tgt:target,sp:SOURCE341.king.projectileSpeed,
-        dmg:(k.min+Math.floor(Math.random()*(k.maxDamage-k.min+1)))*(1+kingAura341(k.team,k).damage),atk:'英雄',ab:{},t:3});
+        dmg:(rollAttack341({attackBase:SOURCE341.king.sourceFields.ua1b,attackDice:SOURCE341.king.sourceFields.ua1d,attackSides:SOURCE341.king.sourceFields.ua1s})+k.min-SOURCE341.king.min)*(1+kingAura341(k.team,k).damage),atk:'英雄',ab:{},t:3});
       k.windup=null;k.flash=.2;
     }
   }
@@ -837,13 +877,24 @@ function walkRoute(unit,distance){
   return unit.routeIndex>=unit.route.length;
 }
 function arenaCounts(){return [0,1].map(team=>G.players.filter(p=>p.team===team).reduce((n,p)=>n+p.fighters.filter(f=>f.hp>0||f.deadT>0).length,0));}
+function arenaResultText341(){
+  const timing=SOURCE341.rules.timing,arena=G.arena;
+  return arena.awarded?`PK 已结算 · ${Math.max(0,Math.ceil(timing.arenaAwardDelay+timing.arenaResult-arena.elapsed))} 秒后准备下一关`:`PK 已分胜负 · ${Math.max(0,Math.ceil(timing.arenaAwardDelay-arena.elapsed))} 秒后发奖`;
+}
 function arenaViews(){
   const sides=[0,1].map(team=>G.players.filter(p=>p.team===team).flatMap(p=>p.fighters));
   return sides.map((fighters,team)=>({arenaView:true,team,fighters,enemies:sides[1-team],direction:team===0?-1:1}));
 }
 function arenaStep(dt){
   const arena=G.arena;arena.elapsed+=dt;G.combatT+=dt;
-  if(arena.stage==='result'){if(arena.elapsed>=5){restoreArenaArmies();startPrep();}return;}
+  if(arena.stage==='result'){
+    const timing=SOURCE341.rules.timing;
+    if(!arena.awarded&&arena.elapsed>=timing.arenaAwardDelay){
+      arena.awarded=true;for(const p of G.players)if(arena.winner===null||p.team===arena.winner)p.gold+=arena.bonus;
+      addLog(`PK 奖励已发放：${arena.winner===null?'双方':'胜方'}每人 +${arena.bonus} 金。`,'l-gold');
+    }
+    if(arena.elapsed>=timing.arenaAwardDelay+timing.arenaResult){restoreArenaArmies();startPrep(true);}return;
+  }
   let views=arenaViews();
   // Status effects and ally auras run once per side. Views are transient and never serialized.
   for(const view of views)tick341(view,dt);
@@ -863,7 +914,7 @@ function arenaStep(dt){
     }
   }
   spreadArenaUnits(dt);
-  G.projectiles=G.projectiles.filter(pr=>projStep(pr,dt));
+  stepProjectiles341(dt);
   // Death summons and reincarnation must resolve before testing for an empty team.
   for(let pass=0;pass<4;pass++)for(const view of arenaViews())for(const f of [...view.fighters]){
     if(f.hp<=0&&f.deadT<=0&&!f.deathHandled)death341(view,f);
@@ -873,15 +924,13 @@ function arenaStep(dt){
   const [blue,red]=arena.counts;
   if(!blue||!red){finishArena(blue?0:red?1:null);return;}
   arena.stage=G.players.some(p=>p.fighters.some(f=>f.arenaReady))?'fight':'march';
-  if(arena.elapsed>=CFG.ARENA_LIMIT){finishArena(null,true);}
 }
-function finishArena(winner,timeout=false){
+function finishArena(winner){
   if(G.arena.stage==='result')return;
   const bonus=G.wave*(winner===null?5:10);
-  for(const p of G.players)if(winner===null||p.team===winner)p.gold+=bonus;
-  G.arena.stage='result';G.arena.winner=winner;G.arena.elapsed=0;G.projectiles=[];
-  G.arenaHistory.push({wave:G.wave,winner,bonus,timeout});
-  addLog(`${timeout?'PK 超时，判为平局':winner===null?'双方军团全灭，PK 平局':(winner===0?'苍岚':'赤焰')+'军团赢得 PK'}！${winner===null?'双方':'胜方'}每人 +${bonus} 金，5 秒后继续守关。`,'l-gold');
+  G.arena.stage='result';G.arena.winner=winner;G.arena.bonus=bonus;G.arena.awarded=false;G.arena.elapsed=0;G.projectiles=[];
+  G.arenaHistory.push({wave:G.wave,winner,bonus,timeout:false});
+  addLog(`${winner===null?'双方军团全灭，PK 平局':(winner===0?'苍岚':'赤焰')+'军团赢得 PK'}！2 秒后发放奖励，展示结果 20 秒后继续守关。`,'l-gold');
 }
 function spreadArenaUnits(dt){
   const units=G.players.flatMap(p=>p.fighters).filter(f=>f.hp>0&&f.deadT<=0&&f.arenaReady);

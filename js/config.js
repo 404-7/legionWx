@@ -48,12 +48,11 @@ const CFG = {
   GRID_W: 12 * 32, GRID_H: 16 * 32,
   FIELD_W: 432, FIELD_H: 576,
   ROAD_Y: 720, GATE_LEFT: 820, GATE_RIGHT: 980,
-  ARENA_WAVES: [10, 20], ARENA_PREP: 30, ARENA_LIMIT: 180,
+  ARENA_WAVES: [10, 20], ARENA_PREP: SOURCE341.rules.timing.arenaPrepare,
 
   START_GOLD: 300,
   START_INCOME: 6,
-  FIRST_PREP: 32,           // 第一波准备时间(秒)
-  PREP_TIME: 22,            // 之后每波准备时间
+  FIRST_PREP: SOURCE341.rules.timing.first,
 
   TOTAL_WAVES: 31,
   WAVE_HP0: 58, WAVE_HP_G: 1.155,
@@ -65,7 +64,6 @@ const CFG = {
 
   AGGRO: 150,               // 敌人索敌半径
   PROJ_SPEED: 340,
-  COMBAT_TIMEOUT: 240,      // 单波战斗安全阀(秒)，超时剩余敌人全部漏过
 
   DIFFS: {
     easy:   { label: '简单', emult: 0.85, aiMult: 0.85, allyMult: 1.15 },
