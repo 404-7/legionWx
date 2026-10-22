@@ -1,7 +1,7 @@
 'use strict';
 // Local presentation state never enters the authoritative game snapshot.
 const CommandUI={panel:'shop',open:false,mobile:false,selection:null,placement:null,pendingSell:null,scroll:{}};
-const COMMAND_TITLES={shop:'种族兵营',king:'国王强化',attack:'派遣进攻',inspect:'单位详情'};
+const COMMAND_TITLES={shop:'种族兵营',attack:'派遣进攻',inspect:'单位详情'};
 const MapCamera={mode:null,zoom:1,cx:null,cy:null,player:null,projection:null,suppressClick:false,battleKey:null};
 
 function openCommandPanel(panel,{toggle=false,focus=false}={}) {

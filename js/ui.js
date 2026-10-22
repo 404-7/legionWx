@@ -2,6 +2,41 @@
 /* ===== UI：商店 / 波次预览 / 选中单位 / 国王 / 雇佣兵 / 日志 / 弹窗 ===== */
 const $ = id => document.getElementById(id);
 const MineUI={slot:null,pending:null,error:''};
+const KingUI={open:false,pending:null,error:''};
+function openKingDialog(){
+  if(!G||!['prep','combat'].includes(G.phase))return;
+  KingUI.open=true;KingUI.pending=null;KingUI.error='';
+  G.selectedFighter=null;selectShop(null);closeCommandPanel();
+  drawPortrait($('kingPortrait'),'king_'+localPlayer().team,96);
+  updateKingUI(localPlayer());$('kingDialog').showModal();updateUI(true);
+}
+function updateKingUI(me){
+  const active=['prep','combat'].includes(G.phase);
+  for(const [team,id] of ['blueKingStatus','redKingStatus'].entries()){
+    $(id).disabled=team!==me.team||!active;
+    $(id).title=team===me.team?'点击强化己方国王':'敌方国王';
+  }
+  if(!KingUI.open)return;
+  if(!active){$('kingDialog').close();return;}
+  const k=G.kings[me.team],pending=KingUI.pending;
+  if(pending&&k.upgrades[pending.stat]>=pending.level)KingUI.pending=null;
+  $('kingDialogTitle').textContent=(me.team===0?'苍岚':'赤焰')+'国王 · Lv.'+k.lvl;
+  $('kingInfo').innerHTML=`<div class="hpbarWrap"><div class="hpbarFill ${k.hp/k.max<.35?'low':''}" style="width:${Math.max(0,k.hp/k.max*100)}%"></div></div><div class="king-live-stats"><b>生命 ${Math.ceil(k.hp)}/${k.max}</b><span>攻击 ${k.dmg} · 恢复 ${k.regen}/秒</span></div>`;
+  document.querySelectorAll('[data-king-stat]').forEach(button=>{
+    const stat=button.dataset.kingStat,def=KING_UPGRADES[stat],cost=kingUpgradeCost(k,stat);
+    button.innerHTML=`<b>强化${def.name}</b><span>Lv.${k.upgrades[stat]} → ${k.upgrades[stat]+1}</span><strong>${cost} 金</strong><small>${def.effect}</small>`;
+    button.disabled=!!KingUI.pending||me.gold<cost;
+  });
+  $('kingDialogStatus').textContent=KingUI.error||(KingUI.pending?'正在提交，等待对局同步…':`持有 ${Math.floor(me.gold)} 金 · 当前每波收入 ${me.income}`);
+}
+async function submitKingUpgrade(stat){
+  if(!KingUI.open||KingUI.pending||!Object.hasOwn(KING_UPGRADES,stat))return;
+  const k=G.kings[localPlayer().team];if(localPlayer().gold<kingUpgradeCost(k,stat))return;
+  const pending={stat,level:k.upgrades[stat]+1};KingUI.pending=pending;KingUI.error='';updateKingUI(localPlayer());
+  try{if(Net.session)await api('action',{type:'king',stat});else if(!performAction({type:'king',stat}))throw new Error('强化未完成，请检查金币和对局状态');}
+  catch(e){if(KingUI.pending===pending){KingUI.pending=null;KingUI.error=e.message;}}
+  if(KingUI.open)updateUI(true);
+}
 const MercUI={mid:null};
 function sendMercUI(mid,index){
   if(!G||!['prep','combat'].includes(G.phase))return;
@@ -255,22 +290,7 @@ function updateUI(force) {
     if(steroid){steroid.textContent=f.steroids?'下一波强化已准备':'注射强化 · 50金 · 下一波生命+20%、攻击+25%';steroid.disabled=G.phase!=='prep'||f.steroids||me.gold<50;}
   }else{sb.style.display='none';delete sb.dataset.signature;}
 
-  // 国王
-  const k = G.kings[me.team];
-  $('kingBox').querySelector('h3').textContent = me.team === 0 ? '♛ 苍岚国王' : '♛ 赤焰国王';
-  const kPort = document.getElementById('kingPortrait');
-  if (kPort) drawPortrait(kPort, 'king_' + me.team, 52);
-  $('kingInfo').innerHTML = `
-    <div class="hpbarWrap"><div class="hpbarFill ${k.hp / k.max < 0.35 ? 'low' : ''}" style="width:${Math.max(0, k.hp / k.max * 100)}%"></div></div>
-    HP ${Math.ceil(k.hp)}/${k.max} · 攻击 ${k.dmg} · 恢复 ${k.regen}/秒<br>
-    三项独立升级，队友共享；每次强化个人收入 +2`;
-  document.querySelectorAll('[data-king-stat]').forEach(button => {
-    const stat = button.dataset.kingStat, def = KING_UPGRADES[stat];
-    const cost = kingUpgradeCost(k, stat);
-    button.innerHTML = `${def.name} Lv.${k.upgrades[stat]} → ${k.upgrades[stat] + 1} · ${cost} 金<small>${def.effect}</small>`;
-    button.title = def.effect + '；个人收入 +2';
-    button.disabled = me.gold < cost || G.phase === 'over';
-  });
+  updateKingUI(me);
 
   // 雇佣兵可用性
   updateMercUI(me);
@@ -363,6 +383,8 @@ function bindEvents() {
     const pos = canvasPos(e);
     const cell = fieldCellAt(me, pos.x, pos.y);
     const radius=Math.max(23,22/getMapProjection().scale);
+    const king=G.kings[me.team];
+    if(Math.hypot(pos.x-king.x,pos.y-king.y)<=Math.max(45,22/getMapProjection().scale)){openKingDialog();return;}
     const mineSlot=Array.from({length:MINE.LIMIT},(_,i)=>i).find(i=>{const at=minePosition(me,i);return Math.abs(pos.x-at.x)<=Math.min(47,radius)&&Math.abs(pos.y-at.y)<=Math.max(27,radius);});
     if(mineSlot!==undefined){openMineDialog(mineSlot);return;}
     if (G.selectedShop) {
@@ -388,6 +410,9 @@ function bindEvents() {
   });
 
   $('btnMineClose').addEventListener('click',()=>$('mineDialog').close());
+  $('btnKingClose').addEventListener('click',()=>$('kingDialog').close());
+  $('kingDialog').addEventListener('close',()=>{KingUI.open=false;KingUI.pending=null;KingUI.error='';});
+  for(const [team,id] of ['blueKingStatus','redKingStatus'].entries())$(id).addEventListener('click',()=>{if(G&&localPlayer().team===team)openKingDialog();});
   $('btnMercClose').addEventListener('click',()=>$('mercDialog').close());
   $('mercDialog').addEventListener('close',()=>{MercUI.mid=null;});
   document.querySelectorAll('[data-merc-detail-send]').forEach(b=>b.addEventListener('click',()=>sendMercUI(MercUI.mid,+b.dataset.mercDetailSend)));
@@ -395,11 +420,7 @@ function bindEvents() {
   $('mineDialog').addEventListener('close',()=>{MineUI.slot=null;MineUI.pending=null;MineUI.error='';if(G)G.selectedMine=null;});
 
   document.querySelectorAll('[data-king-stat]').forEach(button => {
-    button.addEventListener('click', () => {
-      if (!G || G.phase === 'over') return;
-      performAction({ type:'king', stat:button.dataset.kingStat });
-      updateUI(true);
-    });
+    button.addEventListener('click',()=>submitKingUpgrade(button.dataset.kingStat));
   });
   $('btnPause').addEventListener('click', togglePause);
   $('btnSpeed').addEventListener('click', cycleSpeed);

@@ -10,7 +10,7 @@ const clickMine=require('./mine-map-helper.cjs'),output=process.argv[3]&&path.re
    page.on('pageerror',e=>errors.push(e.message));const press=s=>mobile?page.locator(s).tap():page.locator(s).click();
    await page.goto(base);await press('.diff[data-diff="normal"]');
    await page.evaluate(()=>{G.paused=true;localPlayer().gold=5000;updateUI(true);});
-   assert.equal(await page.locator('[data-command]').count(),3);
+   assert.equal(await page.locator('[data-command]').count(),2);
    await clickMine(page,5,{mobile});assert.match(await page.locator('#mineDialogTitle').textContent(),/6 号矿位/);
    const box=await page.locator('#mineDialog').boundingBox();assert.ok(box.y>=0&&box.y+box.height<=viewport.height);
    await press('#btnMineAction');assert.equal(await page.evaluate(()=>localPlayer().mines[0].slot),5);

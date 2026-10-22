@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>军团战争 · Legion Arena</title>
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/responsive.css?v=29">
+<link rel="stylesheet" href="css/responsive.css?v=30">
 </head>
 <body>
 <div id="app">
@@ -26,7 +26,7 @@
   <main>
     <div id="stage">
       <div class="stage-heading"><div><small>THE CONVERGENCE</small><h2>双王交汇之地</h2></div><span>四路防线 / 共享王城</span></div>
-      <div id="battleSummary" aria-label="国王状态"><span id="blueKingStatus">苍岚国王</span><span class="battle-status" id="battleStatus">准备布阵</span><span id="redKingStatus">赤焰国王</span></div>
+      <div id="battleSummary" aria-label="国王状态"><button id="blueKingStatus" type="button" aria-haspopup="dialog">苍岚国王</button><span class="battle-status" id="battleStatus">准备布阵</span><button id="redKingStatus" type="button" aria-haspopup="dialog">赤焰国王</button></div>
       <div id="mapViewport">
         <canvas id="cv" width="1800" height="1440" aria-label="战场，点击己方格子放置或选择单位"></canvas>
         <div class="map-tools" aria-label="地图视角">
@@ -43,7 +43,6 @@
     </div>
     <nav id="commandTabs" role="tablist" aria-label="军团操作">
       <button id="tab-shop" role="tab" aria-selected="true" aria-controls="panel-shop" data-command="shop"><span>⚔</span>军营</button>
-      <button id="tab-king" role="tab" aria-selected="false" aria-controls="panel-king" data-command="king"><span>♛</span>国王</button>
       <button id="tab-attack" role="tab" aria-selected="false" aria-controls="panel-attack" data-command="attack"><span>⚑</span>进攻</button>
     </nav>
     <aside id="side" aria-label="操作面板">
@@ -66,18 +65,6 @@
         <div id="selInfo"></div>
       </section>
       </div>
-      <div class="command-panel" id="panel-king" role="tabpanel" aria-labelledby="tab-king" data-panel="king" hidden>
-      <section class="box" id="kingBox">
-        <h3>👑 蓝方国王</h3>
-        <canvas id="kingPortrait" width="52" height="52"></canvas>
-        <div id="kingInfo"></div>
-        <div id="kingUpgrades" class="king-upgrades">
-          <button class="btn wide" data-king-stat="health">强化生命</button>
-          <button class="btn wide" data-king-stat="attack">强化攻击</button>
-          <button class="btn wide" data-king-stat="regen">强化生命恢复</button>
-        </div>
-      </section>
-      </div>
       <div class="command-panel" id="panel-attack" role="tabpanel" aria-labelledby="tab-attack" data-panel="attack" hidden>
       <section class="box" id="mercBox">
         <h3>💀 雇佣兵 <span class="hint">送给敌方，增加你的收入</span></h3>
@@ -92,6 +79,10 @@
 <div id="drawerBackdrop" hidden aria-hidden="true"></div>
 <div id="quickMenu" hidden><b>战场操作</b><button class="btn" data-delegate="btnPause">暂停</button><button class="btn" data-delegate="btnSpeed">倍速</button><button class="btn" data-delegate="btnHelp">克制表</button><button class="btn" data-delegate="btnRestart">重新开始</button></div>
 <dialog id="sellDialog"><h2>出售单位</h2><p id="sellMessage"></p><div class="sell-actions"><button id="btnKeepUnit" class="btn">保留单位</button><button id="btnConfirmSell" class="btn">确认出售</button></div></dialog>
+<dialog id="kingDialog" aria-labelledby="kingDialogTitle" aria-describedby="kingDialogNote">
+  <div class="king-dialog-head"><canvas id="kingPortrait" width="96" height="96"></canvas><div><small>ROYAL COMMAND</small><h2 id="kingDialogTitle">国王强化</h2></div><button id="btnKingClose" class="btn" aria-label="关闭国王强化">×</button></div>
+  <div class="king-dialog-body"><div id="kingInfo"></div><p id="kingDialogNote">三项独立强化，队友共享；每次强化个人收入 +2。</p><div id="kingUpgrades" class="king-upgrades"><button class="btn" data-king-stat="health">强化生命</button><button class="btn" data-king-stat="attack">强化攻击</button><button class="btn" data-king-stat="regen">强化生命恢复</button></div><p id="kingDialogStatus" role="status" aria-live="polite"></p></div>
+</dialog>
 <dialog id="mineDialog" aria-labelledby="mineDialogTitle" aria-describedby="mineDialogSummary">
   <div class="mine-dialog-head"><span class="mine-emblem" aria-hidden="true">◆</span><div><small>GOLD MINE</small><h2 id="mineDialogTitle">金矿</h2></div><button id="btnMineClose" class="btn" aria-label="关闭金矿窗口">×</button></div>
   <p id="mineDialogSummary"></p><div id="mineDialogStats"></div>
@@ -163,9 +154,9 @@
 <script src="js/combat341.js?v=29"></script>
 <script src="js/ai.js?v=29"></script>
 <script src="js/render.js?v=28"></script>
-<script src="js/ui.js?v=29"></script>
+<script src="js/ui.js?v=30"></script>
 <script src="js/network.js?v=28"></script>
-<script src="js/layout.js?v=29"></script>
+<script src="js/layout.js?v=30"></script>
 <script src="js/main.js?v=22"></script>
 </body>
 </html>
