@@ -304,6 +304,20 @@
       "sheet": 300,
       "parentPlusCost": 200,
       "resolution": "charge Cost, retain listed Total"
+    },
+    {
+      "wave": 17,
+      "field": "Qty",
+      "sheet": 34,
+      "map": 35,
+      "resolution": "map spawn count wins; sheetQty retained"
+    },
+    {
+      "wave": 24,
+      "field": "Qty",
+      "sheet": 36,
+      "map": 35,
+      "resolution": "map spawn count wins; sheetQty retained"
     }
   ]
 }

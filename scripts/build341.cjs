@@ -97,7 +97,15 @@ for(const r of records){r.elite=parent.has(r.id);r.tier=r.buildingId?Number((byI
 function tier(r,seen=new Set()) {if(r.tier)return r.tier;if(seen.has(r.id))return 1;seen.add(r.id);r.tier=parent.has(r.id)?tier(parent.get(r.id),seen):1;return r.tier;}
 for(const r of records){tier(r);if(parent.has(r.id)&&parent.get(r.id).cost+r.baseCost!==r.cost)warnings.push({row:r.row,name:r.english,field:'Total',sheet:r.cost,parentPlusCost:parent.get(r.id).cost+r.baseCost,resolution:'charge Cost, retain listed Total'});}
 const creepIds=[...jass.matchAll(/set udg_Level_UnitType\[udg_Temp_Integer\]='(.{4})'/g)].map(m=>m[1]);
-const waves=sheet.waves.map((w,i)=>({...w,mapId:creepIds[i],map:byId[creepIds[i]]?.fields||{}}));
+const mapWaveCounts=jass.match(/set udg_LevelWaveCountList = "([^"]+)"/)[1].split(',').filter(Boolean).map(Number);
+const spawnTimer=jass.match(/function CreateCreepWaveTimer[\s\S]*?endfunction/)[0];
+const intervals=[...spawnTimer.matchAll(/TimerStart\(udg_PeriodSpawnTimer\s*,\s*([\d.]+)/g)].map(m=>Number(m[1]));
+const mercDelay=Number(jass.match(/call ExecuteFunc\("CreateCreepWaveTimer"\)\s*call PolledWait\(([\d.]+)\)\s*call TriggerExecute\(gg_trg_Warp_Summons\)/)[1]);
+if(mapWaveCounts.length!==31||intervals.length!==2||mapWaveCounts.some(n=>!Number.isInteger(n)||n<=0))throw Error('Unrecognized source wave spawning rules');
+const waves=sheet.waves.map((w,i)=>{
+  if(w.qty!==mapWaveCounts[i])warnings.push({wave:w.level,field:'Qty',sheet:w.qty,map:mapWaveCounts[i],resolution:'map spawn count wins; sheetQty retained'});
+  return {...w,sheetQty:w.qty,qty:mapWaveCounts[i],spawnInterval:intervals[i===30?0:1],mercDelay,mapId:creepIds[i],map:byId[creepIds[i]]?.fields||{}};
+});
 const summonIds=new Set();
 for(const id of ['h0AX','h0D5'])summonIds.add(id);
 for(const a of mapAbilities)if(a.base==='AHwe')for(const [key,value] of Object.entries(a.fields))if(key.startsWith('Hwe1:')&&byId[value])summonIds.add(value);

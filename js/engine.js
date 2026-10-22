@@ -30,7 +30,7 @@ function newGame(diffKey) {
       spawnX: L.laneX, spawnY: i % 2 ? CFG.H-20 : 20,
       direction: i % 2 ? -1 : 1,
       fighters: [], enemies: [], mercQueue: [], mines: [],
-      spawnList: [], spawnT: 0, spawnIv: 1, paid: true,
+      spawnList: [], spawnT: 0, spawnIv: .1, mercSpawnList:[],mercSpawnT:0,paid: true,
       ai: null, aiT: 0,
     });
   }
@@ -60,7 +60,7 @@ function startPrep() {
     const inc = G.wave === 1 ? 0 : Math.round(p.income * gainMult(p));
     p.gold += inc;
     p.paid = true;
-    p.enemies = []; p.spawnList = [];
+    p.enemies = []; p.spawnList = [];p.mercSpawnList=[];p.mercSpawnT=0;
     if (p.isHuman && G.wave > 1) addLog(`${p.name} 收入结算 +${inc} 金`, 'l-gold');
   }
   G.timerMax = G.wave === 1 ? CFG.FIRST_PREP : CFG.PREP_TIME;
@@ -73,16 +73,16 @@ function startCombat() {
   if(G.battleMode==='arena'){startArenaCombat();return;}
   G.phase = 'combat';
   G.combatT = 0;
-  const iv = Math.max(0.5, 1.15 - G.wave * 0.012);
+  const iv = G.waveDef.spawnInterval;
   for (const p of G.players) {
     for(const f of p.fighters)if(f.steroids){f.max=f.def.hp*1.2;f.hp=f.max;}
     start341Round(p);
     p.paid = false;
     p.leakCount = 0;
-    p.spawnIv = iv; p.spawnT = 0.2;
+    p.spawnIv = iv; p.spawnT = iv;
     p.spawnList = [];
     for (let i = 0; i < G.waveDef.count; i++) p.spawnList.push({ type: 'wave' });
-    for (const mid of p.mercQueue) p.spawnList.push({ type: 'merc', id: mid });
+    p.mercSpawnList=p.mercQueue.map(id=>({type:'merc',id}));p.mercSpawnT=G.waveDef.mercDelay;
     p.mercQueue = [];
   }
   addLog(`⚔ 第 ${G.wave} 波来袭！`, 'l-red');
@@ -166,6 +166,8 @@ function simStep(dt) {
 
 function forceLeakAll() {
   for (const p of G.players) {
+    for(const item of [...p.spawnList,...p.mercSpawnList])spawnEnemy(p,item);
+    p.spawnList=[];p.mercSpawnList=[];
     for (const e of [...p.enemies]) leak(p, e);
     p.enemies = [];
   }
@@ -177,10 +179,14 @@ function fieldStep(p, dt) {
   // 出兵
   if (p.spawnList.length) {
     p.spawnT -= dt;
-    while (p.spawnT <= 0 && p.spawnList.length) {
+    while (p.spawnT <= 1e-9 && p.spawnList.length) {
       spawnEnemy(p, p.spawnList.shift());
       p.spawnT += p.spawnIv;
     }
+  }
+  if(p.mercSpawnList.length){
+    p.mercSpawnT-=dt;
+    if(p.mercSpawnT<=1e-9){for(const item of p.mercSpawnList)spawnEnemy(p,item);p.mercSpawnList=[];}
   }
   const combat={...p,enemies:defenseTargets(p)};
   tick341(combat, dt);
@@ -219,7 +225,7 @@ function fieldStep(p, dt) {
     recalcAuras(p);
   }
   // 结算
-  if (!p.paid && !p.spawnList.length && !p.enemies.length) payClear(p);
+  if (!p.paid && !p.spawnList.length && !p.mercSpawnList.length && !p.enemies.length) payClear(p);
 }
 
 function spawnEnemy(p, item) {
@@ -620,7 +626,7 @@ function startArenaPrep(){
   G.battleMode='arena';G.phase='prep';G.timerMax=CFG.ARENA_PREP;G.timer=G.timerMax;
   G.arena={stage:'prepare',elapsed:0,counts:[0,0],winner:null};
   G.projectiles=[];G.selectedShop=null;G.selectedFighter=null;
-  for(const p of G.players){p.paid=true;p.aiT=.5;p.spawnList=[];p.enemies=[];}
+  for(const p of G.players){p.paid=true;p.aiT=.5;p.spawnList=[];p.mercSpawnList=[];p.enemies=[];}
   addLog(`第 ${G.wave} 波已守住！${CFG.ARENA_PREP} 秒后开放中央路口，开始阵营 PK。`,'l-gold');
 }
 function startArenaCombat(){

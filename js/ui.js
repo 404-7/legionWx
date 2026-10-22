@@ -253,7 +253,8 @@ function updateUI(force) {
         <span class="wtime">${G.phase === 'prep' ? Math.ceil(G.timer) + 's 后来袭' : '⚔ 战斗中'}</span>
       </div>
       <div>
-        <span class="chip count">×${d.count}</span>
+        <span class="chip count">每路 ${d.count} 只</span>
+        <span class="chip">每路 ${d.spawnInterval} 秒 / 只</span>
         <span class="chip hp">❤${d.hp}</span>
         <span class="chip dmg">⚔${d.dmg}</span>
         <span class="chip">${d.atk}攻击</span>

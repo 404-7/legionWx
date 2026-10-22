@@ -60,7 +60,7 @@ const WAVES = SOURCE341.waves.map((w,i)=>{
   const attacks={normal:'普通',pierce:'穿刺',magic:'魔法',siege:'攻城',chaos:'混乱'};
   const armorByWave=['无甲','无甲','中甲','重甲','轻甲','城甲','轻甲','中甲','重甲','轻甲','城甲','中甲','轻甲','中甲','重甲','轻甲','城甲','中甲','轻甲','重甲','轻甲','城甲','重甲','中甲','轻甲','重甲','中甲','城甲','重甲','城甲','无甲'];
   const dice=m.ua1d||1,sides=m.ua1s||2,base=m.ua1b||0;
-  return {w:w.level,name:m.unam,count:w.qty,bounty:w.bounty,bonus:w.bonus,value:w.value,
+  return {w:w.level,name:m.unam,count:w.qty,spawnInterval:w.spawnInterval,mercDelay:w.mercDelay,bounty:w.bounty,bonus:w.bonus,value:w.value,
     hp:m.uhpm,dmg:base+dice*(1+sides)/2,aspd:m.ua1c||1.25,
     speed:(m.umvs||270)*SOURCE341.rangeScale,range:ranged?(m.ua1r||400)*SOURCE341.rangeScale:30,
     armor:armorByWave[i],armorPoints:m.udef||0,atk:attacks[m.ua1t]||'普通',
