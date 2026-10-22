@@ -20,6 +20,8 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
    await page.evaluate(()=>{localPlayer().gold=5000;updateUI(true);});
    if(mobile)await press('#tab-shop');
    await page.locator('#panel-shop').waitFor({state:'visible'});
+   const cards=await page.locator('.unit-grid').evaluate(el=>[...el.children].slice(0,2).map(c=>c.getBoundingClientRect().toJSON()));
+   assert.ok(cards.length===2&&Math.abs(cards[0].y-cards[1].y)<1&&cards[1].x>cards[0].x,'barracks uses a two-column card grid');
    for(const id of ['attack'])assert.equal(await page.locator('#panel-'+id).isVisible(),false);
    await press('[data-uid="infantry"] .uName');
    if(mobile)assert.equal(await page.evaluate(()=>CommandUI.open),false,'selecting a unit collapses drawer');

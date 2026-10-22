@@ -409,7 +409,8 @@ function leak(p, e) {
   p.leakCount = (p.leakCount || 0) + 1;
   const k = G.kings[p.team];
   e.toKing = true;e.ownerId=p.id; e.routeX = p.exitX; e.turning = true;forgetCombatTarget(e);
-  e.route=[{x:p.exitX,y:CFG.ROAD_Y},{x:k.x,y:CFG.ROAD_Y},{x:k.x,y:k.y}];e.routeIndex=0;
+  const lane=(e.entityId%5-2)*8;
+  e.route=[{x:p.exitX+lane,y:CFG.ROAD_Y+lane},{x:k.x+lane,y:CFG.ROAD_Y+lane},{x:k.x+lane,y:k.y}];e.routeIndex=0;
   k.leaks.push(e);
   addFloater(p.exitX - 20, e.y, '漏怪!', '#ff6a5e');
   if (p.isHuman) addLog(`${p.name} 第 ${G.wave} 波漏怪！国王受到威胁`, 'l-red');
@@ -419,6 +420,7 @@ function kingStep(k, dt) {
   if (k.slamT > 0) k.slamT -= dt;
   k.cd -= dt;
   if (k.flash > 0) k.flash -= dt;
+  separateKingUnits(k,dt);
   for (const e of k.leaks) {
     if(e.hp<=0)continue;
     const owner=G.players[e.ownerId],defenders=G.players.filter(p=>p.team===k.team).flatMap(p=>p.fighters);

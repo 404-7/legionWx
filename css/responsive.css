@@ -164,3 +164,10 @@ button,[role=button],summary{touch-action:manipulation}
 @media(max-height:430px) and (orientation:landscape){.king-dialog-head{padding:10px 16px}#kingPortrait{width:44px;height:44px}.king-dialog-head h2{font-size:17px}.king-dialog-body{padding:10px 16px}#kingDialog .king-upgrades .btn{min-height:110px;padding:9px 8px}#kingDialogStatus{margin-top:8px}}
 
 .map-tools{pointer-events:none}.map-tools .btn{pointer-events:auto}
+
+.unit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:stretch}
+#shop .unit-grid .ucard{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-height:0;padding:10px 8px;border-radius:12px;min-width:0;overflow:hidden;background:linear-gradient(145deg,#253c2c,#10211d)}
+#shop .unit-grid .portrait{align-self:center;width:82px;height:82px;flex:none;border-radius:12px}#shop .unit-grid .uBody{flex:auto;width:100%;min-width:0}#shop .unit-grid .uName{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:nowrap;gap:4px;font-size:13px;line-height:1.5}#shop .unit-grid .uName>span:first-child{overflow-wrap:anywhere}#shop .unit-grid .cost{margin-left:0;flex-shrink:0}#shop .unit-grid .cost:after{content:' 金';font-size:9px;font-weight:400}
+#shop .unit-grid .uEnglish{font-size:9px;overflow-wrap:anywhere;line-height:1.5;margin-top:4px}#shop .unit-grid .uRole,#shop .unit-grid .uStats{font-size:10px;line-height:1.7}#shop .unit-grid .uTags{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}#shop .unit-grid .chip{margin:0;padding:2px 4px;font-size:9px;white-space:normal;overflow-wrap:anywhere}#shop .unit-grid .upgrade-path{width:100%;font-size:9px;line-height:1.7}#shop .unit-grid .source-details{font-size:10px;overflow-wrap:anywhere;margin-top:7px}#shop .unit-grid .source-details summary{font-size:10px;min-height:44px}#shop .unit-grid .source-details>div{font-size:10px;line-height:1.8;word-break:break-word}
+
+#shop .unit-grid .ucard{align-self:stretch}#shop .unit-grid .uBody{display:flex;flex-direction:column}#shop .unit-grid .source-details{margin-top:auto;padding-top:7px}

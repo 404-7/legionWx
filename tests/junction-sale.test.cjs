@@ -30,6 +30,21 @@ test('dense simultaneous leaks from both lanes reach and damage each king',()=>{
  assert.equal(run('G.kings.every(k=>k.leaks.every(e=>e.routeIndex>=2&&Math.hypot(e.x-k.x,e.y-k.y)<100))'),true);
 });
 
+test('slow large creeps and full mercenary queues cannot deadlock at either merging junction',()=>{
+ for(const [count,speed,radius,dt] of [[54,15,24,.05],[94,25,16,.1]]){
+  const run=engine();run(`G.phase='combat';G.kings.forEach(k=>{k.cd=1e9;k.hp=k.max=1e9;});for(const p of G.players)for(let i=0;i<${count};i++){spawnEnemy(p,{type:'wave'});const e=p.enemies.at(-1);e.speed=${speed};e.r=${radius};e.x=p.exitX+(i%5-2)*4;e.y=p.exitY;leak(p,e);}`);
+  for(let i=0;i<Math.ceil(120/dt);i++)run(`G.players.forEach(p=>separateDefenseUnits(p,${dt}));G.kings.forEach(k=>kingStep(k,${dt}));`);
+  assert.equal(run('G.kings.every(k=>k.leaks.every(e=>e.routeIndex>=2))'),true,`${count} creeps per lane must all clear both bends`);
+  assert.equal(run('G.kings.every(k=>k.hp<k.max)'),true);
+ }
+});
+
+test('crowd separation has one per-unit displacement budget and never pushes marching creeps backwards',()=>{
+ const run=engine();run("G.phase='combat';const p=G.players[0],k=G.kings[0];for(let i=0;i<80;i++){spawnEnemy(p,{type:'wave'});const e=p.enemies.at(-1);e.x=p.exitX;e.y=700;e.speed=10;e.r=24;leak(p,e);e.routeIndex=1;e.x=1400;e.y=720;}const before=k.leaks.map(e=>({x:e.x,y:e.y}));separateKingUnits(k,.05);");
+ assert.equal(run('k.leaks.every((e,i)=>Math.hypot(e.x-before[i].x,e.y-before[i].y)<=10*.05*.35+1e-8)'),true);
+ assert.equal(run('k.leaks.every((e,i)=>{const goal=e.route[e.routeIndex],dx=goal.x-before[i].x,dy=goal.y-before[i].y;return (e.x-before[i].x)*dx+(e.y-before[i].y)*dy>=-1e-8;})'),true);
+});
+
 test('subpixel attack-range rounding cannot leave a creep standing just outside its target forever',()=>{
  const run=engine();run("G.phase='combat';const p=G.players[2];buyFighter(p,'ent',0,0);const f=p.fighters[0];f.x=p.exitX;f.y=CFG.ROAD_Y;spawnEnemy(p,{type:'wave'});const e=p.enemies[0];e.x=f.x+e.range+e.r+1e-10;e.y=f.y;e.cd=0;const hp=f.hp;enemyAct(p,e,.05);");
  assert.ok(run('f.hp')<run('hp'));assert.equal(run('e.brain.state'),'attack');

@@ -121,9 +121,7 @@ function buildShop() {
     group.style.gridColumn = '1 / -1';
     group.innerHTML = `<div class="race-title" style="color:${RACES[race].color}">${RACES[race].icon} ${RACES[race].name}军团</div><p class="race-desc">${RACES[race].desc}</p><p class="race-tip">${RACES[race].tip}</p>`;
     const grid = document.createElement('div');
-    grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = '1fr';
-    grid.style.gap = '6px';
+    grid.className = 'unit-grid';
     for (const [uid, def] of Object.entries(UNITS)) {
       if (def.race !== race || (!shopCatalog && !isBaseUnit(uid)) || !def.sourceRow) continue;
       const card = document.createElement('div');

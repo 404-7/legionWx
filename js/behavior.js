@@ -117,12 +117,39 @@ function idleGuard(p,f,dt){
   moveCombatUnit(p,f,goal,f.def.speed*(f.slowF??1),dt,COMBAT_AI.RETURN_EPS);
 }
 function separateDefenseUnits(p,dt){
-  const units=[...p.fighters,...defenseTargets(p)].filter(u=>u.hp>0&&!(u.deadT>0));
+  separateCombatCrowd([...p.fighters,...p.enemies],p,dt);
+}
+function separateKingUnits(k,dt){
+  if(!k.leaks.length)return;
+  const allies=G.players.filter(p=>p.team===k.team);
+  const guards=allies.flatMap(p=>p.fighters);
+  separateCombatCrowd([...k.leaks,...guards],allies[0],dt,(a,b)=>a.toKing||b.toKing);
+}
+function separateCombatCrowd(candidates,p,dt,pairAllowed=()=>true){
+  const units=candidates.filter(u=>u.hp>0&&!(u.deadT>0)),forces=units.map(()=>({x:0,y:0}));
   for(let i=0;i<units.length;i++)for(let j=i+1;j<units.length;j++){
+    if(!pairAllowed(units[i],units[j]))continue;
     const a=units[i],b=units[j],minimum=(a.r||10)+(b.r||10);let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);
     if(d>=minimum)continue;
     if(d<.01){const angle=(i*37+j*17)*2.39996;dx=Math.cos(angle);dy=Math.sin(angle);d=1;}
     const push=Math.min((minimum-d)*.4,30*dt);
-    for(const [u,sign] of [[a,-1],[b,1]]){const x=u.x+sign*dx/d*push,y=u.y+sign*dy/d*push;if(defenseWalkable(p,x,y)){u.x=x;u.y=y;}}
+    forces[i].x-=dx/d*push;forces[i].y-=dy/d*push;
+    forces[j].x+=dx/d*push;forces[j].y+=dy/d*push;
+  }
+  for(let i=0;i<units.length;i++){
+    const u=units[i],force=forces[i];let budget=30*dt;
+    if(u.toKing&&!u.brain?.targetId){
+      // Soft friendly collision must never cancel route progress, even in a full junction.
+      const goal=u.route?.[u.routeIndex];
+      if(goal){
+        let dx=goal.x-u.x,dy=goal.y-u.y,d=Math.hypot(dx,dy);
+        if(d<.01&&u.route[u.routeIndex+1]){const next=u.route[u.routeIndex+1];dx=next.x-u.x;dy=next.y-u.y;d=Math.hypot(dx,dy);}
+        if(d>.01){const forward=(force.x*dx+force.y*dy)/(d*d);force.x-=forward*dx;force.y-=forward*dy;}
+      }
+      budget=Math.min(budget,u.speed*(u.slowF??1)*(u.mercMove||1)*dt*.35);
+    }
+    const length=Math.hypot(force.x,force.y);if(length<.001)continue;
+    const scale=Math.min(1,budget/length),x=u.x+force.x*scale,y=u.y+force.y*scale;
+    if(defenseWalkable(p,x,y)){u.x=x;u.y=y;}
   }
 }
