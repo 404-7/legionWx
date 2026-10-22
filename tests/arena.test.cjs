@@ -2,19 +2,17 @@ const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 function engine(){const ctx=vm.createContext({}),run=code=>vm.runInContext(code,ctx);run(['source341','config','skills341','data','behavior','engine','combat341','ai'].map(n=>fs.readFileSync(path.join(__dirname,'../js',n+'.js'),'utf8')).join('\n'));run("newGame('normal');G.players.forEach(p=>{p.ai=null;p.gold=100000;})");return run;}
 
-test('expanded grid accepts its far corner and server allows more than 36 permanent fighters',()=>{
+test('expanded grid accepts its far corner and armies beyond 36 units require source farm capacity',()=>{
  const run=engine();assert.equal(run('CFG.COLS*CFG.ROWS'),192);
  assert.equal(run("buyFighter(G.players[0],'ent',11,15)"),true);
  assert.equal(run("buyFighter(G.players[0],'ent',12,15)"),false);
  assert.equal(run("buyFighter(G.players[0],'ent',11,16)"),false);
  const game=require('../server/game.cjs')([0,1,2,3].map(slot=>({slot,name:'P'+slot,race:'beast'})),{raceMode:'select'});
- // Earn the larger army's budget through the same mine actions as a real online player.
- for(let i=0;i<3;i++)assert.equal(game.action(0,{type:'mineBuy'}),true);
- // The source king needs support while one player invests the entire budget in mines.
- for(const slot of [1,2,3])for(const stat of ['health','regen','attack'])assert.equal(game.action(slot,{type:'king',stat}),true);
- for(let i=0;i<2000;i++)game.step(.05);
- for(let i=0;i<40;i++)assert.equal(game.action(0,{type:'buy',uid:'gnoll_warrior',col:i%12,row:Math.floor(i/12)}),true);
- assert.equal(game.snapshot().players[0].fighters.length,40);
+ assert.equal(game.action(0,{type:'farmUpgrade'}),true);
+ assert.equal(game.snapshot().players[0].farmLevel,1);assert.equal(game.snapshot().players[0].gold,196);
+ run('while(foodCapacity341(G.players[0])<60)farmUpgrade341(G.players[0])');
+ for(let i=0;i<40;i++)assert.equal(run(`buyFighter(G.players[0],'gnoll_warrior',${i%12},${Math.floor(i/12)})`),true);
+ assert.equal(run('G.players[0].fighters.length'),41);
 });
 
 test('only waves 10 and 20 insert a 30-second PK prep without double income or wave rewards',()=>{
@@ -72,8 +70,9 @@ test('reincarnation and death summons keep a PK team alive before elimination ch
 test('all 187 imported unit records can cast, attack and summon against real opposing fighters',()=>{
  const run=engine();
  run(`for(const slot of [0,2])for(const [i,row] of SOURCE341.units.entries()){
-  const p=G.players[slot];buyFighter(p,'ent',i%CFG.COLS,Math.floor(i/CFG.COLS));
-  const f=p.fighters.at(-1);f.uid=row.id;f.def=UNITS[row.id];f.effDmg=f.def.dmg;init341Fighter(f);
+  // Deliberately oversized stress fixture; real purchases obey the 200 food ceiling.
+  const p=G.players[slot],def=UNITS[row.id],f={uid:row.id,def,ownerId:p.id,col:i%CFG.COLS,row:Math.floor(i/CFG.COLS),x:p.gx,y:p.gy,hp:def.hp,max:def.hp,cd:0,spent:0,effDmg:def.dmg,deadT:0,flash:0};
+  p.fighters.push(f);init341Fighter(f);
  }
  G.wave=20;startArenaPrep();startCombat();
  for(const p of G.players)for(const [i,f] of p.fighters.entries()){

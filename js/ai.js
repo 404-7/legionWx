@@ -34,6 +34,7 @@ function aiAct(p) {
   const a = p.ai;
   if (!a) return;
   const w = G.wave;
+  if(foodCapacity341(p)-armyFood341(p)<8)farmUpgrade341(p);
 
   // Keep enough gold for defenders while investing in the same mines as humans.
   if (w >= 3 && p.mines.length < Math.min(MINE.LIMIT, Math.floor(w / 3)) && p.gold >= MINE.COST + 180) buyMine(p);

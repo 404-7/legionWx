@@ -48,16 +48,26 @@ function mercAttack341(p,e,target){
  const a=MERCS[e.mercId]?.abil||{};
  const bash=a.bash&&Math.random()<a.bash.chance;
  const dealt=hitFighter(p,target,(e.dmg*(1+(e.mercDamage||0))+(bash?a.bash.damage:0))*(1-(e.damageWeak||0)),e.atk,e)||0;
+ if(e.bounce){const b=e.bounce;const others=G.players.filter(q=>q.team===p.team).flatMap(q=>q.fighters).filter(f=>f!==target&&f.hp>0&&Math.hypot(f.x-target.x,f.y-target.y)<=b.r).slice(0,b.count);
+  others.forEach((f,i)=>hitFighter(p,f,e.dmg*Math.pow(1-b.loss,i+1),e.atk,e));}
  if(dealt<=0)return;
  if(e.mercVamp)e.hp=Math.min(e.max,e.hp+dealt*e.mercVamp);
  if(target.hp<=0||target.def.abil.magicImmune)return;
  if(bash)add341Status(target,'mercBash',{time:a.bash.duration,stun:true});
  if(a.corrupt)add341Status(target,'mercCorruption',{time:a.corrupt.duration,armor:a.corrupt.armor});
- if(a.cold)add341Status(target,'mercCold',{time:a.cold.duration,move:a.cold.move});
+ if(a.cold)add341Status(target,'mercCold',{time:a.cold.duration,move:a.cold.move,attack:a.cold.attack});
  if(a.poison)add341Status(target,'mercPoison',{time:a.poison.duration,dps:a.poison.dps,move:a.poison.move,attack:a.poison.attack});
 }
 // Stateful combat adapters for the supplied 3.41 unit/ability records.
 function armorFactor(points=0) { return points>=0 ? 1/(1+.06*points) : 2-Math.pow(.94,-points); }
+function magicDamageBlocked341(immune,atk){return !!immune&&(atk==='法术'||atk==='魔法'&&SOURCE341.rules.magicImmunesResistDamage);}
+function allowedTarget341(flags,target){
+  const list=String(flags||'').split(',');
+  const air=list.includes('air'),ground=list.includes('ground');
+  if(!air&&!ground)return true;
+  return (target.def?.air??target.air)?air:ground;
+}
+function fighterSpeed341(p,f){return Math.min(SOURCE341.rules.maxSpeed,f.def.speed*(f.slowF??1)*(1+Math.max(f.effMove||0,kingAura341(p.team,f).move)));}
 function init341Fighter(f) {
   resetCombatAgent(f);
   f.mana = Math.min(f.def.manaMax||0,f.def.manaStart||0);
@@ -65,8 +75,8 @@ function init341Fighter(f) {
   f.effArmor=f.def.armorPoints||0;f.effHaste=0;f.effVamp=0;
   f.guardianFactor=1;
 }
-function spell341Targets(p,f,r) {
-  return p.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-f.x,e.y-f.y)<=r+e.r)
+function spell341Targets(p,f,r,flags='') {
+  return p.enemies.filter(e=>e.hp>0&&allowedTarget341(flags,e)&&Math.hypot(e.x-f.x,e.y-f.y)<=r+(e.r||0))
     .sort((a,b)=>Math.hypot(a.x-f.x,a.y-f.y)-Math.hypot(b.x-f.x,b.y-f.y));
 }
 function add341Status(e,key,data) {
@@ -78,7 +88,7 @@ function step341Enemy(e,dt) {
   e.statuses ||= {};e.slowF=1;e.attackSlow=0;e.damageWeak=0;e.armorLoss=0;e.miss=0;e.stunT=0;
   for(const [id,b] of Object.entries(e.statuses)) {
     const active=Math.min(dt,b.time);b.time-=dt;
-    if(b.dps&&e.hp>0)dmgEnemy(e,b.dps*active,'法术');
+    if(b.dps&&e.hp>0)dmgEnemy(e,b.dps*active,'法术',b.ownerId===undefined?null:{ownerId:b.ownerId,hp:0});
     e.slowF=Math.min(e.slowF,1-(b.move||0));
     e.attackSlow=Math.max(e.attackSlow,b.attack||0);
     e.damageWeak=Math.max(e.damageWeak,b.damage||0);
@@ -98,21 +108,23 @@ function tick341(p,dt) {
     for(const [id,b] of Object.entries(f.buffs)){b.time-=dt;if(b.time<=0)delete f.buffs[id];}
     for(const id in f.spellCD)f.spellCD[id]-=dt;
     if(f.temporary){f.life-=dt;if(f.life<=0){f.hp=0;continue;}}
-    let healing=f.def.regenFlat||0,manaRegen=f.def.manaRegen||0,haste=0,vamp=0,armor=0,amp=0;
-    for(const source of alive) {
+    let healing=f.def.regenFlat||0,manaRegen=f.def.manaRegen||0,haste=0,vamp=0,armor=0,amp=0,move=0;
+    const supporters=p.arenaView?alive:G.players.filter(q=>q.team===p.team).flatMap(q=>q.fighters).filter(g=>g.hp>0&&g.deadT<=0);
+    for(const source of supporters) {
       const a=source.def.abil,d=Math.hypot(source.x-f.x,source.y-f.y);
       if(a.healAura&&d<=a.healAura.r)amp=Math.max(amp,a.healAura.hps);
       if(a.manaAura&&d<=a.manaAura.r)manaRegen+=f.def.manaMax*a.manaAura.p;
       if(a.hasteAura&&d<=a.hasteAura.r)haste=Math.max(haste,a.hasteAura.p);
       if(a.vampAura&&f.def.melee&&d<=a.vampAura.r)vamp=Math.max(vamp,a.vampAura.p);
       if(a.armorAura&&d<=a.armorAura.r)armor=Math.max(armor,a.armorAura.armor);
+      if(a.moveAura&&d<=a.moveAura.r)move=Math.max(move,a.moveAura.p);
     }
+    const royal=kingAura341(p.team,f);haste=Math.max(haste,royal.haste);armor=Math.max(armor,royal.armor);
     for(const b of Object.values(f.buffs)){haste+=b.haste||0;armor+=b.armor||0;healing-=b.drain||0;}
     if(f.def.abil.berserk){const ratio=f.hp/f.max;haste+=ratio<.2?.8:ratio<.4?.6:ratio<.6?.4:0;}
     f.hp=Math.max(1,Math.min(f.max,f.hp+(healing+amp)*dt));
     f.mana=Math.min(f.def.manaMax||0,f.mana+manaRegen*dt);
-    const royal=kingAura341(p.team,f);
-    f.effArmor=(f.def.armorPoints||0)+Math.max(armor,royal.armor);f.effHaste=Math.max(haste,royal.haste);f.effVamp=vamp;
+    f.effArmor=(f.def.armorPoints||0)+armor;f.effHaste=haste;f.effVamp=vamp;f.effMove=Math.max(move,royal.move);
     f.damageTaken=(f.illusionTaken||1)*(f.guardianFactor||1);
     if(f.stunT>0||f.deadT>0||(p.arenaView&&!f.arenaReady))continue;
     for(const c of f.def.abil.casts||[])cast341(p,f,c);
@@ -126,8 +138,9 @@ function tick341(p,dt) {
 function cast341(p,f,c) {
   if((f.spellCD[c.id]||0)>0||f.mana<c.mana)return;
   if(c.hpThreshold&&f.hp/f.max>c.hpThreshold)return;
-  const r=Math.max(c.range||0,effRange(f.def)),targets=spell341Targets(p,f,r);
-  const friends=p.fighters.filter(g=>g.hp>0&&g.deadT<=0&&Math.hypot(g.x-f.x,g.y-f.y)<=r)
+  const r=c.kind==='aoe'&&c.center!=='target'?(c.area??c.range):c.range??effRange(f.def);
+  const targets=spell341Targets(p,f,r,c.targets).filter(e=>!e.magicImmune&&!e.def?.abil.magicImmune);
+  const friends=p.fighters.filter(g=>g.hp>0&&g.deadT<=0&&allowedTarget341(c.targets,g)&&Math.hypot(g.x-f.x,g.y-f.y)<=r)
     .sort((a,b)=>a.hp/a.max-b.hp/b.max);
   const target=targets[0];let success=false;
   if(c.kind==='heal'||c.kind==='healGroup'||c.kind==='healChain') {
@@ -151,12 +164,16 @@ function cast341(p,f,c) {
     if(c.kind==='miss') {
       for(const e of targets)add341Status(e,c.id,{time:c.duration,miss:c.miss});success=true;
     } else if(c.kind==='breath') {
-      for(const e of targets){dmgEnemy(e,c.damage,'法术',f);add341Status(e,c.id,{time:c.duration,dps:c.dps});}success=true;
+      const dx=target.x-f.x,dy=target.y-f.y,d=Math.hypot(dx,dy)||1;
+      for(const e of targets){const x=e.x-f.x,y=e.y-f.y,along=(x*dx+y*dy)/d,cross=Math.abs(x*dy-y*dx)/d;
+        if(along<0||cross>(c.area||25)*(1+along/Math.max(1,r)))continue;
+        dmgEnemy(e,c.damage,'法术',f);add341Status(e,c.id,{time:c.duration,dps:c.dps,ownerId:f.ownerId});}success=true;
     } else if(['debuff','haunt','root'].includes(c.kind)) {
       add341Status(target,c.id,{time:target.boss?(c.boss||c.duration):c.duration,dps:c.dps||0,
-        move:c.kind==='root'?1:c.move||0,attack:c.attack||0,damage:c.damage||0});success=true;
+        move:c.kind==='root'?1:c.move||0,attack:c.attack||0,damage:c.damage||0,ownerId:f.ownerId});success=true;
     } else if(c.kind==='aoe'||c.kind==='nova') {
-      for(const e of targets.slice(0,c.n||99)) {
+      const areaTargets=c.kind==='nova'||c.center==='target'?spell341Targets(p,target,c.area??r,c.targets):targets;
+      for(const e of areaTargets.slice(0,c.n||99)) {
         dmgEnemy(e,c.kind==='nova'?(e===target?c.damage:0)+c.aoe:c.damage,'法术',f);
         if(c.stun||c.move||c.attack)add341Status(e,c.id,{time:c.duration||c.stun,stun:!!c.stun,move:c.move||0,attack:c.attack||0});
       }
@@ -164,10 +181,14 @@ function cast341(p,f,c) {
     } else if(c.kind==='bolt') {
       dmgEnemy(target,c.damage,'法术',f);add341Status(target,c.id,{time:target.boss?c.boss:c.stun,stun:true});success=true;
     } else if(c.kind==='chain') {
-      targets.slice(0,c.n).forEach((e,i)=>dmgEnemy(e,c.damage*Math.pow(1-c.falloff,i),'法术',f));success=true;
+      chainTargets341(target,p.enemies,c.n,c.area||125,c.targets).forEach((e,i)=>dmgEnemy(e,c.damage*Math.pow(1-c.falloff,i),'法术',f));success=true;
     }
   }
   if(success){f.mana-=c.mana;f.spellCD[c.id]=Math.max(.1,c.cd||f.def.aspd);}
+}
+function chainTargets341(first,candidates,count,r,flags=''){
+  const hits=[first];while(hits.length<count){const last=hits.at(-1),next=candidates.filter(e=>e.hp>0&&!hits.includes(e)&&allowedTarget341(flags,e)&&Math.hypot(e.x-last.x,e.y-last.y)<=r).sort((a,b)=>Math.hypot(a.x-last.x,a.y-last.y)-Math.hypot(b.x-last.x,b.y-last.y))[0];if(!next)break;hits.push(next);}
+  return hits;
 }
 function spawn341Ally(p,parent,def,life=60) {
   if(p.fighters.filter(f=>f.temporary&&f.hp>0).length>=128)return;
@@ -183,17 +204,17 @@ function death341(p,f) {
   if(a.deathRawSummon){const def=Object.values(UNITS).find(d=>d.rawId===a.deathRawSummon);if(def)spawn341Ally(p,f,def,240);}
   if(a.deathSummon){const def=UNITS[a.deathSummon.id];if(def)for(let i=0;i<a.deathSummon.count;i++)spawn341Ally(p,f,def,240);}
   if(a.deathHeal)for(const g of p.fighters.filter(g=>g!==f&&g.hp>0&&Math.hypot(g.x-f.x,g.y-f.y)<=a.deathHeal.r).slice(0,a.deathHeal.n))g.hp=Math.min(g.max,g.hp+a.deathHeal.amount);
-  if(a.deathBlast)for(const e of spell341Targets(p,f,a.deathBlast.r).slice(0,a.deathBlast.n))dmgEnemy(e,a.deathBlast.amount,'法术');
+  if(a.deathBlast)for(const e of spell341Targets(p,f,a.deathBlast.r).slice(0,a.deathBlast.n))dmgEnemy(e,a.deathBlast.amount,'法术',f);
 }
-function hit341(p,f,e,dealt) {
+function hit341(p,f,e,dealt,rawDamage=dealt) {
   const a=f.def.abil;
-  if(a.poison&&(!a.poison.airOnly||e.air)&&(!a.poison.hpThreshold||f.hp/f.max<=a.poison.hpThreshold))add341Status(e,'poison:'+f.uid+(a.poison.stack?':'+f.attacks:''),{time:a.poison.duration,...a.poison});
+  if(a.poison&&(!a.poison.airOnly||e.air)&&(!a.poison.hpThreshold||f.hp/f.max<=a.poison.hpThreshold))add341Status(e,'poison:'+f.uid+(a.poison.stack?':'+f.attacks:''),{time:a.poison.duration,...a.poison,ownerId:f.ownerId});
   if(a.corrupt)add341Status(e,'corrupt',{time:a.corrupt.duration,armor:a.corrupt.armor});
   if(a.mark)e.mark=a.mark;
-  if(a.bash&&Math.random()<a.bash.chance){dmgEnemy(e,a.bash.damage,'法术');add341Status(e,'bash',{time:e.boss?a.bash.boss:a.bash.duration,stun:true});}
-  if(a.pulverize&&Math.random()<a.pulverize.chance)for(const target of spell341Targets(p,f,a.pulverize.r).filter(t=>!t.air))dmgEnemy(target,a.pulverize.damage,'法术');
-  if(a.fireHit)dmgEnemy(e,a.fireHit,'法术');
-  if(a.aftershock&&Math.random()<a.aftershock.chance)for(const target of spell341Targets(p,f,a.aftershock.r).slice(0,a.aftershock.n))dmgEnemy(target,a.aftershock.damage,'法术');
+  if(a.bash&&Math.random()<a.bash.chance){dmgEnemy(e,a.bash.damage,'法术',f);if(a.bash.mult>1)dmgEnemy(e,rawDamage*(a.bash.mult-1),f.def.atk,f);add341Status(e,'bash',{time:e.boss?a.bash.boss:a.bash.duration,stun:true});}
+  if(a.pulverize&&Math.random()<a.pulverize.chance)for(const target of spell341Targets(p,f,a.pulverize.r).filter(t=>!t.air))dmgEnemy(target,a.pulverize.damage,'法术',f);
+  if(a.fireHit)dmgEnemy(e,a.fireHit,'法术',f);
+  if(a.aftershock&&Math.random()<a.aftershock.chance)for(const target of spell341Targets(p,f,a.aftershock.r).slice(0,a.aftershock.n))dmgEnemy(target,a.aftershock.damage,'法术',f);
   if(a.spree&&(e.hp<=0||Math.random()<a.spree.chance))f.buffs.spree={damage:a.spree.damage,time:a.spree.duration};
   const vamp=Math.max(a.lifesteal||0,f.effVamp||0);if(vamp)f.hp=Math.min(f.max,f.hp+dealt*vamp);
   if(a.feast&&f.attacks%a.feast.every===0)f.hp=Math.min(f.max,f.hp+a.feast.heal);

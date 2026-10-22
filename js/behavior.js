@@ -34,7 +34,7 @@ function forgetCombatTarget(unit,returning=false){
 function chooseCombatTarget(unit,candidates,options,dt){
   const b=advanceCombatBrain(unit,dt),sense=options.sense,leash=options.leash??Infinity;
   const distance=e=>Math.hypot(e.x-unit.x,e.y-unit.y);
-  const eligible=e=>e!==unit&&e.hp>0&&!(e.deadT>0)&&(!options.canTarget||options.canTarget(e))&&Math.hypot(e.x-options.x,e.y-options.y)<=leash+60;
+  const eligible=e=>e!==unit&&e.hp>0&&!(e.deadT>0)&&allowedTarget341(unit.def?.targets||unit.targets,e)&&(!options.canTarget||options.canTarget(e))&&Math.hypot(e.x-options.x,e.y-options.y)<=leash+60;
   let target=candidates.find(e=>{combatAgent(e);return e.entityId===b.targetId&&eligible(e);})||null;
   if(b.targetId&&!target){const escaped=candidates.some(e=>e.entityId===b.targetId&&e.hp>0);forgetCombatTarget(unit,!!options.returnHome&&escaped);if(!escaped)b.ignore=0;}
   if(target){
@@ -114,7 +114,7 @@ function idleGuard(p,f,dt){
   if(Math.hypot(goal.x-f.x,goal.y-f.y)<=COMBAT_AI.RETURN_EPS+.05){
     if(goal===home){f.x=home.x;f.y=home.y;b.returning=false;b.state='guard';}return;
   }
-  moveCombatUnit(p,f,goal,f.def.speed*(f.slowF??1)*(1+kingAura341(p.team,f).move),dt,COMBAT_AI.RETURN_EPS);
+  moveCombatUnit(p,f,goal,fighterSpeed341(p,f),dt,COMBAT_AI.RETURN_EPS);
 }
 function separateDefenseUnits(p,dt){
   separateCombatCrowd([...p.fighters,...p.enemies],p,dt);

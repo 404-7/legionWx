@@ -38,5 +38,5 @@ test('blood rush uses mana and buffs an ally; vampirism heals on actual damage; 
  assert.equal(run('shaman.mana'),0);assert.ok(run('militia.bloodBuff.time')>0);
  run("buyFighter(p,'ent',5,7);const f=p.fighters[0];f.hp=f.max=10000;militia.hp-=20;const oldHp=militia.hp;mercAttack341(p,militia,f)");assert.ok(run('militia.hp')>run('oldHp'));
  run("p.enemies=[];p.fighters=[];spawnEnemy(p,{type:'merc',id:'chariot'});const e=p.enemies[0],k=G.kings[0];leak(p,e);e.x=k.x;e.y=k.y;e.routeIndex=e.route.length-1;e.cd=0;k.cd=100;const before=k.hp;kingStep(k,.01);");
- assert.equal(run('before-k.hp'),run("e.dmg*.5*2"));
+ assert.equal(run('before-k.hp'),run("e.dmg*2"));
 });

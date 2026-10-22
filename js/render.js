@@ -197,6 +197,11 @@ function draw(now) {
     }
     c.globalAlpha = 1;
   }
+  for(const w of G.skillWaves||[]){
+    if(!visibleWorldPoint(w.x,w.y))continue;
+    c.save();c.globalAlpha=.6;c.strokeStyle=w.kind==='king'?'#a5deff':'#ffbd6c';c.lineWidth=6;
+    c.beginPath();c.arc(w.x,w.y,w.radius,0,Math.PI*2);c.stroke();c.restore();
+  }
   // 死亡烟雾 / 特效
   for (const f of G.fx) {
     if(!visibleWorldPoint(f.x,f.y))continue;

@@ -170,7 +170,8 @@
       ],
       "adapters": [
         "casts",
-        "hasteAura"
+        "hasteAura",
+        "moveAura"
       ],
       "pending": []
     },
@@ -3183,7 +3184,8 @@
       ],
       "adapters": [
         "casts",
-        "hasteAura"
+        "hasteAura",
+        "moveAura"
       ],
       "pending": []
     },

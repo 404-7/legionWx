@@ -55,7 +55,7 @@ test('kill bounty, wave bonus and 31 source waves do not pay twice',()=>{
  assert.equal(run('p.gold'),303);run('fieldStep(p,0)');assert.equal(run('p.gold'),303);
  run('endWave()');assert.equal(run('p.gold'),320);
  run('G.wave=31;G.waveDef=WAVES[30];G.kings[0].hp=G.kings[0].max;G.kings[1].hp=G.kings[1].max;endWave()');
- assert.equal(run('G.result.winner'),null);assert.equal(run('G.phase'),'over');
+ assert.equal(run('G.result'),null);assert.notEqual(run('G.phase'),'over');
 });
 test('summons, hydra splitting and regen remain finite',()=>{
  const {run}=engine();

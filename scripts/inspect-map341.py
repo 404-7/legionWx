@@ -12,7 +12,7 @@ binary = source.read_bytes()
 offset = binary.find(b'MPQ\x1a')
 if offset < 0: raise ValueError('MPQ header not found')
 archive = mpyq.MPQArchive(io.BytesIO(binary[offset:]), listfile=False)
-names = ['war3map.j','war3map.w3u','war3map.w3a','war3map.w3q','war3map.wts']
+names = ['war3map.j','war3map.w3u','war3map.w3a','war3map.w3q','war3map.wts','war3mapMisc.txt']
 print('Archive entries:', len(names))
 print('\n'.join(n for n in names if n.lower().endswith(('.w3u','.w3a','.j','.wts','.slk','.txt'))))
 for name in names:

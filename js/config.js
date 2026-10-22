@@ -1,6 +1,6 @@
 'use strict';
 // Shared fixed battle vision. Public king approaches are an L-shaped corridor.
-function visionOpen(state){return state.phase==='over'||state.phase==='menu';}
+function visionOpen(state){return state.phase==='over'||state.phase==='menu'||!!state.bonus;}
 function publicEnemyVision(state,team){
   const king=state.kings[1-team],exit=state.players.find(p=>p.team!==team).exitX;
   return {king,exit,r:56,kingRadius:82,bridge:{x:CFG.W/2-120,y:CFG.ROAD_Y-110,w:240,h:220}};
@@ -22,18 +22,20 @@ function scopeBattleSnapshot(state,slot){
   const team=viewer.team;state.vision={team,fog:!visionOpen(state)};
   if(visionOpen(state))return state;
   delete state.entitySerial;
+  if(state.kingGoldPools)state.kingGoldPools[1-team]=null;
   const visible=u=>pointVisibleToTeam(state,team,u.x,u.y);
   const hiddenArmy=state.players.filter(p=>p.team!==team).some(p=>p.fighters.some(f=>(f.hp>0||f.deadT>0)&&!visible(f)));
   const publicUnit=u=>Object.fromEntries(Object.entries(u).filter(([key])=>!['col','row','spent','homeX','homeY','brain','route','routeIndex','laneX'].includes(key)));
   for(const p of state.players)if(p.team!==team){
     p.fighters=p.fighters.filter(visible).map(publicUnit);p.enemies=p.enemies.filter(visible).map(publicUnit);
-    p.mines=[];p.gold=null;if(!incomeVisibleToTeam(state,team,p))p.income=null;p.paid=null;p.leakCount=null;p.aiT=null;
+    p.mines=[];p.gold=null;p.farmLevel=null;if(!incomeVisibleToTeam(state,team,p))p.income=null;p.paid=null;p.leakCount=null;p.aiT=null;
     p.spawnList=[];p.mercSpawnList=[];p.mercSpawnT=null;p.spawnT=null;
     p.mercQueue=p.mercQueue.map(()=>null);
   }
   for(const k of state.kings)if(k.team!==team)k.leaks=k.leaks.filter(visible).map(publicUnit);
   if(state.arena&&hiddenArmy)state.arena.counts[1-team]=null;
   state.projectiles=state.projectiles.filter(pr=>visible(pr)&&pointVisibleToTeam(state,team,pr.px,pr.py));
+  if(state.skillWaves)state.skillWaves=state.skillWaves.filter(w=>visible(w)&&pointVisibleToTeam(state,team,w.px,w.py));
   state.fx=state.fx.filter(visible);state.floaters=state.floaters.filter(visible);
   state.logLines=visibleGameLogs(state,team);
   return state;
@@ -97,14 +99,7 @@ const ATK_TYPES  = ['普通', '穿刺', '魔法', '攻城', '混乱'];
 const ARMOR_TYPES = ['无甲', '轻甲', '中甲', '重甲', '城甲'];
 
 /* 攻击 × 护甲 伤害倍率（>1 克制 / <1 被抵抗） */
-const ATK_ARMOR = {
-  '英雄': { '无甲':1,'轻甲':1,'中甲':1,'重甲':1,'城甲':.5,'英雄甲':1 },
-  '普通': { '无甲': 1, '轻甲': 1, '中甲': 1.5, '重甲': 1, '城甲': .7 },
-  '穿刺': { '无甲': 1.5, '轻甲': 2, '中甲': .75, '重甲': 1, '城甲': .35 },
-  '魔法': { '无甲': 1, '轻甲': 1.25, '中甲': .75, '重甲': 2, '城甲': .35 },
-  '攻城': { '无甲': 1.5, '轻甲': 1, '中甲': .5, '重甲': 1, '城甲': 1.5 },
-  '混乱': { '无甲': 1, '轻甲': 1, '中甲': 1, '重甲': 1, '城甲': 1 },
-};
+const ATK_ARMOR = SOURCE341.rules.damage;
 
 const RACES = {
   mech: { name: '机械', icon: '⚙', color: '#e6bd71', desc: '装甲前排、领导光环与远程火力', tip: '新兵挡线，机枪手输出；队长为周围单位增伤。' },

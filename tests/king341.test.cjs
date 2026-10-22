@@ -17,10 +17,10 @@ test('king fires a delayed single-target hero missile without free splash and ca
  run('k.cd=0;k.windup=null;G.projectiles=[];kingStep(k,.01);e.hp=0;other.hp=0;kingStep(k,1)');assert.equal(run('G.projectiles.length'),0);assert.equal(run('k.windup'),null);
 });
 test('hero armor and automatic four-wave growth reduce incoming damage and shorten attack intervals once',()=>{
- const run=engine();leaks(run);run('e.x=k.x;e.range=30;e.dmg=100;e.atk="穿刺";e.cd=0;k.cd=100;kingStep(k,.01)');assert.equal(run('k.hp'),2550);
+ const run=engine();leaks(run);run('e.x=k.x;e.range=30;e.dmg=100;e.atk="穿刺";e.cd=0;k.cd=100;kingStep(k,.01)');assert.equal(run('k.hp'),2500);
  run('growKing341(k,4)');assert.equal(run('k.armorPoints'),4);assert.ok(Math.abs(run('kingInterval341(k)')-.9/1.1)<1e-8);assert.equal(run('k.skills.length'),1);
  const skill=run('k.skills[0]');run('growKing341(k,4)');assert.equal(run('k.skills[0]'),skill);assert.equal(run('k.skills.length'),1);
- run('k.hp=2600;k.skills=[];e.cd=0;kingStep(k,.01)');assert.ok(Math.abs(run('2600-k.hp')-50/1.24)<1e-8);
+ run('k.hp=2600;k.skills=[];e.cd=0;kingStep(k,.01)');assert.ok(Math.abs(run('2600-k.hp')-100/1.24)<1e-8);
 });
 test('learned stomp respects mana, cooldown, stun and magic immunity; immolation hits only ground',()=>{
  const run=engine();leaks(run);run("k.skills=['A022'];e.x=k.x+35;other.x=k.x+45;other.magicImmune=true;kingSpell341(k,e)");
@@ -29,7 +29,7 @@ test('learned stomp respects mana, cooldown, stun and magic immunity; immolation
  run("k.skills=['A01T'];e.air=false;other.magicImmune=false;other.air=true;k.cd=100;kingStep(k,1)");assert.equal(run('e.hp'),9943);assert.equal(run('other.hp'),10000);
 });
 test('shockwave follows a line and late-wave royal auras affect nearby guards and king, excluding PK',()=>{
- const run=engine();leaks(run);run("k.skills=['A021'];other.x=k.x-70;kingSpell341(k,e)");assert.equal(run('e.hp'),9910);assert.equal(run('other.hp'),10000);assert.equal(run('k.mana'),800);
+ const run=engine();leaks(run);run("k.skills=['A021'];other.x=k.x-70;kingSpell341(k,e);stepSkillWaves341(1)");assert.equal(run('e.hp'),9910);assert.equal(run('other.hp'),10000);assert.equal(run('k.mana'),800);
  run("growKing341(k,13);growKing341(k,19);growKing341(k,23);buyFighter(p,'ent',5,7);globalThis.f=p.fighters[0];f.x=k.x+20;f.y=k.y;tick341({...p,enemies:[]},.01)");
  assert.equal(run('f.effDmg'),run('f.def.dmg*1.15'));assert.equal(run('f.effArmor'),run('f.def.armorPoints+5'));assert.equal(run('f.effHaste'),.1);assert.equal(run('kingAura341(0,k).move'),.15);
  run("G.battleMode='arena';tick341({...p,enemies:[]},.01)");assert.equal(run('f.effHaste'),0);assert.equal(run('f.effArmor'),run('f.def.armorPoints'));assert.equal(run('f.effDmg'),run('f.def.dmg'));

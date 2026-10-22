@@ -20,7 +20,7 @@ function compile341Skills(row) {
     const mana=v('amcs'), cd=v('acdn',row.interval);
     const airOnly=v('atar','')==='air,enemies'||/air (?:enemies|units) only/i.test(text);
     let mapped=true;
-    const cast=(kind,values)=>out.casts.push({id,kind,mana,cd,range:r,duration:dur,...values});
+    const cast=(kind,values)=>out.casts.push({id,kind,mana,cd,range:v('aran',row.rawRange)*SOURCE341.rangeScale,area:r,targets:v('atar','enemies'),duration:dur,...values});
     switch(a.base) {
       case 'ACac': case 'ACat': {
         const p=v(a.base==='ACat'?'Ear1':'Cac1');
@@ -32,7 +32,7 @@ function compile341Skills(row) {
       case 'AIva':out.lifesteal=v('Ivam');break;
       case 'ACvp':out.vampAura={p:v('Uav1'),r};break;
       case 'ACav':out.armorAura={armor:v('Dev1',Number(text.match(/(\d+) additional armor/)?.[1]||0)),r};break;
-      case 'SCae':out.hasteAura={p:v('Oae2'),r};break;
+      case 'SCae':out.hasteAura={p:v('Oae2'),r};out.moveAura={p:v('Oae1'),r};break;
       case 'ACua': {
         const p=v('Uau1');if(p<0)out.slowAura={p:-p,r};else out.moveAura={p,r};break;
       }
@@ -67,7 +67,7 @@ function compile341Skills(row) {
       case 'Amim':out.magicImmune=true;break;
       case 'ACim':out.burn={dps:v('Eim1',10),r};break;
       case 'ACbf':cast('breath',{damage:v('Ucs1'),dps:v('Nbf5'),range:v('Ucs3',300)*SOURCE341.rangeScale});break;
-      case 'ANcs':cast('aoe',{damage:Number(text.match(/up to (\d+) damage/)?.[1]||v('Ncs1')),n:99,stun:dur||1,range:v('aran',300)*SOURCE341.rangeScale});break;
+      case 'ANcs':cast('aoe',{center:'target',damage:Number(text.match(/up to (\d+) damage/)?.[1]||v('Ncs1')),n:99,stun:dur||1,range:v('aran',300)*SOURCE341.rangeScale});break;
       case 'AOmi':cast('illusion',{factor:v('Omi2',.5),taken:v('Omi3',2),duration:dur||60});break;
       case 'Apsh':add('A06Z',true);break;
       case 'AEfk':case 'Aroc': {
@@ -110,8 +110,11 @@ function compile341Skills(row) {
     orc_warlock:['A019'],thrall:['A02I'],druid:['A0BN'],pandaren:['A098']};
   for(const id of injected[row.id]||[])add(id,true);
   const f=row.map.fields;
-  if(f.ua1w==='msplash')out.splash={p:.5,r:(f.ua1q||f.ua1h||100)*SOURCE341.rangeScale,groundOnly:!(f.ua1p||'').includes('air')};
-  if(f.ua1w==='mbounce')out.chain={n:row.id==='oceanus'?2:row.id==='machine_turret'||row.id==='machine_robot'?2:1,f:.5};
+  if(f.ua1w==='msplash'){
+    const zones=[{r:(f.ua1f||0)*SOURCE341.rangeScale,factor:1},{r:(f.ua1h||0)*SOURCE341.rangeScale,factor:f.uhd1??.5},{r:(f.ua1q||0)*SOURCE341.rangeScale,factor:f.uqd1??.25}].filter(z=>z.r>0).sort((a,b)=>a.r-b.r);
+    out.splash={p:.5,r:zones.at(-1)?.r||25,zones,groundOnly:!(f.ua1p||'').includes('air')};
+  }
+  if(f.ua1w==='mbounce')out.chain={n:(f.utc1??(row.id==='oceanus'||row.id==='machine_turret'||row.id==='machine_robot'?3:2))-1,f:1-(f.udl1??.5),r:(f.ua1f||500)*SOURCE341.rangeScale};
   if(row.id==='hydra')out.multishot=3;
   if(row.id==='elite_archer'){out.multishot=3;out.casts=out.casts.filter(c=>c.id!=='A07M');}
   if(row.id==='fenix')out.focusManaDivisor=3;

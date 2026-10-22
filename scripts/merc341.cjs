@@ -1,5 +1,5 @@
 // The four live barracks sell 24 classes. Read-only/retired entries are not extra units.
-module.exports=function merc341(byId,clean){
+module.exports=function merc341(byId,clean,rules){
  const ids=byId.h05C.fields.useu.split(',').concat(byId.h0B0.fields.useu.split(','));
  const keys='militia bowman ghoul warrior whelp hermit dino commander furbolg wyvern chariot blood_orc frost_wolf ice_troll warlock pandaren ballista shaman pudge gargoyle behemoth kraken infernal demon'.split(' ');
  const names='民兵 弓箭手 食尸鬼 兽人战士 幼龙 隐士 恐龙 指挥官 熊怪 双足飞龙 绞肉战车 血色兽人 霜狼 冰霜巨魔 术士 熊猫人 弩车 萨满 帕吉 石像鬼 巨兽 克拉肯 地狱火 恶魔'.split(' ');
@@ -12,16 +12,16 @@ module.exports=function merc341(byId,clean){
   furbolg:[['坚韧光环','范围内友军获得 3 点额外护甲。','A07E',{armorAura:{armor:3,r:75}}]],
   chariot:[['弑君','对国王造成双倍伤害；对战士不触发。','A037',{kingMult:2}]],
   frost_wolf:[['冰霜光环','范围内敌军移动速度和攻击速度降低 10%。','A039',{frostAura:{move:.1,attack:.1,r:75}}]],
-  ice_troll:[['寒冷攻击','命中降低移动速度 25%，持续 2 秒。原技能未覆盖减速比例，25% 为网页版适配值。','A01M',{cold:{move:.25,duration:2}}]],
+  ice_troll:[['寒冷攻击',`命中降低移速 ${rules.frost.move*100}%、攻速 ${rules.frost.attack*100}%，持续 2 秒；采用原地图冰霜常量。`,'A01M',{cold:{move:rules.frost.move,attack:rules.frost.attack,duration:2}}]],
   warlock:[['腐蚀','命中使目标护甲降低 4 点，持续 4 秒。','A03A',{corrupt:{armor:4,duration:4}}]],
   pandaren:[['热血','每秒额外恢复 7 点生命。','A03O',{}]],
   ballista:[['弑君','对国王造成双倍伤害；对战士不触发。','A037',{kingMult:2}]],
   shaman:[['嗜血冲锋','消耗 20 法力，为附近一名友军提高 20% 攻速和移速，持续 30 秒；冷却 10 秒。','A03B',{bloodRush:{haste:.2,move:.2,duration:30,mana:20,cd:10,r:150}}]],
   pudge:[['鲜肉光环','范围内近战友军的攻击回复相当于实际伤害 8% 的生命。','A03C',{vampAura:{p:.08,r:75}}]],
-  behemoth:[['坚韧光环','范围内友军获得 3 点额外护甲。','A07E',{armorAura:{armor:3,r:75}}],['魔法免疫','免疫魔法攻击、法术伤害及敌方施加的法术减益。','A038',{magicImmune:true}]],
-  kraken:[['深海剧毒','命中附加每秒 20 点毒伤，移速和攻速降低 20%，持续 6 秒。','A03E',{poison:{dps:20,move:.2,attack:.2,duration:6}}],['治疗光环','范围内友军每秒恢复 10 点生命。','A03K',{healAura:{hps:10,r:100}}],['魔法免疫','免疫魔法攻击、法术伤害及敌方施加的法术减益。','A038',{magicImmune:true}]],
-  infernal:[['重击','攻击有 25% 概率额外造成 120 点伤害，并眩晕 1 秒。','A03D',{bash:{chance:.25,damage:120,duration:1}}],['献祭','范围内地面敌军每秒受到 10 点法术伤害。','A00T',{burn:{dps:10,r:100}}],['魔法免疫','免疫魔法攻击、法术伤害及敌方施加的法术减益。','A038',{magicImmune:true}]],
-  demon:[['迅捷光环','范围内友军移动速度提高 15%。','A043',{moveAura:{p:.15,r:75}}],['命令光环','范围内友军攻击伤害提高 10%。','A0BL',{aura:{p:.1,r:75}}],['魔法免疫','免疫魔法攻击、法术伤害及敌方施加的法术减益。','A038',{magicImmune:true}]],
+  behemoth:[['坚韧光环','范围内友军获得 3 点额外护甲。','A07E',{armorAura:{armor:3,r:75}}],['魔法免疫','免疫法术伤害及敌方施加的法术减益；本地图允许魔法普攻命中。','A038',{magicImmune:true}]],
+  kraken:[['深海剧毒','命中附加每秒 20 点毒伤，移速和攻速降低 20%，持续 6 秒。','A03E',{poison:{dps:20,move:.2,attack:.2,duration:6}}],['治疗光环','范围内友军每秒恢复 10 点生命。','A03K',{healAura:{hps:10,r:100}}],['魔法免疫','免疫法术伤害及敌方施加的法术减益；本地图允许魔法普攻命中。','A038',{magicImmune:true}]],
+  infernal:[['重击','攻击有 25% 概率额外造成 120 点伤害，并眩晕 1 秒。','A03D',{bash:{chance:.25,damage:120,duration:1}}],['献祭','范围内地面敌军每秒受到 10 点法术伤害。','A00T',{burn:{dps:10,r:100}}],['魔法免疫','免疫法术伤害及敌方施加的法术减益；本地图允许魔法普攻命中。','A038',{magicImmune:true}]],
+  demon:[['迅捷光环','范围内友军移动速度提高 15%。','A043',{moveAura:{p:.15,r:75}}],['命令光环','范围内友军攻击伤害提高 10%。','A0BL',{aura:{p:.1,r:75}}],['魔法免疫','免疫法术伤害及敌方施加的法术减益；本地图允许魔法普攻命中。','A038',{magicImmune:true}]],
  };
  const armor={small:'轻甲',medium:'中甲',large:'重甲',normal:'城甲',none:'无甲'};
  const armorText={Light:'轻甲',Medium:'中甲',Heavy:'重甲',Fortified:'城甲',Unarmored:'无甲'};

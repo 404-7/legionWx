@@ -15,7 +15,8 @@ for (const row of [...SOURCE341.units,...SOURCE341.summons]) {
     rawRange,melee:rawRange<=180,atk:row.atk,armor:row.armor,food:row.food,
     armorPoints:row.map.armorPoints,regenFlat:row.map.regen,speed:(row.map.moveSpeed??270)*SOURCE341.rangeScale,
     acquireRange:(row.map.fields.uacq??(rawRange<=180?500:650))*SOURCE341.rangeScale,
-    attackPoint:row.map.fields.udp1??.3,air:row.map.fields.umvt==='fly',
+    attackPoint:row.map.fields.udp1??.3,air:row.map.fields.utar==='air'||(row.map.fields.umvt??(['hdhw','nadk'].includes(row.map.base)?'fly':'foot'))==='fly',
+    targets:row.map.fields.ua1g||'enemies',
     manaMax:row.map.manaMax,manaStart:row.map.manaStart,manaRegen:row.map.manaRegen,
     upgrades:row.upgrades,up:row.upgrades[0],stances:row.stances||[],elite:row.elite,summonOnly:row.summonOnly,
     role:row.rawRange<=180?'前排':row.min===0?'法术':'远程',
@@ -56,14 +57,17 @@ const MERCS = Object.fromEntries(SOURCE341.mercs.map(m=>[m.id,m]));
 
 const WAVES = SOURCE341.waves.map((w,i)=>{
   const m=w.map, boss=[10,20,30].includes(w.level);
-  const ranged=[4,8,12,16,20,24,28,29].includes(w.level);
+  const ranged=w.rawRange>180;
   const attacks={normal:'普通',pierce:'穿刺',magic:'魔法',siege:'攻城',chaos:'混乱'};
-  const armorByWave=['无甲','无甲','中甲','重甲','轻甲','城甲','轻甲','中甲','重甲','轻甲','城甲','中甲','轻甲','中甲','重甲','轻甲','城甲','中甲','轻甲','重甲','轻甲','城甲','重甲','中甲','轻甲','重甲','中甲','城甲','重甲','城甲','无甲'];
+  const armorTypes={none:'无甲',small:'轻甲',medium:'中甲',large:'重甲',normal:'城甲',fort:'城甲',hero:'英雄甲'};
   const dice=m.ua1d||1,sides=m.ua1s||2,base=m.ua1b||0;
   return {w:w.level,name:m.unam,count:w.qty,spawnInterval:w.spawnInterval,mercDelay:w.mercDelay,bounty:w.bounty,bonus:w.bonus,value:w.value,
-    hp:m.uhpm,dmg:base+dice*(1+sides)/2,aspd:m.ua1c||1.25,
-    speed:(m.umvs||270)*SOURCE341.rangeScale,range:ranged?(m.ua1r||400)*SOURCE341.rangeScale:30,
-    armor:armorByWave[i],armorPoints:m.udef||0,atk:attacks[m.ua1t]||'普通',
-    air:[5,13,21,29].includes(w.level),r:boss?17:9,regen:0,regenFlat:m.uhpr||0,
+    hp:m.uhpm*(String(m.upgr||'').split(',').includes(SOURCE341.rules.creepHp.tech)?1+SOURCE341.rules.creepHp.percent:1),dmg:base+dice*(1+sides)/2,aspd:m.ua1c||1.25,
+    attackBase:base,attackDice:dice,attackSides:sides,rawId:w.mapId,targets:m.ua1g||'enemies',
+    speed:(m.umvs||270)*SOURCE341.rangeScale,range:w.rawRange*SOURCE341.rangeScale,
+    spellIds:String(m.uabi||'').split(',').filter(Boolean),manaMax:m.umpm||0,manaStart:m.umpi||0,manaRegen:m.umpr||0,
+    weapon:m.ua1w||SOURCE341.rules.inherited[w.base].weapon,bounce:m.ua1w==='mbounce'?{count:(m.utc1||1)-1,r:(m.ua1f||300)*.25,loss:m.udl1??.3}:null,
+    armor:armorTypes[m.udty??SOURCE341.rules.inherited[w.base].armor],armorPoints:m.udef||0,atk:attacks[m.ua1t??SOURCE341.rules.inherited[w.base].attack]||'英雄',
+    air:m.utar==='air'||m.umvt==='fly',r:boss?17:9,regen:0,regenFlat:m.uhpr||0,
     magicImmune:false,boss,trait:boss?'boss':ranged?'ranged':null};
 });

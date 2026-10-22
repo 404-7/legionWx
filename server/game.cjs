@@ -41,6 +41,7 @@ module.exports = function createGame(humans,{raceMode='random'}={}) {
           case 'sell': return !!f && sellFighter(p, f);
           case 'steroids': return !!f && inject341Steroids(p,f);
           case 'king': return kingUpgrade(p, a.stat);
+          case 'farmUpgrade': return farmUpgrade341(p);
           case 'mineBuy': return buyMine(p,a.mineSlot);
           case 'mineUpgrade': return upgradeMine(p, a.id);
           case 'merc': { const target = Number.isInteger(a.target) && G.players[a.target]; return Object.hasOwn(MERCS, a.mid) && !!target && target.mercQueue.length < 40 && sendMerc(p, target, a.mid); }
@@ -51,6 +52,7 @@ module.exports = function createGame(humans,{raceMode='random'}={}) {
         const state=JSON.parse(JSON.stringify(G, (key, value) => {
           if (['selectedFighter','selectedShop','hover','ai','diff'].includes(key)) return undefined;
           if (key === 'projectiles') return value.map(pr => ({ x:pr.x, y:pr.y, px:pr.px, py:pr.py, atk:pr.atk }));
+          if (key === 'skillWaves') return value.map(w=>({x:w.x,y:w.y,px:w.px,py:w.py,radius:w.radius,kind:w.kind}));
           return value;
         }));
         return viewerSlot===undefined?state:scopeBattleSnapshot(state,viewerSlot);

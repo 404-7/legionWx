@@ -264,10 +264,15 @@ function updateUI(force) {
   updateMines(me);
   $('stGold').textContent = Math.floor(me.gold);
   $('stIncome').textContent = me.income;
+  const food=armyFood341(me),capacity=foodCapacity341(me),farm=SOURCE341.rules.population.farms[me.farmLevel+1];
+  $('populationInfo').textContent=`人口 ${food} / ${capacity}`;
+  $('btnFarmUpgrade').textContent=farm&&capacity<200?`农场 +${Math.min(200,7+farm.supply)-capacity} 人口 · ${farm.cost} 金`:'农场已满级';
+  $('btnFarmUpgrade').disabled=!farm||capacity>=200||me.gold<farm.cost||!canManageArmy();
   updateIncomeBoard(me);
   $('stValue').textContent = playerValue(me);
   $('stWave').textContent = (G.battleMode==='arena'?`第 ${G.wave} 波后 · 阵营 PK`:G.wave > CFG.TOTAL_WAVES ? `加时赛 第${G.wave}波` : `第 ${G.wave} / ${CFG.TOTAL_WAVES} 波`) +
     (G.phase === 'prep' ? ` · 准备 ${Math.ceil(G.timer)}s` : G.phase === 'combat' ? ' · 战斗中' : '');
+  if(G.bonus)$('stWave').textContent=G.phase==='prep'?`燃烧军团 · 准备 ${Math.ceil(G.timer)}s`:`燃烧军团 · 第 ${G.bonus.batch} 批 · ${Math.ceil(G.bonus.timer)}s 后增援`;
 
   // 波次预告
   const wi = $('waveInfo');
@@ -291,11 +296,12 @@ function updateUI(force) {
         <span class="chip">${d.range > 50 ? '远程' : '近战'}</span>
         ${traitTxt}
       </div>${incoming}`;
+    if(G.bonus)wi.innerHTML=`<div class="wrow"><span class="wnum">燃烧军团 · 持续生存</span><span class="wtime">${G.phase==='prep'?Math.ceil(G.timer)+'s 后开始':Math.ceil(G.bonus.timer)+'s 后增援'}</span></div><div class="race-tip">${G.phase==='prep'?'最后 60 秒准备，阵亡的永久兵种已恢复。':'第 '+G.bonus.batch+' 批已入场，存活部队保留生命、法力和冷却。'}<br>每批每路 ${d.count} 只，每 ${d.spawnInterval} 秒出兵；后续增援间隔逐渐缩短。<br>国王倒下才分胜负，清除本批不会结束对局。</div>`;
   }
 
   // 商店可用性
   document.querySelectorAll('.ucard').forEach(card => {
-    card.classList.toggle('poor', me.gold < UNITS[card.dataset.uid].cost);
+    card.classList.toggle('poor', me.gold < UNITS[card.dataset.uid].cost||food+(UNITS[card.dataset.uid].food||0)>capacity);
     card.classList.toggle('sel', G.selectedShop === card.dataset.uid);
   });
 
@@ -309,8 +315,8 @@ function updateUI(force) {
       $('btnSell').addEventListener('click',()=>{requestUnitSale(f);});
     }
     const behavior={guard:'待命',advance:'前移接敌',chase:'追击',attack:'交战',cast:'施法支援',return:'回阵'};
-    $('selLiveStats').textContent=`❤${Math.max(0,Math.ceil(f.hp))}/${def.hp} · 法力 ${Math.floor(f.mana||0)}/${def.manaMax} · ${f.hp>0?behavior[f.brain?.state]||'在场':'等待下波复活'} · 移速 ${Math.round(def.speed*(f.slowF??1))}`;
-    sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>{const id=button.dataset.upgradeUid;button.disabled=!canManageArmy()||me.gold<(def.stances.includes(id)?0:UNITS[id].purchaseCost);});
+    $('selLiveStats').textContent=`❤${Math.max(0,Math.ceil(f.hp))}/${def.hp} · 法力 ${Math.floor(f.mana||0)}/${def.manaMax} · ${f.hp>0?behavior[f.brain?.state]||'在场':G.bonus?'已阵亡':'等待下波复活'} · 移速 ${Math.round(fighterSpeed341(me,f))}`;
+    sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>{const id=button.dataset.upgradeUid;button.disabled=!canManageArmy()||me.gold<(def.stances.includes(id)?0:UNITS[id].purchaseCost)||armyFood341(me)-(def.food||0)+(UNITS[id].food||0)>foodCapacity341(me);});
     $('btnSell').disabled=!canManageArmy();
     const refund=fighterSellValue(f);$('btnSell').textContent=`卖出 · 3折返还 +${refund}金`;
     $('btnSell').disabled=!canManageArmy();
