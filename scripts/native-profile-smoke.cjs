@@ -27,4 +27,3 @@ const {chromium}=require(process.argv[2]||'playwright'),{server}=require('../ser
   assert.equal(await guest.evaluate(()=>localPlayer().wood),17);assert.equal(await host.evaluate(()=>G.players[4].wood),null);await guest.reload();await guest.waitForFunction(()=>G?.online&&localPlayer().farmLevel===1);assert.equal(await guest.evaluate(()=>localPlayer().race),'nature');console.log('Native eight-seat protocol, AP choice, wood payment, privacy and reconnect passed');await hostContext.close();await guestContext.close();
  }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});
-
