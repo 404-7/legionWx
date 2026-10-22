@@ -453,14 +453,17 @@ function kingStep(k, dt) {
 /* ---------- 经济 / 操作 ---------- */
 function minePosition(p, index) {
   const zone=mineZone(p);
-  return { x:zone.x+44+(index%2)*72,y:zone.y+100+Math.floor(index/2)*150 };
+  return { x:zone.x+32+(index%2)*96,y:zone.y+100+Math.floor(index/2)*150 };
 }
 function mineZone(p){return {x:p.team===0?1060:580,y:p.id%2?870:70,w:160,h:500};}
 
-function buyMine(p) {
+function buyMine(p, mineSlot) {
   if (!['prep', 'combat'].includes(G.phase) || p.mines.length >= MINE.LIMIT || p.gold < MINE.COST) return false;
+  const occupied = slot => p.mines.some(m => (m.slot ?? m.id) === slot);
+  if (mineSlot === undefined) mineSlot = Array.from({length:MINE.LIMIT},(_,i)=>i).find(i=>!occupied(i));
+  if (!Number.isInteger(mineSlot) || mineSlot < 0 || mineSlot >= MINE.LIMIT || occupied(mineSlot)) return false;
   p.gold -= MINE.COST;
-  p.mines.push({ id: p.mines.length, level: 1, elapsed: 0 });
+  p.mines.push({ id: p.mines.length, slot:mineSlot, level: 1, elapsed: 0 });
   addLog(`${p.name} 建造金矿（${p.mines.length}/${MINE.LIMIT}）`, 'l-gold');
   return true;
 }
@@ -472,7 +475,7 @@ function upgradeMine(p, id) {
   const cost = MINE.LEVELS[mine.level - 1].upgrade;
   if (p.gold < cost) return false;
   p.gold -= cost; mine.level++;
-  addLog(`${p.name} 的 ${id + 1} 号金矿升至 Lv.${mine.level}`, 'l-gold');
+  addLog(`${p.name} 的 ${(mine.slot ?? id) + 1} 号金矿升至 Lv.${mine.level}`, 'l-gold');
   return true;
 }
 
@@ -484,7 +487,7 @@ function mineStep(p, dt) {
     mine.elapsed = Math.max(0, mine.elapsed - ticks * MINE.INTERVAL);
     const gold = ticks * MINE.LEVELS[mine.level - 1].gold;
     p.gold += gold;
-    const pos = minePosition(p, mine.id);
+    const pos = minePosition(p, mine.slot ?? mine.id);
     addFloater(pos.x, pos.y - 15, `+${gold}金`, '#f5c542');
   }
 }

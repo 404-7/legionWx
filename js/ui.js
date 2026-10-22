@@ -1,6 +1,26 @@
 'use strict';
 /* ===== UI：商店 / 波次预览 / 选中单位 / 国王 / 雇佣兵 / 日志 / 弹窗 ===== */
 const $ = id => document.getElementById(id);
+const MineUI={slot:null,pending:null,error:''};
+function mineAtSlot(p,slot){return p.mines.find(m=>(m.slot??m.id)===slot);}
+function openMineDialog(slot){
+  MineUI.slot=slot;MineUI.pending=null;MineUI.error='';
+  G.selectedMine=mineAtSlot(localPlayer(),slot)?.id??null;
+  G.selectedFighter=null;selectShop(null);closeCommandPanel();
+  updateMines(localPlayer());$('mineDialog').showModal();updateUI(true);
+}
+async function submitMineAction(){
+  if(MineUI.slot===null||MineUI.pending||$('btnMineAction').disabled)return;
+  const mine=mineAtSlot(localPlayer(),MineUI.slot);
+  const pending={slot:MineUI.slot,level:(mine?.level??0)+1};
+  const action=mine?{type:'mineUpgrade',id:mine.id}:{type:'mineBuy',mineSlot:MineUI.slot};
+  MineUI.pending=pending;MineUI.error='';updateMines(localPlayer());
+  try{
+    if(Net.session)await api('action',action);
+    else if(!performAction(action))throw new Error('操作未完成，请检查金币和对局状态');
+  }catch(e){if(MineUI.pending===pending){MineUI.pending=null;MineUI.error=e.message;}}
+  if(MineUI.slot!==null)updateUI(true);
+}
 const SHOP_ORDER = Object.keys(RACES);
 let shopRace = SHOP_ORDER[0], shopCatalog=false;
 const escape341 = text=>String(text??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -233,28 +253,20 @@ function updateUI(force) {
 }
 
 function updateMines(me) {
-  const total = me.mines.reduce((sum,m) => sum + MINE.LEVELS[m.level-1].gold,0);
-  $('mineInfo').textContent = `已建 ${me.mines.length}/${MINE.LIMIT} · 合计 ${total} 金 / 5 秒`;
-  const buy = $('btnMineBuy');
-  buy.textContent = me.mines.length >= MINE.LIMIT ? '金矿已达上限（6/6）' : `购买金矿 · ${MINE.COST} 金`;
-  buy.disabled = me.gold < MINE.COST || me.mines.length >= MINE.LIMIT || G.phase === 'over';
-  const list = $('mineList'), signature = me.mines.map(m=>`${m.id}:${m.level}`).join('|');
-  if (list.dataset.signature !== signature) {
-    list.dataset.signature = signature;
-    list.innerHTML = Array.from({length:MINE.LIMIT},(_,index)=>{
-      const m=me.mines[index];
-      if(!m)return `<div class="mine-row empty ${index===me.mines.length?'next':''}" data-mine-slot="${index}"><span class="mine-empty-icon">◇</span><b>${index+1} 号矿位</b>${index===me.mines.length?'<button class="btn" data-mine-build>建造 · 100 金</button>':'<small>空闲矿位</small>'}</div>`;
-      const def = MINE.LEVELS[m.level-1], next = MINE.LEVELS[m.level];
-      return `<div class="mine-row" data-mine-id="${m.id}"><div><b>◆ ${m.id+1} 号金矿 · Lv.${m.level}</b><small>${def.gold} 金 / 5 秒 <span data-mine-time="${m.id}"></span></small></div><button class="btn" data-mine-upgrade="${m.id}" title="${next ? `升级后 ${next.gold} 金 / 5 秒` : '已达最高等级'}">${next ? `升级 ${def.upgrade} 金` : '已满级'}</button></div>`;
-    }).join('');
-  }
-  list.querySelectorAll('[data-mine-id]').forEach(row=>{
-    const mine = me.mines[+row.dataset.mineId], def = MINE.LEVELS[mine.level-1];
-    row.classList.toggle('selected',G.selectedMine === mine.id);
-    row.querySelector('[data-mine-time]').textContent = `· ${Math.ceil(MINE.INTERVAL-mine.elapsed)}s`;
-    row.querySelector('button').disabled = def.upgrade === null || me.gold < def.upgrade || G.phase === 'over';
-  });
-  list.querySelectorAll('[data-mine-build]').forEach(button=>button.disabled=me.gold<MINE.COST||G.phase==='over');
+  if(MineUI.slot===null)return;
+  if(!['prep','combat'].includes(G.phase)){if($('mineDialog').open)$('mineDialog').close();return;}
+  const mine=mineAtSlot(me,MineUI.slot),def=mine?MINE.LEVELS[mine.level-1]:null;
+  const next=MINE.LEVELS[mine?.level??0],cost=mine?def.upgrade:MINE.COST;
+  if(MineUI.pending&&mine?.level>=MineUI.pending.level)MineUI.pending=null;
+  G.selectedMine=mine?.id??null;
+  const total=me.mines.reduce((sum,m)=>sum+MINE.LEVELS[m.level-1].gold,0);
+  $('mineDialogTitle').textContent=`${MineUI.slot+1} 号${mine?'金矿 · Lv.'+mine.level:'矿位'}`;
+  $('mineDialogSummary').textContent=mine?'升级保留产金倒计时，下次结算使用新等级收益。':'在这处空矿位建造金矿，每 5 秒自动获得金币。';
+  $('mineDialogStats').innerHTML=`<div><small>当前收益</small><b>${def?.gold??0} 金 / 5 秒</b></div><div><small>${mine?'升级后收益':'建成后收益'}</small><b>${next?next.gold+' 金 / 5 秒':'已达最高等级'}</b></div><div><small>持有金币 / 已建矿井</small><b>${Math.floor(me.gold)} 金 · ${me.mines.length}/${MINE.LIMIT}</b></div><div><small>矿区总收益</small><b>${total} 金 / 5 秒</b></div>`;
+  const allowed=['prep','combat'].includes(G.phase),insufficient=cost!==null&&me.gold<cost;
+  $('mineDialogStatus').textContent=MineUI.error||(MineUI.pending?'正在提交，等待对局同步…':insufficient?`还需 ${Math.ceil(cost-me.gold)} 金` :mine?`下次产金：${Math.max(0,Math.ceil(MINE.INTERVAL-mine.elapsed))} 秒`:'金矿独立产金，不占用战士格子');
+  $('btnMineAction').textContent=MineUI.pending?'正在处理…':!next?'已满级':`${mine?'升级金矿':'建造金矿'} · ${cost} 金`;
+  $('btnMineAction').disabled=!!MineUI.pending||!allowed||!next||insufficient||(!mine&&me.mines.length>=MINE.LIMIT);
 }
 
 /* ---------- 弹窗 ---------- */
@@ -317,12 +329,9 @@ function bindEvents() {
     const me = localPlayer();
     const pos = canvasPos(e);
     const cell = fieldCellAt(me, pos.x, pos.y);
-    const mine = me.mines.find(m => { const at = minePosition(me,m.id); return Math.abs(pos.x-at.x)<=23 && Math.abs(pos.y-at.y)<=27; });
-    if (mine) {
-      G.selectedMine = mine.id; G.selectedShop = null; G.selectedFighter = null;
-      cv.classList.remove('placing');
-      openCommandPanel('economy'); updateUI(true); return;
-    }
+    const radius=Math.max(23,22/getMapProjection().scale);
+    const mineSlot=Array.from({length:MINE.LIMIT},(_,i)=>i).find(i=>{const at=minePosition(me,i);return Math.abs(pos.x-at.x)<=Math.min(47,radius)&&Math.abs(pos.y-at.y)<=Math.max(27,radius);});
+    if(mineSlot!==undefined){openMineDialog(mineSlot);return;}
     if (G.selectedShop) {
       if (cell && performAction({ type:'buy', uid:G.selectedShop, col:cell.col, row:cell.row })) {
         if (me.gold < UNITS[G.selectedShop].cost) selectShop(null);
@@ -345,19 +354,9 @@ function bindEvents() {
     if (G && G.selectedShop) selectShop(null);
   });
 
-  $('btnMineBuy').addEventListener('click', () => {
-    if (!G || G.phase === 'over') return;
-    performAction({type:'mineBuy'}); updateUI(true);
-  });
-  $('mineList').addEventListener('click', event => {
-    if (!G || G.phase === 'over') return;
-    if(event.target.closest('[data-mine-build]')){performAction({type:'mineBuy'});updateUI(true);return;}
-    const row = event.target.closest('[data-mine-id]');
-    if (!row) return;
-    G.selectedMine = +row.dataset.mineId;
-    if (event.target.closest('[data-mine-upgrade]')) performAction({type:'mineUpgrade',id:G.selectedMine});
-    updateUI(true);
-  });
+  $('btnMineClose').addEventListener('click',()=>$('mineDialog').close());
+  $('btnMineAction').addEventListener('click',submitMineAction);
+  $('mineDialog').addEventListener('close',()=>{MineUI.slot=null;MineUI.pending=null;MineUI.error='';if(G)G.selectedMine=null;});
 
   document.querySelectorAll('[data-king-stat]').forEach(button => {
     button.addEventListener('click', () => {
@@ -372,7 +371,7 @@ function bindEvents() {
   $('btnRestart').addEventListener('click', () => Net.session ? leaveOnline() : location.reload());
 
   document.addEventListener('keydown', e => {
-    if (!G || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+    if (!G || document.querySelector('dialog[open]') || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
     if (e.code === 'Space') { e.preventDefault(); togglePause(); }
     if (e.key === '1') setSpeed(1);
     if (e.key === '2') setSpeed(2);

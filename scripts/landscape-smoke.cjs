@@ -27,9 +27,9 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
    await page.locator('[data-uid="infantry"] .uName').tap();await page.locator('#side').waitFor({state:'hidden'});
    const point=await page.evaluate(()=>{const p=localPlayer(),v=getMapProjection(),r=$('cv').getBoundingClientRect();return {x:r.left+v.tx+(p.gx+5.5*CFG.CELL)*v.scale,y:r.top+v.ty+(p.gy+7.5*CFG.CELL)*v.scale};});
    await page.touchscreen.tap(point.x,point.y);assert.equal(await page.evaluate(()=>localPlayer().fighters[0]?.uid),'infantry');
-   await page.locator('#btnCancelPlacement').tap();await page.locator('#tab-economy').tap();await page.locator('#btnMineBuy').tap();
+   await page.locator('#btnCancelPlacement').tap();await require('./mine-map-helper.cjs')(page,0,{mobile:true});await page.locator('#btnMineAction').tap();
    assert.equal(await page.evaluate(()=>localPlayer().mines.length),1);
-   await page.locator('#btnPanelClose').tap();await page.locator('#side').waitFor({state:'hidden'});
+   await page.locator('#btnMineClose').tap();
    if(output)await page.screenshot({path:path.join(output,`landscape-${viewport.width}-battle.png`)});
    if(viewport.width===844){
     const before=await page.evaluate(()=>({gold:localPlayer().gold,count:localPlayer().fighters.length,wave:G.wave}));

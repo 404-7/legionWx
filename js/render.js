@@ -246,18 +246,18 @@ function drawField(p, t) {
 function drawMines(c, p, t) {
   const zone=mineZone(p);c.fillStyle='#333b3e88';c.strokeStyle='#929ca0';c.lineWidth=2;
   roundRect(c,zone.x,zone.y,zone.w,zone.h,9);c.fill();c.stroke();
-  const mineTop = minePosition(p, 0);
   c.textAlign = 'center'; c.font = '11px "Microsoft YaHei"';
   c.fillStyle = p.id === localPlayer().id ? '#e4ca87' : '#8b9d86';
   c.fillText(`${p.name} · 矿区 ${p.mines.length}/${MINE.LIMIT}`, zone.x+zone.w/2,zone.y+30);
   for (let i = 0; i < MINE.LIMIT; i++) {
-    const { x, y } = minePosition(p, i), mine = p.mines[i];
-    const selected = p.id === localPlayer().id && G.selectedMine === i;
+    const { x, y } = minePosition(p, i), mine = p.mines.find(m=>(m.slot??m.id)===i);
+    const own=p.id===localPlayer().id;
+    const selected = own && MineUI.slot===i;
     c.fillStyle = mine ? '#354230' : 'rgba(38,55,43,.35)';
-    c.strokeStyle = selected ? '#fff0a6' : mine ? '#a38a4e' : '#3a4b3b';
+    c.strokeStyle = selected ? '#fff0a6' : mine ? '#a38a4e' : own?'#a09060':'#3a4b3b';
     c.lineWidth = selected ? 2 : 1;
     roundRect(c, x - 23, y - 24, 46, 51, 7); c.fill(); c.stroke();
-    if (!mine) { c.fillStyle = '#536650'; c.fillText('◇', x, y + 4); continue; }
+    if (!mine) { c.fillStyle = own?'#e7cd86':'#536650';c.font='22px "Microsoft YaHei"';c.fillText(own?'＋':'◇',x,y+3);c.font='9px "Microsoft YaHei"';c.fillText(own?'建造 · 100金':'空矿位',x,y+20);c.font='11px "Microsoft YaHei"';continue; }
     // Rock entrance, timber beam and ore: code-native artwork matching the existing sprites.
     c.fillStyle = '#657060'; c.beginPath();
     c.moveTo(x-18,y+7); c.lineTo(x-13,y-9); c.lineTo(x-3,y-18);

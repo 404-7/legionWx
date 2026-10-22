@@ -20,7 +20,7 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
    await page.evaluate(()=>{localPlayer().gold=5000;updateUI(true);});
    if(mobile)await press('#tab-shop');
    await page.locator('#panel-shop').waitFor({state:'visible'});
-   for(const id of ['economy','king','attack'])assert.equal(await page.locator('#panel-'+id).isVisible(),false);
+   for(const id of ['king','attack'])assert.equal(await page.locator('#panel-'+id).isVisible(),false);
    await press('[data-uid="infantry"] .uName');
    if(mobile)assert.equal(await page.evaluate(()=>CommandUI.open),false,'selecting a unit collapses drawer');
    assert.equal(await page.locator('#placementBar').isVisible(),true);
@@ -42,10 +42,10 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
    await press('[data-upgrade-uid="zeus"]');
    assert.equal(await page.evaluate(()=>localPlayer().fighters[0].uid),'zeus');
    if(mobile){await press('#btnSell');assert.equal(await page.locator('#sellDialog').isVisible(),true);await press('#btnKeepUnit');assert.equal(await page.evaluate(()=>localPlayer().fighters.length),1);}
-   await press('#tab-economy');assert.equal(await page.locator('#panel-shop').isVisible(),false);
-   assert.equal(await page.locator('#mineList .mine-row').count(),6);
-   await press('#btnMineBuy');await press('[data-mine-upgrade="0"]');
+   await require('./mine-map-helper.cjs')(page,0,{mobile});
+   await press('#btnMineAction');await press('#btnMineAction');
    assert.equal(await page.evaluate(()=>localPlayer().mines[0].level),2);
+   await press('#btnMineClose');
    await press('#tab-king');await press('[data-king-stat="regen"]');
    assert.equal(await page.evaluate(()=>G.kings[localPlayer().team].upgrades.regen),1);
    await press('#tab-attack');await press('.mrow:first-child button:first-of-type');
@@ -73,7 +73,7 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
    if(output&&viewport.width!==844){
     fs.mkdirSync(output,{recursive:true});
     await page.screenshot({path:path.join(output,`layout-${viewport.width}-battle.png`)});
-    await press('#tab-economy');if(mobile)await page.waitForFunction(()=>Math.abs($('side').getBoundingClientRect().bottom-$('commandTabs').getBoundingClientRect().top)<2);await page.screenshot({path:path.join(output,`layout-${viewport.width}-economy.png`)});
+    await require('./mine-map-helper.cjs')(page,0,{mobile});await page.screenshot({path:path.join(output,`layout-${viewport.width}-mine.png`)});await press('#btnMineClose');
     await press('#tab-shop');if(mobile)await page.waitForFunction(()=>getComputedStyle($('side')).transform==='matrix(1, 0, 0, 1, 0, 0)');await page.evaluate(()=>$('commandBody').scrollTop=0);await page.screenshot({path:path.join(output,`layout-${viewport.width}-shop.png`)});
    }
    if(mobile){

@@ -27,7 +27,7 @@ function performAction(a) {
     case 'sell': return !!f && sellFighter(p,f);
     case 'steroids': return !!f && inject341Steroids(p,f);
     case 'king': return kingUpgrade(p, a.stat);
-    case 'mineBuy': return buyMine(p);
+    case 'mineBuy': return buyMine(p,a.mineSlot);
     case 'mineUpgrade': return upgradeMine(p, a.id);
     case 'merc': return sendMerc(p,G.players[a.target],a.mid);
   }

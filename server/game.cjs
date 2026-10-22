@@ -41,7 +41,7 @@ module.exports = function createGame(humans,{raceMode='random'}={}) {
           case 'sell': return !!f && sellFighter(p, f);
           case 'steroids': return !!f && inject341Steroids(p,f);
           case 'king': return kingUpgrade(p, a.stat);
-          case 'mineBuy': return buyMine(p);
+          case 'mineBuy': return buyMine(p,a.mineSlot);
           case 'mineUpgrade': return upgradeMine(p, a.id);
           case 'merc': { const target = Number.isInteger(a.target) && G.players[a.target]; return Object.hasOwn(MERCS, a.mid) && !!target && target.mercQueue.length < 40 && sendMerc(p, target, a.mid); }
           default: return false;

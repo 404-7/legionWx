@@ -66,3 +66,18 @@ test('online mine upgrades and payouts are owned by the authenticated seat',()=>
   assert.equal(game.snapshot().players[0].gold,156);
   assert.equal(game.snapshot().players[2].gold,300);
 });
+
+test('map purchases preserve the clicked slot and reject occupied or invalid slots without charging',()=>{
+  const game=createGame([{slot:0,name:'Blue'},{slot:2,name:'Red'}]);
+  assert.equal(game.action(0,{type:'mineBuy',mineSlot:5}),true);
+  let me=game.snapshot().players[0];
+  assert.equal(me.mines[0].slot,5);assert.equal(me.gold,200);
+  for(const mineSlot of [5,-1,6,1.5,'2',null])assert.equal(game.action(0,{type:'mineBuy',mineSlot}),false);
+  assert.equal(game.snapshot().players[0].gold,200);
+  assert.equal(game.action(0,{type:'mineBuy'}),true);
+  assert.equal(game.snapshot().players[0].mines[1].slot,0);
+  assert.equal(game.action(2,{type:'mineUpgrade',id:0}),false);
+  assert.equal(game.action(0,{type:'mineUpgrade',id:0}),true);
+  me=game.snapshot().players[0];
+  assert.equal(me.mines[0].slot,5);assert.equal(me.mines[0].level,2);assert.equal(me.gold,20);
+});
