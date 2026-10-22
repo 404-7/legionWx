@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>军团战争 · Legion Arena</title>
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/responsive.css?v=40">
+<link rel="stylesheet" href="css/responsive.css?v=42">
 </head>
 <body>
 <div id="app">
   <header id="hud">
     <div class="brand"><span class="brand-mark">♜</span> 军团战争 <span class="sub">LEGION ARENA</span></div>
     <div class="stat gold">🪙 <b id="stGold">0</b></div>
+    <div class="stat wood">🌲 木材 <b id="stWood">97</b></div>
     <div class="stat income">📈 收入 <b id="stIncome">0</b></div>
     <div class="stat value">🗡 战力 <b id="stValue">0</b></div>
     <div class="stat wave" id="stWave">第 1 波</div>
@@ -33,7 +34,7 @@
         <div class="map-tools" aria-label="地图视角">
           <button id="btnMapHome" class="btn" aria-label="回到自己的防区">⌖ 我的防区</button>
           <button id="btnMapField" class="btn" aria-label="查看自己的完整布阵区域">防区全览</button>
-          <button id="btnMapMines" class="btn" aria-label="定位我的矿区，点击矿位购买或升级">矿区</button>
+          <button id="btnMapMines" class="btn" aria-label="定位我的矿区，点击矿位购买或升级">⌂ 城镇</button>
           <button id="btnMapOverview" class="btn" aria-label="查看完整战场">全图</button>
           <button id="btnMapZoomOut" class="btn" aria-label="缩小地图">−</button><button id="btnMapZoomIn" class="btn" aria-label="放大地图">＋</button>
         </div>
@@ -56,9 +57,9 @@
         <div id="waveInfo"></div>
       </section>
       <section class="box" id="shopBox">
-        <h3>⚔ 种族兵营 <span class="hint">切换种族查看兵种 · 可混编 · 选中后点击防区</span></h3>
-        <div id="populationPanel"><span id="populationInfo">人口 0 / 15</span><button id="btnFarmUpgrade" class="btn" type="button" onclick="performAction({type:'farmUpgrade'});updateUI(true)">升级农场</button></div>
-        <div id="shop"></div>
+        <h3>⚔ 种族兵营 <span class="hint">AP 选择建造者 · 本族兵种与原图升级树</span></h3>
+        <div id="townPanel"><p id="townInfo"></p><button id="btnWorker" class="btn" onclick="performAction({type:'worker'});updateUI(true)">训练伐木工</button><button id="btnLumberResearch" class="btn" onclick="performAction({type:'lumberResearch'});updateUI(true)">研究伐木</button></div><button id="btnBuilderChange" class="btn" onclick="selectShop(null);performAction({type:'changeBuilder'});buildShop();updateUI(true)">更换建造者</button><button id="btnProphetReroll" class="btn" hidden onclick="selectShop(null);performAction({type:'rerollProphet'});buildShop();updateUI(true)">重抽兵种</button><div id="populationPanel"><span id="populationInfo">人口 0 / 15</span><button id="btnFarmUpgrade" class="btn" type="button" onclick="performAction({type:'farmUpgrade'});updateUI(true)">升级农场</button></div>
+        <button id="btnFarmCancel" class="btn" hidden onclick="performAction({type:'cancelFarm'});updateUI(true)">取消农场升级 · 全额退还</button><div id="shop"></div>
       </section>
       </div>
       <div class="command-panel" id="panel-inspect" aria-label="单位详情" data-panel="inspect" hidden>
@@ -83,7 +84,7 @@
 <dialog id="sellDialog"><h2>出售单位</h2><p id="sellMessage"></p><div class="sell-actions"><button id="btnKeepUnit" class="btn">保留单位</button><button id="btnConfirmSell" class="btn">确认出售</button></div></dialog>
 <dialog id="kingDialog" aria-labelledby="kingDialogTitle" aria-describedby="kingDialogNote">
   <div class="king-dialog-head"><canvas id="kingPortrait" width="96" height="96"></canvas><div><small>ROYAL COMMAND</small><h2 id="kingDialogTitle">国王强化</h2></div><button id="btnKingClose" class="btn" aria-label="关闭国王强化">×</button></div>
-  <div class="king-dialog-body"><div id="kingInfo"></div><p id="kingDialogNote">三项独立强化，队友共享；每次个人收入 +3。国王以闪电弹攻击单体，每 4 波结束后自动提升护甲和攻速。射程与范围显示原地图单位，战场按 1:4 换算。</p><div id="kingUpgrades" class="king-upgrades"><button class="btn" data-king-stat="health">强化生命</button><button class="btn" data-king-stat="attack">强化攻击</button><button class="btn" data-king-stat="regen">强化生命恢复</button></div><p id="kingDialogStatus" role="status" aria-live="polite"></p><details class="king-skill-details"><summary>国王技能与解锁进度</summary><div id="kingSkills"></div></details></div>
+  <div class="king-dialog-body"><div id="kingInfo"></div><div id="kingCommands"><p id="kingControlStatus"></p><button id="btnRoyalHeal" class="btn" onclick="performAction({type:'royalHeal'});updateUI(true)">圣光 · 整局一次</button><button id="btnKingClaim" class="btn" onclick="performAction({type:'claimKing'});updateUI(true)">接管国王</button><button id="btnKingAuto" class="btn" onclick="performAction({type:'kingCommand',order:'autocast',enabled:!G.kings[localPlayer().team].autocast});updateUI(true)">自动施法</button><select id="kingAttackTarget" aria-label="国王攻击目标" onchange="performAction({type:'kingCommand',order:'target',targetId:this.value?Number(this.value):null});updateUI(true)"></select><div id="kingManualSpells" onclick="const b=event.target.closest('[data-king-spell]');if(b){performAction({type:'kingCommand',order:'spell',spell:b.dataset.kingSpell,targetId:G.kings[localPlayer().team].manualTarget});updateUI(true)}"></div></div><p id="kingDialogNote">三项独立强化，队友共享；每次个人收入 +3。国王以闪电弹攻击单体，每 4 波结束后自动提升护甲和攻速。射程与范围显示原地图单位，战场按 1:4 换算。</p><div id="kingUpgrades" class="king-upgrades"><button class="btn" data-king-stat="health">强化生命</button><button class="btn" data-king-stat="attack">强化攻击</button><button class="btn" data-king-stat="regen">强化生命恢复</button></div><p id="kingDialogStatus" role="status" aria-live="polite"></p><details class="king-skill-details"><summary>国王技能与解锁进度</summary><div id="kingSkills"></div></details></div>
 </dialog>
 <dialog id="mineDialog" aria-labelledby="mineDialogTitle" aria-describedby="mineDialogSummary">
   <div class="mine-dialog-head"><span class="mine-emblem" aria-hidden="true">◆</span><div><small>GOLD MINE</small><h2 id="mineDialogTitle">金矿</h2></div><button id="btnMineClose" class="btn" aria-label="关闭金矿窗口">×</button></div>
@@ -94,7 +95,7 @@
 <dialog id="mercDialog" aria-labelledby="mercDetailName">
   <div class="merc-detail-head"><canvas id="mercDetailPortrait" width="128" height="128"></canvas><div><small>ATTACK LEGION</small><h2 id="mercDetailName"></h2><p id="mercDetailEnglish"></p></div><button id="btnMercClose" class="btn" aria-label="关闭进攻单位详情">×</button></div>
   <div class="merc-detail-body"><p id="mercDetailIntro"></p><div id="mercDetailStats"></div><h3>技能与特性</h3><div id="mercDetailSkills"></div><p id="mercDetailStatus" role="status" aria-live="polite"></p></div>
-  <div id="mercDetailActions"><button class="btn" data-merc-detail-send="0">派遣 → 敌军 Ⅰ</button><button class="btn" data-merc-detail-send="1">派遣 → 敌军 Ⅱ</button></div>
+  <div id="mercDetailActions"><button class="btn" data-merc-detail-send="0">派遣 → 敌军 Ⅰ</button></div>
 </dialog>
 
 <div id="overlay">
@@ -108,17 +109,17 @@
     <div id="soloOptions">
       <p class="choose">选择征战难度 <span>你与 AI 队友，对抗敌方军团</span></p>
       <div class="diffRow">
-        <button class="btn diff" data-diff="easy">初入战场 <small>简单</small></button>
-        <button class="btn diff" data-diff="normal">势均力敌 <small>标准</small></button>
-        <button class="btn diff" data-diff="hard">王者试炼 <small>困难</small></button>
+
+        <button class="btn diff" data-diff="normal">进入原版 3.41 <small>AP / HG / GG / MM / CB / x3</small></button>
+
       </div>
     </div>
     <div id="onlineOptions" hidden>
       <div class="online-fields"><label>指挥官名称<input id="playerName" maxlength="16" placeholder="指挥官" autocomplete="nickname"></label><label>房间码<input id="joinCode" maxlength="6" placeholder="6 位房间码" autocomplete="off"></label></div>
-      <label class="room-setting" for="roomRaceMode">创建房间 · 对局模式<select id="roomRaceMode"><option value="random">随机种族 · 开局由服务器分配</option><option value="select">自选种族 · 每位玩家在大厅选择</option></select></label>
-      <p class="race-mode-help">开局后每人只能建造自己种族的兵种；加入房间时使用房主设置。</p>
+      <select id="roomRaceMode" hidden><option value="ap">原版默认模式</option></select>
+      <p class="race-mode-help">原图默认 AP / HG / GG / MM / CB / x3；进入地图后选择建造者。</p>
       <div class="diffRow"><button id="createRoom" class="btn primary">创建房间</button><button id="joinRoom" class="btn">加入对战</button></div>
-      <p class="foot">2–4 名真人 · 两队对抗 · 空位 AI 补齐 · 服务端同步战斗</p>
+      <p class="foot">2–8 名真人 · 4v4 两队对抗 · 空席位不刷怪 · 服务端同步战斗</p>
     </div>
     <div id="lobby" hidden>
       <div class="room-title">战备大厅 <strong id="roomCode"></strong></div>
@@ -130,7 +131,7 @@
     </div>
     <p id="netMessage" role="status" aria-live="polite"></p>
     <div class="menu-guide"><span>01 选择兵种并点击防区布阵</span><span>02 防守每一波，守护国王</span><span>03 派遣雇佣兵压制对手</span></div>
-    <p class="foot">红蓝阵营路线 · 粉色圆环为国王 · 每人 192 格布阵 · 第 10 / 20 波后开放中央 PK</p>
+    <p class="foot">原图八防区与双王城 · 第 10 / 20 波后传送独立竞技场</p>
   </div>
 </div>
 
@@ -144,21 +145,21 @@
   </div>
 </div>
 
-<script src="js/source341.js?v=40"></script>
-<script src="js/config.js?v=40"></script>
-<script src="js/skills341.js?v=40"></script>
-<script src="js/data.js?v=40"></script>
+<script src="js/source341.js?v=42"></script>
+<script src="js/config.js?v=42"></script>
+<script src="js/skills341.js?v=42"></script>
+<script src="js/data.js?v=42"></script>
 <script src="js/art-manifest.js?v=29"></script>
 <script src="js/unit-art.js?v=23"></script>
 <script src="js/sprites.js?v=29"></script>
-<script src="js/behavior.js?v=40"></script>
-<script src="js/engine.js?v=40"></script>
-<script src="js/combat341.js?v=40"></script>
-<script src="js/ai.js?v=40"></script>
-<script src="js/render.js?v=40"></script>
-<script src="js/ui.js?v=40"></script>
-<script src="js/network.js?v=40"></script>
-<script src="js/layout.js?v=40"></script>
+<script src="js/behavior.js?v=42"></script>
+<script src="js/engine.js?v=42"></script>
+<script src="js/combat341.js?v=42"></script>
+<script src="js/ai.js?v=42"></script>
+<script src="js/render.js?v=42"></script>
+<script src="js/ui.js?v=42"></script>
+<script src="js/network.js?v=42"></script>
+<script src="js/layout.js?v=42"></script>
 <script src="js/main.js?v=22"></script>
 </body>
 </html>

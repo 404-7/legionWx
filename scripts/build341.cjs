@@ -120,6 +120,21 @@ const mapSource=fs.existsSync(cache+'manifest.json')?JSON.parse(fs.readFileSync(
 const upgrades=load('war3map.w3q');
 const king=require('./king341.cjs')(byId,abilities,upgrades);
 const rules=require('./rules341.cjs')({misc:fs.readFileSync(cache+'war3mapMisc.txt','utf8'),jass,units:byId,abilities,upgrades});
+rules.native=require('./native341.cjs')({units:byId,abilities,upgrades,jass});
+// Restore map authority. The workbook is a cross-check, never a gameplay override.
+for(const r of [...records,...summons]){
+ const f=r.map.fields,b=byId[r.buildingId]?.fields||{},inherited=rules.inherited[r.map.base]||{};
+ const dice=f.ua1d??inherited.attackDice??Math.max(1,r.min-(f.ua1b??r.min-1));
+ const sides=f.ua1s??inherited.attackSides??Math.max(1,Math.round((r.max-r.min)/dice)+1),base=f.ua1b??r.min-dice;
+ r.sheetStats={min:r.min,max:r.max,hp:r.hp,interval:r.interval,cost:r.baseCost,total:r.cost};
+ r.min=base+dice;r.max=base+dice*sides;r.attackBase=base;r.attackDice=dice;r.attackSides=sides;
+ r.hp=f.uhpm??r.hp;r.interval=f.ua1c??r.interval;r.rawRange=f.ua1r??inherited.range??r.rawRange;
+ r.baseCost=b.ugol??r.baseCost;r.cost=b.upoi??r.cost;r.woodCost=b.ulum??0;r.pointValue=b.upoi??r.cost;
+  r.constructionTime=b.ubld??0;
+ r.food=b.ufus??f.ufus??r.food;r.map.armorPoints=f.udef??r.map.armorPoints;
+ r.dps=(r.min+r.max)/2/r.interval;
+}
+for(const warning of warnings)if(warning.field==='Cost')warning.resolution='map wins; spreadsheet retained as sheetStats';
 const mercs=require('./merc341.cjs')(byId,clean,rules);
 for(const w of waves){const o=byId[w.mapId];w.base=o.base;w.rawRange=o.fields.ua1r??rules.inherited[o.base]?.range;if(w.rawRange===undefined)throw Error('Missing creep range '+w.mapId);}
 const payload={version:'3.41',source:sheet.file,sourceHash:sheet.sha256,mapSource,rangeScale:.25,units:records,summons,mercs,king,rules,abilities:mapAbilities,waves,warnings};

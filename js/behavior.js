@@ -64,12 +64,9 @@ function chooseCombatTarget(unit,candidates,options,dt){
 function defenseTargets(p){return [...p.enemies,...G.kings[p.team].leaks.filter(e=>e.ownerId===p.id)];}
 function inDefenseField(p,x,y){return x>=p.fx&&x<=p.fx+CFG.FIELD_W&&y>=p.fy&&y<=p.fy+CFG.FIELD_H;}
 function defenseWalkable(p,x,y){
-  if(G.players.some(ally=>ally.team===p.team&&inDefenseField(ally,x,y)))return true;
-  const k=G.kings[p.team],r=38;
-  return (Math.abs(x-p.exitX)<=r&&y>=12&&y<=CFG.H-12)||
-    (Math.abs(y-CFG.ROAD_Y)<=r&&x>=Math.min(k.x,p.exitX)-r&&x<=Math.max(k.x,p.exitX)+r)||
-    (Math.abs(x-k.x)<=r&&y>=Math.min(k.y,CFG.ROAD_Y)-r&&y<=Math.max(k.y,CFG.ROAD_Y)+r);
+ const area=nativeRect341(p.team===0?'LVision':'RVision');return x>=area.x&&x<=area.x+area.w&&y>=area.y&&y<=area.y+area.h;
 }
+
 function defenseLineClear(p,a,b){
   if(inDefenseField(p,a.x,a.y)&&inDefenseField(p,b.x,b.y))return true;
   const n=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/22));

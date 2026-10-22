@@ -3,14 +3,18 @@
 let G = null;
 
 function layoutFor(playerIndex) {
-  const right = playerIndex < 2, bottom = playerIndex % 2 === 1;
-  const fx = right ? 1284 : 84, fy = bottom ? 824 : 40;
-  return { fx, fy, gx: fx + 24, gy: fy + 40, laneX:right?1500:300 };
+  const native=SOURCE341.rules.native.map,rect=native.rects['P'+(playerIndex+1)+'BuildArea'];
+  const fx=(rect[0]-native.minX)*native.scale,fy=(native.maxY-rect[3])*native.scale;
+  const spawn=nativeRect341('Creep_'+(playerIndex+1));
+  return {fx,fy,gx:fx,gy:fy,laneX:spawn.x+spawn.w/2,spawnY:spawn.y+spawn.h/2};
 }
+function nativeRect341(name){const m=SOURCE341.rules.native.map,r=m.rects[name];return {x:(r[0]-m.minX)*m.scale,y:(m.maxY-r[3])*m.scale,w:(r[2]-r[0])*m.scale,h:(r[3]-r[1])*m.scale};}
+function nativeCenter341(name){const r=nativeRect341(name);return {x:r.x+r.w/2,y:r.y+r.h/2};}
+function nativePoint341(point){const m=SOURCE341.rules.native.map;return {x:(point[0]-m.minX)*m.scale,y:(m.maxY-point[1])*m.scale};}
 
 function newGame(diffKey) {
   const diff = CFG.DIFFS[diffKey] || CFG.DIFFS.normal;
-  const names = ['你', '盟友·岚', '红将·焰', '红将·岳'];
+  const names = ['你','西方Ⅱ','西方Ⅲ','西方Ⅳ','东方Ⅰ','东方Ⅱ','东方Ⅲ','东方Ⅳ'];
   G = {
     phase: 'prep', diffKey, diff,
     wave: 0, timer: 0, timerMax: 1,
@@ -20,29 +24,31 @@ function newGame(diffKey) {
     hover: null, logLines: [],
     waveDef: null, result: null, battleMode:'defense', arena:null, arenaHistory:[],entitySerial:0,kingGoldPools:[0,0],bonus:null,
   };
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < SOURCE341.rules.native.slots; i++) {
     const L = layoutFor(i);
     G.players.push({
-      id: i, team: i < 2 ? 0 : 1, name: names[i], isHuman: i === 0,
+      id: i, team: i < 4 ? 0 : 1, name: names[i], isHuman: i === 0,active:i===0,
       gold: CFG.START_GOLD, income: CFG.START_INCOME, kingLvl: 0,farmLevel:SOURCE341.rules.population.startFarm,
+      wood:SOURCE341.rules.native.startWood,workers:1,workerHarvest:[0],lumberLevel:0,lumberElapsed:0,workerQueue:[],lumberResearch:null,race:null,builderChanges:0,builderChoices:null,prophetDeck:[],prophetRerolls:0,royalHealUsed:false,totalLeaks:0,leakGoldFactor:0,
       fx: L.fx, fy: L.fy, gx: L.gx, gy: L.gy,
-      exitX: L.laneX, exitY: i % 2 ? 776 : 664,
-      spawnX: L.laneX, spawnY: i % 2 ? CFG.H-20 : 20,
+      exitX: L.laneX, exitY: CFG.ROAD_Y,
+      spawnX: L.laneX, spawnY: L.spawnY,
       direction: i % 2 ? -1 : 1,
       fighters: [], enemies: [], mercQueue: [], mines: [],
       spawnList: [], spawnT: 0, spawnIv: .1, mercSpawnList:[],mercSpawnT:0,paid: true,
       ai: null, aiT: 0,
     });
   }
+  for(const p of G.players)p.towers=p.fighters;
   G.kings = [0, 1].map(t => ({
-    team: t,royalTeam:t,r:26, x: t === 0 ? CFG.GATE_RIGHT : CFG.GATE_LEFT, y: t===0?1260:180,
+    team: t,royalTeam:t,r:26,...nativePoint341(SOURCE341.rules.native.map.kings[t]),
     hp: CFG.KING_HP, max: CFG.KING_HP, lvl: 0, cd: 0, flash: 0, leaks: [],
     dmg: CFG.KING_DMG, aspd: CFG.KING_ASPD, regen: CFG.KING_REGEN,
     min:SOURCE341.king.min,maxDamage:SOURCE341.king.max,armorPoints:SOURCE341.king.armorPoints,
     mana:SOURCE341.king.mana,manaMax:SOURCE341.king.mana,skills:[],spellCD:{},autoLevel:0,growthWave:0,windup:null,
+    controller:null,controlLock:0,autocast:true,manualTarget:null,facing:Math.PI/2,
     upgrades: { health: 0, attack: 0, regen: 0 },
   }));
-  aiSetupAll();
   addLog('战斗开始！守护本队国王。', 'l-blue');
   startPrep();
   return G;
@@ -78,6 +84,10 @@ function startCombat() {
   G.combatT = 0;
   const iv = G.waveDef.spawnInterval;
   for (const p of G.players) {
+    if(!p.active)continue;
+    createBattleArmy341(p);
+    const ratio=playerValue(p)/Math.max(1,G.waveDef.value)-p.totalLeaks/150;
+    p.leakGoldFactor=ratio>=.1?Math.min(1,ratio):0;
     for(const f of p.fighters)if(f.steroids){f.max=f.def.hp*1.2;f.hp=f.max;}
     start341Round(p);
     p.paid = false;
@@ -105,10 +115,11 @@ function endWave() {
     k.leaks = [];k.windup=null;
   }
   for (const p of G.players) {
+    if(!p.active){p.fighters=[];continue;}
     p.gold += Math.round((G.waveDef.bonus || 0) * (G.wave===30?SOURCE341.rules.bonus.completionBonusMultiplier:1) * gainMult(p));
     const survivors=p.fighters.filter(f=>f.hp>0&&!f.temporary);
     if(survivors.some(f=>f.def.abil.slaveTrade))p.gold+=survivors.reduce((sum,f)=>sum+(f.uid==='slavemaster'?3:f.uid==='servant'?2:0),0);
-    p.fighters = p.fighters.filter(f => !f.temporary);
+    p.fighters = p.towers;
     for (const f of p.fighters) restoreFighter(p,f);
     recalcAuras(p);
   }
@@ -123,7 +134,7 @@ function bonusStep341(dt){
   bonus.timer-=dt;
   while(bonus.timer<=1e-9){
     bonus.batch++;bonus.cleared=false;
-    for(const p of G.players){
+    for(const p of G.players.filter(p=>p.active)){
       for(let i=0;i<G.waveDef.count;i++)p.spawnList.push({type:'wave'});
       p.spawnT=Math.min(p.spawnT,p.spawnIv);p.paid=false;
       p.mercSpawnList.push(...p.mercQueue.map(id=>({type:'merc',id})));p.mercQueue=[];p.mercSpawnT=SOURCE341.rules.bonus.mercDelay;
@@ -150,6 +161,15 @@ function gameOver(winner) {
   addLog(winner === null ? '双方守住了最终波，平局！' : winner === 0 ? '🏆 蓝方胜利！' : '💀 蓝方战败…', winner === 0 ? 'l-green' : 'l-red');
   if (typeof showOverlay === 'function') showOverlay('result');
 }
+function leavePlayer341(slot){
+  const p=G.players[slot];if(!p?.active)return;
+  p.active=false;p.isHuman=false;p.ai=null;p.towers=[];
+  if(G.phase==='prep')p.fighters=[];
+  p.spawnList=[];p.mercSpawnList=[];p.mercQueue=[];p.workerQueue=[];p.lumberResearch=null;
+  if(!p.enemies.length)p.paid=true;
+  addLog(`${p.name} 已离场，其防区停止后续刷怪。`,'l-red');
+  if(!G.players.some(q=>q.active&&q.team===p.team))gameOver(1-p.team);
+}
 
 function checkOver() {
   for (const k of G.kings) if (k.hp <= 0) { gameOver(1 - k.team); return true; }
@@ -175,9 +195,11 @@ function waveDefFor(w) {
 /* ---------- 模拟主循环 ---------- */
 function simStep(dt) {
   if (G.phase === 'prep' || G.phase === 'combat') {
+    G.kingControlClock=(G.kingControlClock||0)+dt;const ticks=Math.floor(G.kingControlClock+1e-9);
+    if(ticks){G.kingControlClock-=ticks;for(const k of G.kings)k.controlLock=Math.max(0,k.controlLock-ticks);}
     G.floaters = G.floaters.filter(f => { f.t -= dt; f.y -= 20 * dt; return f.t > 0; });
     G.fx = G.fx.filter(f => (f.t -= dt) > 0);
-    for (const p of G.players) mineStep(p, dt);
+    for (const p of G.players)if(p.active){stepConstruction341(p,dt);mineStep(p, dt);}
     for (const k of G.kings) if (k.hp > 0) {
       k.hp = Math.min(k.max, k.hp + k.regen * dt);
       k.mana=Math.min(k.manaMax,k.mana+SOURCE341.king.manaRegen*dt);
@@ -282,6 +304,7 @@ function spawnEnemy(p, item) {
       attackBase:m.attackBase,attackDice:m.attackDice,attackSides:m.attackSides,weapon:m.weapon,attackPoint:m.attackPoint,projectileSpeed:m.projectileSpeed,
       mana:m.manaStart,bloodCD:0 };
     e.mercId = item.id;
+    e.bounty=m.sourceFields.ulev??1;
   } else {
     const d = G.waveDef;
     e = { hp: d.hp, max: d.hp, dmg: d.dmg, aspd: d.aspd, range: d.range, speed: d.speed, armor: d.armor, atk: d.atk, r: d.r, regen: d.regen, magicImmune: d.magicImmune, boss: d.boss };
@@ -516,14 +539,15 @@ function growKing341(k,wave){
 }
 function kingInterval341(k){return k.aspd/(1+k.autoLevel*SOURCE341.king.auto.hastePerLevel+kingAura341(k.team,k).haste);}
 function kingMagic341(k,e,damage){if(!e.magicImmune)dmgEnemy(e,damage,'法术',k);}
-function kingSpell341(k,target){
+function kingSpell341(k,target,manualId=null){
   for(const s of SOURCE341.king.skills){
+    if(manualId&&s.id!==manualId)continue;
     if(!k.skills.includes(s.id)||!s.cd||(k.spellCD[s.id]||0)>0||k.mana<s.mana)continue;
     const dx=target.x-k.x,dy=target.y-k.y,d=Math.hypot(dx,dy);
-    if(s.id==='A022'&&d>50)continue; // Original autocast condition: 200 Warcraft units.
-    k.mana-=s.mana;k.spellCD[s.id]=s.cd;k.slamT=.35;
+    if(s.id==='A022'&&!manualId&&d>50)continue; // Original autocast condition: 200 Warcraft units.
+    k.mana-=s.mana;k.spellCD[s.id]=s.cd;k.slamT=.35;k.controlLock=5;
     if(s.id==='A021'){
-      launchSkillWave341(k,target,{damage:s.damage,radius:s.radius,length:s.length,speed:SOURCE341.rules.inherited.shockwave.speed*.25,targets:'ground',kind:'king'});
+      launchSkillWave341(k,manualId?target:k,{damage:s.damage,radius:s.radius,length:s.length,speed:SOURCE341.rules.inherited.shockwave.speed*.25,targets:'ground',kind:'king'});
       addFloater(k.x,k.y-30,s.name,'#b0d9ff');return;
     }
     for(const e of k.leaks){
@@ -540,11 +564,29 @@ function kingSpell341(k,target){
     return;
   }
 }
+function claimKing341(p){
+  const k=G.kings[p.team];if(!p.active||!['prep','combat'].includes(G.phase)||k.hp<=0||k.controlLock>0&&k.controller!==p.id)return false;
+  if(k.controller!==p.id){k.controller=p.id;k.controlLock=5;}return true;
+}
+function royalHeal341(p){
+  const k=G.kings[p.team];if(!p.active||!p.race||p.royalHealUsed||!['prep','combat'].includes(G.phase)||k.hp<=0||k.hp>=k.max)return false;
+  p.royalHealUsed=true;const healed=Math.min(k.max-k.hp,SOURCE341.rules.native.royalHeal.amount);k.hp+=healed;addFloater(k.x,k.y-40,'圣光 +'+Math.round(healed),'#afeab7');return true;
+}
+function kingCommand341(p,command){
+  const k=G.kings[p.team];if(!p.active||k.controller!==p.id||k.hp<=0||!['prep','combat'].includes(G.phase))return false;
+  if(command.order==='autocast'){if(typeof command.enabled!=='boolean')return false;k.autocast=command.enabled;}
+  else if(command.order==='target'){if(command.targetId!==null&&!k.leaks.some(e=>e.entityId===command.targetId&&e.hp>0))return false;k.manualTarget=command.targetId;k.windup=null;}
+  else if(command.order==='spell'){
+    const spell=SOURCE341.king.skills.find(s=>s.id===command.spell&&s.cd>0);if(!spell||!k.skills.includes(spell.id)||k.mana<spell.mana||(k.spellCD[spell.id]||0)>0)return false;
+    const target=k.leaks.find(e=>e.entityId===command.targetId&&e.hp>0)||k.leaks.find(e=>e.hp>0)||k;
+    const mana=k.mana;kingSpell341(k,target,spell.id);if(k.mana===mana)return false;
+  }else return false;k.controlLock=5;return true;
+}
 
 function launchSkillWave341(source,target,spell){
   const dx=target.x-source.x,dy=target.y-source.y,d=Math.hypot(dx,dy);
   G.skillWaves.push({...spell,x:source.x,y:source.y,px:source.x,py:source.y,startX:source.x,startY:source.y,
-    ux:d?dx/d:0,uy:d?dy/d:source.royalTeam!==undefined?(source.royalTeam===0?-1:1):(G.players[source.ownerId].team===0?1:-1),distance:0,remainingDamage:spell.maxDamage??Infinity,hitIds:[],sourceId:source.entityId,ownerId:source.ownerId,royalTeam:source.royalTeam,team:source.royalTeam??G.players[source.ownerId].team});
+    ux:d?dx/d:Math.cos(source.facing??Math.PI/2),uy:d?dy/d:Math.sin(source.facing??Math.PI/2),distance:0,remainingDamage:spell.maxDamage??Infinity,hitIds:[],sourceId:source.entityId,ownerId:source.ownerId,royalTeam:source.royalTeam,team:source.royalTeam??G.players[source.ownerId].team});
 }
 function bossStep341(p,e,dt){
   const rule=SOURCE341.rules.bosses[e.rawId];if(!rule)return;
@@ -583,10 +625,12 @@ function leak(p, e) {
   const i = p.enemies.indexOf(e);
   if (i >= 0) p.enemies.splice(i, 1);
   p.leakCount = (p.leakCount || 0) + 1;
+  p.totalLeaks++;e.leakRewardFactor=p.leakGoldFactor;
   const k = G.kings[p.team];
   e.toKing = true;e.ownerId=p.id; e.routeX = p.exitX; e.turning = true;forgetCombatTarget(e);
-  const lane=(e.entityId%5-2)*8;
-  e.route=[{x:p.exitX+lane,y:CFG.ROAD_Y+lane},{x:k.x+lane,y:CFG.ROAD_Y+lane},{x:k.x+lane,y:k.y}];e.routeIndex=0;
+  const spawn=nativeRect341(p.team===0?'LKingSpawn':'RKingSpawn');
+  e.x=spawn.x+Math.random()*spawn.w;e.y=spawn.y+Math.random()*spawn.h;
+  e.route=[{x:k.x,y:k.y}];e.routeIndex=0;
   k.leaks.push(e);
   addFloater(p.exitX - 20, e.y, '漏怪!', '#ff6a5e');
   if (p.isHuman) addLog(`${p.name} 第 ${G.wave} 波漏怪！国王受到威胁`, 'l-red',p.team);
@@ -635,8 +679,9 @@ function kingStep(k, dt) {
       const d = Math.hypot(e.x - k.x, e.y - k.y);
       if (d < td) { td = d; tgt = e; }
     }
+    const manual=k.leaks.find(e=>e.entityId===k.manualTarget&&e.hp>0);if(manual){tgt=manual;td=Math.hypot(tgt.x-k.x,tgt.y-k.y);}
     if (tgt && td <= CFG.KING_RANGE + tgt.r) {
-      kingSpell341(k,tgt);
+      k.facing=Math.atan2(tgt.y-k.y,tgt.x-k.x);if(k.autocast)kingSpell341(k,tgt);
       k.cd = kingInterval341(k);
       k.windup={targetId:tgt.entityId,time:SOURCE341.king.windup*k.cd/k.aspd};
     }
@@ -646,53 +691,46 @@ function kingStep(k, dt) {
 }
 
 /* ---------- 经济 / 操作 ---------- */
-function armyFood341(p){return p.fighters.reduce((sum,f)=>sum+(f.temporary?0:f.def.food||0),0);}
+function armyFood341(p){return p.towers.reduce((sum,f)=>sum+((UNITS[f.upgradePending]||f.def).food||0),0);}
 function foodCapacity341(p){const rules=SOURCE341.rules.population;return Math.min(rules.ceiling,rules.town+(rules.farms[p.farmLevel]?.supply||0));}
 function farmUpgrade341(p){
-  if(!canManageArmy())return false;
+  if(!['prep','combat'].includes(G.phase))return false;
   const next=SOURCE341.rules.population.farms[p.farmLevel+1];
-  if(!next||foodCapacity341(p)>=SOURCE341.rules.population.ceiling||p.gold<next.cost)return false;
-  p.gold-=next.cost;p.farmLevel++;
-  addLog(`${p.name} 升级农场，人口上限 ${foodCapacity341(p)}`,'l-gold',p.team);return true;
+  if(p.farmPending||!next||foodCapacity341(p)>=SOURCE341.rules.population.ceiling||p.gold<next.gold||p.wood<next.wood)return false;
+  p.gold-=next.gold;p.wood-=next.wood;p.farmPending={time:next.time,level:p.farmLevel+1};
+  addLog(`${p.name} 开始升级农场，${next.time} 秒后扩容。`,'l-gold',p.team);return true;
 }
 function minePosition(p, index) {
   const zone=mineZone(p);
   return { x:zone.x+32+(index%2)*96,y:zone.y+100+Math.floor(index/2)*150 };
 }
-function mineZone(p){return {x:p.team===0?1060:580,y:p.id%2?870:70,w:160,h:500};}
+function mineZone(p){const at=townPosition341(p);return {x:at.x-100,y:at.y-100,w:200,h:200};}
+function townPosition341(p){const m=SOURCE341.rules.native.map,at=m.towns[p.id];return {x:(at[0]-m.minX)*m.scale,y:(m.maxY-at[1])*m.scale};}
 
-function buyMine(p, mineSlot) {
-  if (!['prep', 'combat'].includes(G.phase) || p.mines.length >= MINE.LIMIT || p.gold < MINE.COST) return false;
-  const occupied = slot => p.mines.some(m => (m.slot ?? m.id) === slot);
-  if (mineSlot === undefined) mineSlot = Array.from({length:MINE.LIMIT},(_,i)=>i).find(i=>!occupied(i));
-  if (!Number.isInteger(mineSlot) || mineSlot < 0 || mineSlot >= MINE.LIMIT || occupied(mineSlot)) return false;
-  p.gold -= MINE.COST;
-  p.mines.push({ id: p.mines.length, slot:mineSlot, level: 1, elapsed: 0 });
-  addLog(`${p.name} 建造金矿（${p.mines.length}/${MINE.LIMIT}）`, 'l-gold',p.team);
-  return true;
+function buyMine(){return false;}
+
+function upgradeMine(){return false;}
+
+function mineStep(p,dt){lumberStep341(p,dt);}
+
+function buyWorker341(p){
+  const r=SOURCE341.rules.native.workers;
+  if(!['prep','combat'].includes(G.phase)||p.lumberResearch||p.workers+p.workerQueue.length>=r.limit||p.gold<r.gold||playerValue(p)<r.requireValue)return false;
+  p.gold-=r.gold;p.workerQueue.push({time:r.time});return true;
 }
-
-function upgradeMine(p, id) {
-  if (!['prep', 'combat'].includes(G.phase) || !Number.isInteger(id)) return false;
-  const mine = p.mines.find(m => m.id === id);
-  if (!mine || mine.level >= MINE.LEVELS.length) return false;
-  const cost = MINE.LEVELS[mine.level - 1].upgrade;
-  if (p.gold < cost) return false;
-  p.gold -= cost; mine.level++;
-  addLog(`${p.name} 的 ${(mine.slot ?? id) + 1} 号金矿升至 Lv.${mine.level}`, 'l-gold',p.team);
-  return true;
+function researchLumber341(p){
+  const r=SOURCE341.rules.native.workers.upgrades[p.lumberLevel],required=[600,1300,2000][Math.min(p.lumberLevel,2)];
+  if(!r||p.workerQueue.length||p.lumberResearch||p.gold<r.gold||p.wood<r.wood||playerValue(p)<required||!['prep','combat'].includes(G.phase))return false;
+  p.gold-=r.gold;p.wood-=r.wood;p.lumberResearch={time:r.time};return true;
 }
-
-function mineStep(p, dt) {
-  for (const mine of p.mines) {
-    mine.elapsed += dt;
-    const ticks = Math.floor((mine.elapsed + 1e-9) / MINE.INTERVAL);
-    if (!ticks) continue;
-    mine.elapsed = Math.max(0, mine.elapsed - ticks * MINE.INTERVAL);
-    const gold = ticks * MINE.LEVELS[mine.level - 1].gold;
-    p.gold += gold;
-    const pos = minePosition(p, mine.slot ?? mine.id);
-    addFloater(pos.x, pos.y - 15, `+${gold}金`, '#f5c542');
+function lumberStep341(p,dt){
+  const r=SOURCE341.rules.native.workers;
+  while(dt>1e-9){
+    const step=Math.min(dt,p.workerQueue[0]?.time??Infinity,p.lumberResearch?.time??Infinity,...p.workerHarvest.map(t=>r.cycle-t));
+    for(let i=0;i<p.workerHarvest.length;i++){p.workerHarvest[i]+=step;if(p.workerHarvest[i]>=r.cycle-1e-9){p.workerHarvest[i]=0;p.wood+=r.amount+p.lumberLevel;}}
+    if(p.workerQueue.length){p.workerQueue[0].time-=step;if(p.workerQueue[0].time<=1e-9){p.workerQueue.shift();p.workers++;p.workerHarvest.push(0);}}
+    if(p.lumberResearch){p.lumberResearch.time-=step;if(p.lumberResearch.time<=1e-9){p.lumberLevel++;p.lumberResearch=null;}}
+    dt-=step;
   }
 }
 
@@ -702,68 +740,110 @@ function payClear(p) {
 }
 function rewardEnemy(p,e){
   if(!p||e.rewarded)return;
+  const bounty=G.wave>=31?0:Math.floor((e.bounty||0)*(e.toKing?(e.leakRewardFactor??0):1));
   if(e.killedByKing!==undefined){
-    const gold=e.bounty||0;G.kingGoldPools[e.killedByKing]+=gold;e.rewarded=true;
+    const gold=bounty;for(const team of [0,1])G.kingGoldPools[team]+=gold;e.rewarded=true;
     if(gold>0)addFloater(e.x,e.y-e.r-18,`+${gold} 团队金`,'#f5cf65','gold');return;
   }
   p=G.players[e.killerPlayerId]||p;
-  const gold=Math.round((e.bounty||0)*gainMult(p));
+  const gold=Math.round(bounty*gainMult(p));
   p.gold+=gold;e.rewarded=true;
   if(gold>0)addFloater(e.x,e.y-e.r-18,`+${gold} 金`,'#f5cf65','gold');
 }
 function settleKingGold341(){
   for(const team of [0,1]){
-    const players=G.players.filter(p=>p.team===team),share=Math.floor(G.kingGoldPools[team]/players.length);
+    const players=G.players.filter(p=>p.active&&p.team===team),share=players.length?Math.floor(G.kingGoldPools[team]/players.length):0;
     for(const p of players)if(share>0){p.gold+=Math.round(share*gainMult(p));addLog(`${p.name} 获得国王击杀分红 +${share} 金`,'l-gold',team);}
     G.kingGoldPools[team]=0;
   }
 }
 
 function cellFree(p, col, row) {
-  return !p.fighters.some(f => !f.temporary && f.col === col && f.row === row);
+  return !p.towers.some(f => f.col === col && f.row === row);
 }
 
 function buyFighter(p, uid, col, row) {
   if(!canManageArmy())return false;
   const def = UNITS[uid];
-  if(G.online&&def?.race!==p.race)return false;
+  if(!p.race||(p.race==='prophet'?!p.prophetDeck.includes(uid):def?.race!==p.race))return false;
   if(def&&armyFood341(p)+(def.food||0)>foodCapacity341(p))return false;
   if (!Object.hasOwn(UNITS,uid) || !def || def.elite || def.summonOnly || !Number.isInteger(col) || !Number.isInteger(row) || p.gold < def.purchaseCost || col < 0 || col >= CFG.COLS || row < 0 || row >= CFG.ROWS || !cellFree(p, col, row)) return false;
-  p.gold -= def.purchaseCost;
-  p.fighters.push({
+  if(p.wood<def.woodCost)return false;
+  p.gold -= def.purchaseCost;p.wood-=def.woodCost;
+  p.towers.push({
     def, uid, col, row,ownerId:p.id,r:10,
     x: p.gx + (col + 0.5) * CFG.CELL, y: p.gy + (row + 0.5) * CFG.CELL,
-    hp: def.hp, max: def.hp, cd: 0.3, spent: def.purchaseCost,
+    hp: def.hp, max: def.hp, cd: 0.3, spent: def.purchaseCost,newlyBuilt:p.race!=='hybrid',constructionRemaining:def.constructionTime,constructionGold:def.purchaseCost,constructionWood:def.woodCost,hybridTier:def.hybridTier,pendingBattle:G.phase==='combat',
     effDmg: def.dmg, flash: 0, deadT: 0, reincUsed: false,
   });
-  init341Fighter(p.fighters[p.fighters.length-1]);
+  init341Fighter(p.towers[p.towers.length-1]);
   recalcAuras(p);
   return true;
+}
+function chooseBuilder341(p,race){
+  if(!['prep','combat'].includes(G.phase)||p.race||!Object.hasOwn(RACES,race)||p.builderChoices&&!p.builderChoices.includes(race)||!p.builderChoices&&p.towers.length)return false;
+  p.race=race;p.builderChoices=null;p.prophetDeck=race==='prophet'?rollProphet341():[];return true;
+}
+function rollProphet341(){return UNIT_POOLS341.map(pool=>pool[Math.floor(Math.random()*pool.length)]);}
+function rerollProphet341(p){
+  const r=SOURCE341.rules.native.prophetReroll,n=p.prophetRerolls;
+  if(!['prep','combat'].includes(G.phase)||p.race!=='prophet'||n>=r.limit||p.gold<r.gold+n*r.goldStep||p.wood<r.wood+n*r.woodStep)return false;
+  p.gold-=r.gold+n*r.goldStep;p.wood-=r.wood+n*r.woodStep;p.prophetRerolls++;p.prophetDeck=rollProphet341();return true;
+}
+function stepConstruction341(p,dt){
+  if(p.farmPending){p.farmPending.time-=dt;if(p.farmPending.time<=1e-9){p.farmLevel=p.farmPending.level;p.farmPending=null;}}
+  for(const f of p.towers){
+    if(!(f.constructionRemaining>0))continue;f.constructionRemaining=Math.max(0,f.constructionRemaining-dt);if(f.constructionRemaining>1e-9)continue;
+    f.constructionRemaining=0;
+    if(f.hybridTier!==undefined){const pool=UNIT_POOLS341[f.hybridTier];f.uid=pool[Math.floor(Math.random()*pool.length)];f.def=UNITS[f.uid];delete f.hybridTier;}
+    if(f.upgradePending){f.uid=f.upgradePending;f.def=UNITS[f.uid];delete f.upgradePending;}
+    f.hp=f.max=f.def.hp;f.effDmg=f.def.dmg;init341Fighter(f);
+  }
+}
+function changeBuilder341(p){
+  const r=SOURCE341.rules.native.changeBuilder,n=p.builderChanges;
+  if(!['prep','combat'].includes(G.phase)||!p.race||n>=r.limit||p.gold<r.gold+n*r.goldStep||p.wood<r.wood+n*r.woodStep)return false;
+  p.gold-=r.gold+n*r.goldStep;p.wood-=r.wood+n*r.woodStep;p.builderChanges++;
+  const pool=Object.keys(RACES),first=pool.splice(Math.floor(Math.random()*pool.length),1)[0],second=pool[Math.floor(Math.random()*pool.length)];
+  p.race=null;p.builderChoices=[first,second];return true;
 }
 
 function upgradeFighter(p,f,targetId) {
   if(!canManageArmy())return false;
-  if(!p.fighters.includes(f)||f.temporary)return false;
+  if(!p.towers.includes(f)||f.constructionRemaining>0||G.phase==='combat'&&!f.pendingBattle)return false;
   const nextId=targetId??f.def.up;
   const stance=f.def.stances.includes(nextId);
   if(!stance&&!f.def.upgrades.includes(nextId))return false;
   const next=UNITS[nextId];if(!next)return false;
   if(armyFood341(p)-(f.def.food||0)+(next.food||0)>foodCapacity341(p))return false;
   const cost=stance?0:next.purchaseCost;
-  if(p.gold<cost)return false;
+  if(p.gold<cost||p.wood<(stance?0:next.woodCost))return false;
   const ratio=f.hp/f.max,mana=f.mana;
-  p.gold-=cost;f.spent+=cost;f.def=next;f.uid=nextId;f.hp=next.hp;f.max=next.hp;
+  p.gold-=cost;p.wood-=stance?0:next.woodCost;f.spent+=cost;
+  if(!stance&&next.constructionTime>0){f.upgradePending=nextId;f.constructionRemaining=next.constructionTime;f.constructionGold=cost;f.constructionWood=next.woodCost;return true;}
+  f.def=next;f.uid=nextId;f.hp=next.hp;f.max=next.hp;
   init341Fighter(f);
   if(stance){f.hp=f.max*ratio;f.mana=Math.min(next.manaMax,mana);}
   addFloater(f.x,f.y,stance?'切换形态':'升级!','#7ee08a');recalcAuras(p);return true;
 }
 
-function fighterSellValue(f){return Math.floor(f.spent*3/10);}
+function fighterSellValue(f){return Math.floor(f.def.pointValue*(f.newlyBuilt?1:f.def.abil.refund??SOURCE341.rules.native.sellPercent));}
+function cancelConstruction341(p,f){
+  if(!['prep','combat'].includes(G.phase)||!p.towers.includes(f)||!(f.constructionRemaining>0)||f.hybridTier!==undefined&&f.constructionRemaining<=.3)return false;
+  const rate=Number(SOURCE341.rules.misc[f.upgradePending?'UpgradeRefundRate':'ConstructionRefundRate']);
+  p.gold+=Math.floor(f.constructionGold*rate);p.wood+=Math.floor(f.constructionWood*rate);
+  if(f.upgradePending){f.spent-=f.constructionGold;delete f.upgradePending;f.constructionRemaining=0;}else p.towers.splice(p.towers.indexOf(f),1);
+  return true;
+}
+function cancelFarm341(p){
+  if(!['prep','combat'].includes(G.phase)||!p.farmPending)return false;const farm=SOURCE341.rules.population.farms[p.farmPending.level],rate=Number(SOURCE341.rules.misc.UpgradeRefundRate);
+  p.gold+=Math.floor(farm.gold*rate);p.wood+=Math.floor(farm.wood*rate);p.farmPending=null;return true;
+}
 function sellFighter(p, f) {
-  if(!canManageArmy())return false;
-  const i = p.fighters.indexOf(f);
-  if (i < 0 || f.temporary) return false;
-  p.fighters.splice(i, 1);
+  if(G.phase!=='prep')return false;
+  const i = p.towers.indexOf(f);
+  if (i < 0 || f.temporary||f.constructionRemaining>0) return false;
+  p.towers.splice(i, 1);
   const refund=fighterSellValue(f);p.gold += refund;
   addFloater(f.x, f.y, `+${refund}金`, '#f5c542');
   if (G.selectedFighter === f) G.selectedFighter = null;
@@ -790,8 +870,8 @@ function kingUpgrade(p, stat = 'health') {
   if (!Object.hasOwn(KING_UPGRADES, stat) || !['prep', 'combat'].includes(G.phase)) return false;
   const k = G.kings[p.team];
   const cost = kingUpgradeCost(k, stat);
-  if (!Number.isFinite(cost)||p.gold < cost) return false;
-  p.gold -= cost;
+  if (!Number.isFinite(cost)||p.wood < cost) return false;
+  p.wood -= cost;
   k.lvl++;
   k.upgrades[stat]++;
   const def=KING_UPGRADES[stat],amount = def.amounts?.[k.upgrades[stat]-1]??def.amount;
@@ -806,9 +886,11 @@ function kingUpgrade(p, stat = 'health') {
 
 function sendMerc(from, target, mercId) {
   const m = Object.hasOwn(MERCS,mercId)?MERCS[mercId]:null;
-  if (!m || !['prep','combat'].includes(G.phase) || G.wave<m.unlockWave || from.gold < m.cost || !target || target.team === from.team || target.mercQueue.length>=40) return false;
-  from.gold -= m.cost;
+  const enemies=G.players.filter(p=>p.active&&p.team!==from.team);
+  if (!m || !from.active || !['prep','combat'].includes(G.phase) || G.wave<m.unlockWave || from.wood < m.cost || !enemies.length) return false;
+  from.wood -= m.cost;
   from.income += m.income;
+  G.mercCursor||=[0,0];target=enemies[G.mercCursor[from.team]++%enemies.length];
   target.mercQueue.push(mercId);
   if (from.isHuman) addLog(`${from.name} 雇佣「${m.name}」→ ${target.name}，收入 +${m.income}`, 'l-green');
   else if (target.isHuman) addLog(`${from.name} 向 ${target.name} 派遣了「${m.name}」！`, 'l-red');
@@ -825,10 +907,14 @@ function addLog(txt, cls,team=null) {
   G.logLines.push({ txt, cls: cls || '',team });
   if (G.logLines.length > 60) G.logLines.shift();
 }
-function playerValue(p) { return p.fighters.reduce((s, f) => s + f.spent, 0); }
+function playerValue(p) { return p.towers.reduce((s, f) => s + f.def.pointValue, 0); }
 
 /* ---------- 3.41 阵营竞技场：第 10 / 20 波后的独立奖励回合 ---------- */
 function canManageArmy(){return ['prep','combat'].includes(G.phase)&&!(G.battleMode==='arena'&&G.phase==='combat');}
+function createBattleArmy341(p){
+  for(const t of p.towers)if(t.constructionRemaining>0)t.pendingBattle=true;
+  p.fighters=p.towers.filter(t=>!(t.constructionRemaining>0)).map(tower=>{tower.newlyBuilt=false;tower.pendingBattle=false;const f={...tower,entityId:undefined,brain:undefined},steroids=tower.steroids;restoreFighter(p,f);f.steroids=steroids;tower.steroids=false;return f;});
+}
 function restoreFighter(p,f){
   f.x=p.gx+(f.col+.5)*CFG.CELL;f.y=p.gy+(f.row+.5)*CFG.CELL;
   f.max=f.def.hp;f.hp=f.max;f.deadT=0;f.reincUsed=false;f.cd=.3;f.steroids=false;
@@ -842,24 +928,25 @@ function startArenaPrep(){
   G.arena={stage:'prepare',elapsed:0,counts:[0,0],winner:null};
   G.projectiles=[];G.selectedShop=null;G.selectedFighter=null;
   for(const p of G.players){p.paid=true;p.aiT=.5;p.spawnList=[];p.mercSpawnList=[];p.enemies=[];}
-  addLog(`第 ${G.wave} 波已守住！${CFG.ARENA_PREP} 秒后开放中央路口，开始阵营 PK。`,'l-gold');
+  addLog(`第 ${G.wave} 波已守住！${CFG.ARENA_PREP} 秒后传送至独立竞技场，开始阵营 PK。`,'l-gold');
 }
 function startArenaCombat(){
   G.phase='combat';G.combatT=0;G.arena.stage='march';G.arena.elapsed=0;
   G.projectiles=[];G.selectedShop=null;G.selectedFighter=null;
   for(const p of G.players){
-    p.fighters=p.fighters.filter(f=>!f.temporary);
+    createBattleArmy341(p);
     for(const f of p.fighters){
       const steroids=f.steroids;restoreFighter(p,f);f.steroids=steroids;
       if(steroids){f.max=f.def.hp*1.2;f.hp=f.max;}
       prepareArenaFighter(p,f);
-      f.cd=.2+Math.random()*.2;
-      f.route=[{x:p.exitX,y:f.y},{x:p.exitX,y:CFG.ROAD_Y},{x:p.team===0?CFG.GATE_RIGHT:CFG.GATE_LEFT,y:CFG.ROAD_Y}];f.routeIndex=0;
+      f.cd=0;f.newlyBuilt=false;
+      const area=nativeRect341(p.team===0?'ArenaTopBig':'ArenaBotBig');f.x=area.x+Math.random()*area.w;f.y=area.y+Math.random()*area.h;
+      f.route=[nativeCenter341('ArenaCenter')];f.routeIndex=0;
     }
     start341Round(p);
   }
-  G.arena.counts=arenaCounts();
-  addLog('中央路口已开放！双方军团沿本阵营路线进场，国王和金矿不参战。','l-red');
+  G.arena.counts=arenaCounts();G.arena.countdown=5.5;
+  addLog('双方军团已传送至独立竞技场，倒计时后交战。','l-red');
 }
 function prepareArenaFighter(p,f){
   f.ownerId=p.id;f.team=p.team;f.r=12;f.armor=f.def.armor;f.armorPoints=f.def.armorPoints;
@@ -890,11 +977,12 @@ function arenaStep(dt){
   if(arena.stage==='result'){
     const timing=SOURCE341.rules.timing;
     if(!arena.awarded&&arena.elapsed>=timing.arenaAwardDelay){
-      arena.awarded=true;for(const p of G.players)if(arena.winner===null||p.team===arena.winner)p.gold+=arena.bonus;
+      arena.awarded=true;for(const p of G.players)if(p.active&&(arena.winner===null||p.team===arena.winner))p.gold+=arena.bonus;
       addLog(`PK 奖励已发放：${arena.winner===null?'双方':'胜方'}每人 +${arena.bonus} 金。`,'l-gold');
     }
     if(arena.elapsed>=timing.arenaAwardDelay+timing.arenaResult){restoreArenaArmies();startPrep(true);}return;
   }
+  if(arena.countdown>0){arena.countdown=Math.max(0,arena.countdown-dt);return;}
   let views=arenaViews();
   // Status effects and ally auras run once per side. Views are transient and never serialized.
   for(const view of views)tick341(view,dt);
@@ -905,7 +993,8 @@ function arenaStep(dt){
       if(f.hp<=0)continue;
       if(f.stunT>0){f.cd-=dt;continue;}
       if(f.route&&!f.arenaReady){
-        f.arenaReady=walkRoute(f,(f.def.speed||75)*f.slowF*dt);
+        const enemies=views[1-view.team].fighters.filter(e=>e.hp>0);const nearby=enemies.some(e=>Math.hypot(e.x-f.x,e.y-f.y)<=Math.max(f.def.acquireRange||125,effRange(f.def)+28));
+        f.arenaReady=nearby||walkRoute(f,(f.def.speed||75)*f.slowF*dt);
         f.cd=Math.max(0,f.cd-dt);continue;
       }
       const targets=view.enemies.filter(e=>e.hp>0&&e.deadT<=0&&e.arenaReady);
@@ -941,8 +1030,8 @@ function spreadArenaUnits(dt){
     const push=Math.min((24-d)/2,36*dt);
     a.x-=dx/d*push;a.y-=dy/d*push;b.x+=dx/d*push;b.y+=dy/d*push;
   }
-  for(const f of units){f.x=Math.max(CFG.GATE_LEFT-80,Math.min(CFG.GATE_RIGHT+80,f.x));f.y=Math.max(CFG.ROAD_Y-55,Math.min(CFG.ROAD_Y+55,f.y));}
+  const area=nativeRect341('ArenaVision');for(const f of units){f.x=Math.max(area.x,Math.min(area.x+area.w,f.x));f.y=Math.max(200,Math.min(1900,f.y));}
 }
 function restoreArenaArmies(){
-  for(const p of G.players){p.fighters=p.fighters.filter(f=>!f.temporary);for(const f of p.fighters)restoreFighter(p,f);recalcAuras(p);}
+  for(const p of G.players){p.fighters=p.towers;for(const f of p.fighters)restoreFighter(p,f);recalcAuras(p);}
 }

@@ -1,5 +1,5 @@
 {
-  "policy": "Spreadsheet fighter damage bounds retained; compatible object dice preserve independent-roll distribution. Object overrides win for windup and missile speed. Missing native defaults remain explicitly unverified.",
+  "policy": "Original map overrides take precedence for damage, price and timing. Workbook values remain in sheetStats. Missing native defaults remain explicitly unverified.",
   "units": [
     {
       "id": "gnoll_warrior",
@@ -206,10 +206,10 @@
       "base": "hfoo",
       "damage": {
         "min": 142,
-        "max": 154,
+        "max": 168,
         "base": 140,
         "dice": 2,
-        "sides": 7
+        "sides": 14
       },
       "sourceDamage": {
         "base": 140,
@@ -778,10 +778,10 @@
       "base": "hrif",
       "damage": {
         "min": 91,
-        "max": 102,
+        "max": 101,
         "base": 90,
         "dice": 1,
-        "sides": 12
+        "sides": 11
       },
       "sourceDamage": {
         "base": 90,
@@ -1173,11 +1173,11 @@
       "rawId": "h05A",
       "base": "hfoo",
       "damage": {
-        "min": 55,
-        "max": 66,
-        "base": 54,
+        "min": 155,
+        "max": 173,
+        "base": 154,
         "dice": 1,
-        "sides": 12
+        "sides": 19
       },
       "sourceDamage": {
         "base": 154,
@@ -2406,10 +2406,10 @@
       "base": "hrif",
       "damage": {
         "min": 178,
-        "max": 275,
-        "base": 177,
-        "dice": 1,
-        "sides": 98
+        "max": 205,
+        "base": 175,
+        "dice": 3,
+        "sides": 10
       },
       "sourceDamage": {
         "base": 175,
@@ -2780,10 +2780,10 @@
       "base": "nwwf",
       "damage": {
         "min": 21,
-        "max": 22,
+        "max": 31,
         "base": 20,
         "dice": 1,
-        "sides": 2
+        "sides": 11
       },
       "sourceDamage": {
         "base": 20,
@@ -3131,11 +3131,11 @@
       "rawId": "h0A9",
       "base": "hrif",
       "damage": {
-        "min": 66,
+        "min": 62,
         "max": 68,
-        "base": 65,
+        "base": 61,
         "dice": 1,
-        "sides": 3
+        "sides": 7
       },
       "sourceDamage": {
         "base": 61,

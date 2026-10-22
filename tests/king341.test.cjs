@@ -1,11 +1,11 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-function engine(){const ctx=vm.createContext({}),run=code=>vm.runInContext(code,ctx);run(['source341','config','skills341','data','behavior','engine','combat341','ai'].map(n=>fs.readFileSync(path.join(__dirname,'../js',n+'.js'),'utf8')).join('\n'));run("newGame('normal');G.players.forEach(p=>{p.ai=null;p.gold=100000;});globalThis.p=G.players[0];globalThis.k=G.kings[0];");return run;}
+function engine(){const ctx=vm.createContext({}),run=code=>vm.runInContext(code,ctx);run(['source341','config','skills341','data','behavior','engine','combat341','ai'].map(n=>fs.readFileSync(path.join(__dirname,'../js',n+'.js'),'utf8')).join('\n')+require('./helpers/native-engine.cjs').fixtureSource);run("newGame('normal');G.players.forEach(p=>{p.ai=null;p.active=true;p.gold=100000;p.wood=100000;});globalThis.p=G.players[0];p.race='nature';globalThis.k=G.kings[0];");return run;}
 function leaks(run){run("G.phase='combat';spawnEnemy(p,{type:'wave'});spawnEnemy(p,{type:'wave'});for(const e of [...p.enemies]){leak(p,e);e.x=k.x+70;e.y=k.y;e.speed=0;e.hp=e.max=10000;e.cd=100;e.routeIndex=e.route.length-1;}globalThis.e=k.leaks[0];globalThis.other=k.leaks[1];");}
 
 test('source king uses map base stats and bounded fixed-cost team upgrades',()=>{
  const run=engine();assert.deepEqual(JSON.parse(run('JSON.stringify([k.hp,k.regen,k.min,k.maxDamage,k.aspd,CFG.KING_RANGE,k.mana])')),[2600,3,31,41,.9,178.75,1000]);
- run("kingUpgrade(p,'health');kingUpgrade(p,'health')");assert.equal(run('k.max'),3525);assert.equal(run('p.gold'),99840);assert.equal(run('p.income'),12);
+ run("kingUpgrade(p,'health');kingUpgrade(p,'health')");assert.equal(run('k.max'),3525);assert.equal(run('p.gold'),100000);assert.equal(run('p.wood'),99840);assert.equal(run('p.income'),6);
  run("while(kingUpgrade(p,'health')){};while(kingUpgrade(p,'attack')){};while(kingUpgrade(p,'regen')){}");
  assert.equal(run('k.max'),16350);assert.equal(run('k.min'),331);assert.equal(run('k.maxDamage'),341);assert.equal(run('k.regen'),103);
  for(const stat of ['health','attack','regen']){assert.equal(run(`kingUpgradeCost(k,'${stat}')`),Infinity);const gold=run('p.gold');assert.equal(run(`kingUpgrade(p,'${stat}')`),false);assert.equal(run('p.gold'),gold);}
@@ -29,8 +29,8 @@ test('learned stomp respects mana, cooldown, stun and magic immunity; immolation
  run("k.skills=['A01T'];e.air=false;other.magicImmune=false;other.air=true;k.cd=100;kingStep(k,1)");assert.equal(run('e.hp'),9943);assert.equal(run('other.hp'),10000);
 });
 test('shockwave follows a line and late-wave royal auras affect nearby guards and king, excluding PK',()=>{
- const run=engine();leaks(run);run("k.skills=['A021'];other.x=k.x-70;kingSpell341(k,e);stepSkillWaves341(1)");assert.equal(run('e.hp'),9910);assert.equal(run('other.hp'),10000);assert.equal(run('k.mana'),800);
- run("growKing341(k,13);growKing341(k,19);growKing341(k,23);buyFighter(p,'ent',5,7);globalThis.f=p.fighters[0];f.x=k.x+20;f.y=k.y;tick341({...p,enemies:[]},.01)");
+ const run=engine();leaks(run);run("k.skills=['A021'];other.x=k.x-70;kingSpell341(k,e,'A021');stepSkillWaves341(1)");assert.equal(run('e.hp'),9910);assert.equal(run('other.hp'),10000);assert.equal(run('k.mana'),800);
+ run("growKing341(k,13);growKing341(k,19);growKing341(k,23);buyReady341(p,'ent',5,7);globalThis.f=p.fighters[0];f.x=k.x+20;f.y=k.y;tick341({...p,enemies:[]},.01)");
  assert.equal(run('f.effDmg'),run('f.def.dmg*1.15'));assert.equal(run('f.effArmor'),run('f.def.armorPoints+5'));assert.equal(run('f.effHaste'),.1);assert.equal(run('kingAura341(0,k).move'),.15);
  run("G.battleMode='arena';tick341({...p,enemies:[]},.01)");assert.equal(run('f.effHaste'),0);assert.equal(run('f.effArmor'),run('f.def.armorPoints'));assert.equal(run('f.effDmg'),run('f.def.dmg'));
 });

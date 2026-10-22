@@ -2,7 +2,7 @@
 const fs=require('node:fs'),vm=require('node:vm');
 const c=vm.createContext({});vm.runInContext(['source341','config','skills341','data'].map(n=>fs.readFileSync('js/'+n+'.js','utf8')).join('\n'),c);
 const result=vm.runInContext(`({
- policy:'Spreadsheet fighter damage bounds retained; compatible object dice preserve independent-roll distribution. Object overrides win for windup and missile speed. Missing native defaults remain explicitly unverified.',
+ policy:'Original map overrides take precedence for damage, price and timing. Workbook values remain in sheetStats. Missing native defaults remain explicitly unverified.',
  units:[...SOURCE341.units,...SOURCE341.summons].map(row=>{
   const f=row.map.fields,u=UNITS[row.id],inherited=SOURCE341.rules.inherited[row.map.base]||{};
   return {id:row.id,name:row.english,rawId:row.fighterId,base:row.map.base,damage:{min:u.min,max:u.max,base:u.attackBase,dice:u.attackDice,sides:u.attackSides},

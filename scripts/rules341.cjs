@@ -7,7 +7,7 @@ module.exports=function rules341({misc,jass,units,abilities,upgrades}){
   const values=raw['DamageBonus'+key]?.split(',').map(Number);if(values?.length!==8||values.some(n=>!Number.isFinite(n)))throw Error('Missing source damage matrix '+key);
   matrix[attack]=Object.fromEntries(armorOrder.map((name,i)=>[name,values[i]]));
  }
- const farms=[];let id='h024';while(id){const f=units[id].fields;farms.push({id,supply:f.ufma,gold:f.ugol,wood:f.ulum,cost:f.ugol+f.ulum,sourceFields:f});id=f.uupt;if(farms.length>30)throw Error('Farm cycle');}
+ const farms=[];let id='h024';while(id){const f=units[id].fields;farms.push({id,supply:f.ufma,gold:f.ugol,wood:f.ulum,cost:f.ugol,time:f.ubld??0,sourceFields:f});id=f.uupt;if(farms.length>30)throw Error('Farm cycle');}
  const hpLevels=Number(jass.match(/SetPlayerTechResearchedSwap\('R004'\s*,\s*(\d+)/)?.[1]);
  const hpUpgrade=upgrades.find(o=>o.id==='R004').fields;
  const timer=fn=>jass.match(new RegExp('function '+fn+'[\\s\\S]*?endfunction'))?.[0]||'';

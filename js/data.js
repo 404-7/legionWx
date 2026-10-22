@@ -30,12 +30,12 @@ for (const row of [...SOURCE341.units,...SOURCE341.summons]) {
   const abil = compile341Skills(row);
   const rawRange = row.rawRange;
   UNITS[row.id] = { id:row.id,name:row.name,english:row.english,race:row.race,tier:row.tier,model:row.model,
-    cost:row.cost??0, purchaseCost:row.baseCost, hp:row.hp,
+    cost:row.cost??0, purchaseCost:row.baseCost,woodCost:row.woodCost||0,pointValue:row.pointValue??row.cost??0,constructionTime:row.constructionTime||0,hp:row.hp,
     dmg:(row.min+row.max)/2, min:row.min,max:row.max,aspd:row.interval,range:rawRange*SOURCE341.rangeScale,
     rawRange,melee:rawRange<=180,atk:row.atk,armor:row.armor,food:row.food,
     armorPoints:row.map.armorPoints,regenFlat:row.map.regen,speed:(row.map.moveSpeed??270)*SOURCE341.rangeScale,
     acquireRange:(row.map.fields.uacq??(rawRange<=180?500:650))*SOURCE341.rangeScale,
-    ...attackDice341(row.min,row.max,row.map.fields),...weapon341(row.map.fields,row.map.base,rawRange<=180),
+    attackBase:row.attackBase,attackDice:row.attackDice,attackSides:row.attackSides,...weapon341(row.map.fields,row.map.base,rawRange<=180),
     air:row.map.fields.utar==='air'||(row.map.fields.umvt??(['hdhw','nadk'].includes(row.map.base)?'fly':'foot'))==='fly',
     targets:row.map.fields.ua1g||'enemies',
     manaMax:row.map.manaMax,manaStart:row.map.manaStart,manaRegen:row.map.manaRegen,
@@ -43,6 +43,11 @@ for (const row of [...SOURCE341.units,...SOURCE341.summons]) {
     role:row.rawRange<=180?'前排':row.min===0?'法术':'远程',
     abil,abilityNames:row.abilityNames,sourceRow:row.row,sourceDps:row.dps,
     rawId:row.fighterId,buildingId:row.buildingId };
+}
+const UNIT_POOLS341=SOURCE341.rules.native.unitPools.map(pool=>pool.map(raw=>SOURCE341.units.find(r=>r.buildingId===raw)?.id).filter(Boolean));
+for(const [tier,hybrid] of SOURCE341.rules.native.hybrid.entries()){
+ const id='hybrid_'+(tier+1),template=UNITS[UNIT_POOLS341[tier][0]];
+ UNITS[id]={...template,id,name:'混合随机塔 · T'+(tier+1),english:'Hybrid T'+(tier+1),race:'hybrid',role:'随机建造',tier:tier+1,purchaseCost:hybrid.cost,cost:hybrid.cost,pointValue:hybrid.cost,woodCost:0,hybridTier:tier,constructionTime:hybrid.time,food:0,hp:1,dmg:0,min:0,max:0,attackBase:0,attackDice:0,attackSides:1,sourceDps:0,rawId:hybrid.id,buildingId:hybrid.id,elite:false,summonOnly:false,sourceRow:'地图',upgrades:[],stances:[],up:undefined,abil:{},abilityNames:'从原图对应阶级池随机替换'};
 }
 
 /* 兵种有效攻击距离：近战含索敌余量（可够到远程波敌人） */

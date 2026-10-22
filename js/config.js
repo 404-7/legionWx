@@ -1,19 +1,17 @@
 'use strict';
 // Shared fixed battle vision. Public king approaches are an L-shaped corridor.
-function visionOpen(state){return state.phase==='over'||state.phase==='menu'||!!state.bonus;}
+function visionOpen(state){return state.phase==='over'||state.phase==='menu'||state.battleMode==='arena'||!!state.bonus;}
 function publicEnemyVision(state,team){
   const king=state.kings[1-team],exit=state.players.find(p=>p.team!==team).exitX;
   return {king,exit,r:56,kingRadius:82,bridge:{x:CFG.W/2-120,y:CFG.ROAD_Y-110,w:240,h:220}};
 }
 function pointVisibleToTeam(state,team,x,y){
-  if(!Number.isFinite(x)||!Number.isFinite(y))return false;
-  if(visionOpen(state)||(team===0?x>=CFG.W/2:x<=CFG.W/2))return true;
-  const {king,exit,r,kingRadius,bridge}=publicEnemyVision(state,team);
-  return Math.hypot(x-king.x,y-king.y)<=kingRadius||
-    (x>=bridge.x&&x<=bridge.x+bridge.w&&y>=bridge.y&&y<=bridge.y+bridge.h)||
-    (Math.abs(y-CFG.ROAD_Y)<=r&&x>=Math.min(exit,king.x)-r&&x<=Math.max(exit,king.x)+r)||
-    (Math.abs(x-king.x)<=r&&y>=Math.min(king.y,CFG.ROAD_Y)-r&&y<=Math.max(king.y,CFG.ROAD_Y)+r);
+ if(!Number.isFinite(x)||!Number.isFinite(y))return false;
+ if(visionOpen(state))return true;
+ const r=SOURCE341.rules.native.map.rects[team===0?'LVision':'RVision'],m=SOURCE341.rules.native.map;
+ return x>=(r[0]-m.minX)*m.scale&&x<=(r[2]-m.minX)*m.scale&&y>=(m.maxY-r[3])*m.scale&&y<=(m.maxY-r[1])*m.scale;
 }
+
 function visibleGameLogs(state,team){return state.logLines.filter(l=>l.team==null||l.team===team);}
 function arenaCountText(count){return count==null?'未知':count;}
 function incomeVisibleToTeam(state,team,player){return player.team===team||state.battleMode==='arena'||visionOpen(state);}
@@ -27,12 +25,13 @@ function scopeBattleSnapshot(state,slot){
   const hiddenArmy=state.players.filter(p=>p.team!==team).some(p=>p.fighters.some(f=>(f.hp>0||f.deadT>0)&&!visible(f)));
   const publicUnit=u=>Object.fromEntries(Object.entries(u).filter(([key])=>!['col','row','spent','homeX','homeY','brain','route','routeIndex','laneX'].includes(key)));
   for(const p of state.players)if(p.team!==team){
+    p.towers=[];p.workerHarvest=[];p.builderChoices=null;p.builderChanges=null;p.prophetDeck=[];p.prophetRerolls=null;p.farmPending=null;
     p.fighters=p.fighters.filter(visible).map(publicUnit);p.enemies=p.enemies.filter(visible).map(publicUnit);
-    p.mines=[];p.gold=null;p.farmLevel=null;if(!incomeVisibleToTeam(state,team,p))p.income=null;p.paid=null;p.leakCount=null;p.aiT=null;
+    p.mines=[];p.gold=null;p.wood=null;p.workers=null;p.workerQueue=[];p.lumberResearch=null;p.lumberLevel=null;p.farmLevel=null;if(!incomeVisibleToTeam(state,team,p))p.income=null;p.paid=null;p.leakCount=null;p.aiT=null;
     p.spawnList=[];p.mercSpawnList=[];p.mercSpawnT=null;p.spawnT=null;
     p.mercQueue=p.mercQueue.map(()=>null);
   }
-  for(const k of state.kings)if(k.team!==team)k.leaks=k.leaks.filter(visible).map(publicUnit);
+  for(const k of state.kings)if(k.team!==team){k.leaks=k.leaks.filter(visible).map(publicUnit);k.manualTarget=null;k.controller=null;k.controlLock=null;}
   if(state.arena&&hiddenArmy)state.arena.counts[1-team]=null;
   state.projectiles=state.projectiles.filter(pr=>visible(pr)&&pointVisibleToTeam(state,team,pr.px,pr.py));
   if(state.skillWaves)state.skillWaves=state.skillWaves.filter(w=>visible(w)&&pointVisibleToTeam(state,team,w.px,w.py));
@@ -42,16 +41,16 @@ function scopeBattleSnapshot(state,slot){
 }
 /* ===== 全局配置：地图布局、经济、国王、平衡常数 ===== */
 const CFG = {
-  W: 1800, H: 1440,
+  W: SOURCE341.rules.native.map.width, H: SOURCE341.rules.native.map.height,
 
-  COLS: 12, ROWS: 16, CELL: 32,
-  GRID_W: 12 * 32, GRID_H: 16 * 32,
-  FIELD_W: 432, FIELD_H: 576,
-  ROAD_Y: 720, GATE_LEFT: 820, GATE_RIGHT: 980,
+  COLS: 18, ROWS: 25, CELL: 32,
+  GRID_W: 18 * 32, GRID_H: 25 * 32,
+  FIELD_W: 608, FIELD_H: 832,
+  ROAD_Y: 1124, GATE_LEFT: 1640, GATE_RIGHT: 1880,
   ARENA_WAVES: [10, 20], ARENA_PREP: SOURCE341.rules.timing.arenaPrepare,
 
-  START_GOLD: 300,
-  START_INCOME: 6,
+  START_GOLD: SOURCE341.rules.native.startGold,
+  START_INCOME: SOURCE341.rules.native.startIncome,
   FIRST_PREP: SOURCE341.rules.timing.first,
 
   TOTAL_WAVES: 31,
@@ -66,9 +65,7 @@ const CFG = {
   PROJ_SPEED: 340,
 
   DIFFS: {
-    easy:   { label: '简单', emult: 0.85, aiMult: 0.85, allyMult: 1.15 },
-    normal: { label: '标准', emult: 1.00, aiMult: 1.00, allyMult: 1.12 },
-    hard:   { label: '困难', emult: 1.16, aiMult: 1.15, allyMult: 1.00 },
+    normal: { label: '原版 3.41', emult: 1.00, aiMult: 1.00, allyMult: 1.00 },
   },
 };
 
@@ -83,7 +80,7 @@ const KING_UPGRADES = {
 };
 
 const MINE = {
-  COST: 100, LIMIT: 6, INTERVAL: 5,
+  COST: Infinity, LIMIT: 0, INTERVAL: 5,
   LEVELS: [
     { gold: 8, upgrade: 80 },
     { gold: 12, upgrade: 120 },
@@ -100,6 +97,8 @@ const ARMOR_TYPES = ['无甲', '轻甲', '中甲', '重甲', '城甲'];
 const ATK_ARMOR = SOURCE341.rules.damage;
 
 const RACES = {
+  hybrid:{name:'混合',icon:'✥',color:'#d8b288',desc:'原图 Hybrid：建造六阶随机塔',tip:'按阶付费，建成后从原图该阶单位池随机替换；退款按替换后实际单位处理。'},
+  prophet:{name:'预言者',icon:'✦',color:'#c5a5de',desc:'原图 Prophet：每阶随机一个基础兵种',tip:'六阶各抽取一种兵，保留其原生升级分支；可按原图重抽研究更新可建造组合。'},
   mech: { name: '机械', icon: '⚙', color: '#e6bd71', desc: '装甲前排、领导光环与远程火力', tip: '新兵挡线，机枪手输出；队长为周围单位增伤。' },
   nature: { name: '自然', icon: '♣', color: '#9bd18b', desc: '树人坚守、游侠点杀与生命恢复', tip: '树人承担伤害，游侠后排射击；生命之树持续治疗。' },
   beast: { name: '野兽', icon: '♞', color: '#d4a77d', desc: '猛兽重击、持续压制与龙族范围伤害', tip: '食人魔抵挡前锋，鹰身女妖减速；龙裔清理密集怪群。' },

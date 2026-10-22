@@ -11,7 +11,7 @@ function aiSetupAll() {
   G.players.forEach((p,i)=>{
     if(p.isHuman)return;
     const race=deckKeys[(offset+i-1)%deckKeys.length];
-    p.ai={race,deck:AI_DECKS[race],aggression:.5+(i-1)*.25};
+    p.race=race;p.ai={race,deck:AI_DECKS[race],aggression:.5+(i-1)*.25};
   });
 }
 
@@ -36,18 +36,16 @@ function aiAct(p) {
   const w = G.wave;
   if(foodCapacity341(p)-armyFood341(p)<8)farmUpgrade341(p);
 
-  // Keep enough gold for defenders while investing in the same mines as humans.
-  if (w >= 3 && p.mines.length < Math.min(MINE.LIMIT, Math.floor(w / 3)) && p.gold >= MINE.COST + 180) buyMine(p);
-  const mine = p.mines.find(m => m.level < MINE.LEVELS.length && p.gold >= MINE.LEVELS[m.level - 1].upgrade + 300);
-  if (mine) upgradeMine(p, mine.id);
+  if(playerValue(p)>=350&&p.gold>150&&p.workers+p.workerQueue.length<7)buyWorker341(p);
+  if(p.gold>250&&p.wood>200)researchLumber341(p);
 
   // 1) 强化国王（关键节点，留足买兵钱）
   const king = G.kings[p.team];
   const stat = king.hp < king.max * .5 ? 'health'
     : ['health', 'attack', 'regen'].reduce((best, key) => king.upgrades[key] < king.upgrades[best] ? key : best, 'health');
   const kCost = kingUpgradeCost(king, stat);
-  if ([5, 11, 18, 24].includes(w) && p.gold >= kCost + 150) kingUpgrade(p, stat);
-  if (w > 24 && p.gold >= kCost + 220) kingUpgrade(p, stat);
+  if ([5, 11, 18, 24].includes(w) && p.wood >= kCost + 150) kingUpgrade(p, stat);
+  if (w > 24 && p.wood >= kCost + 220) kingUpgrade(p, stat);
 
   // 2) 补墙 / 买输出
   let walls = p.fighters.filter(f => isWall(f.def)).length;
@@ -100,8 +98,8 @@ function aiAct(p) {
     let sends = 0;
     const enemiesOfAi = G.players.filter(q => q.team !== p.team);
     while (sends < 2) {
-      if (p.gold < 300 || !enemiesOfAi.length) break;
-      const affordable = Object.keys(MERCS).filter(id => MERCS[id].unlockWave<=G.wave && MERCS[id].cost <= p.gold - 150);
+      if (p.wood < 60 || !enemiesOfAi.length) break;
+      const affordable = Object.keys(MERCS).filter(id => MERCS[id].unlockWave<=G.wave && MERCS[id].cost <= p.wood - 30);
       if (!affordable.length) break;
       const mid = affordable[Math.floor(Math.random() * affordable.length)];
       const tgt = enemiesOfAi[Math.floor(Math.random() * enemiesOfAi.length)];

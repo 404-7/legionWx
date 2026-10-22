@@ -1,5 +1,9 @@
 'use strict';
 const Net = { session: null, stream: null, ended: false, busy: false,room:null,raceBusy:false };
+function hydrateBattleState341(state){
+  for(const p of state.players)for(const list of [p.fighters,p.towers])for(const f of list||[])if(typeof f.def==='string')f.def=UNITS[f.def];
+  return state;
+}
 function localPlayer() { return G.players[Net.session?.slot ?? 0]; }
 function notice(message) {
   if ($('netMessage')) $('netMessage').textContent = message;
@@ -20,32 +24,40 @@ function performAction(a) {
     api('action', a).catch(e => notice(e.message));
     return false;
   }
-  const p = localPlayer(), f = p.fighters.find(f => !f.temporary && f.col === a.col && f.row === a.row);
+  const p = localPlayer(), f = p.towers.find(f => f.col === a.col && f.row === a.row);
   switch (a.type) {
+    case 'chooseBuilder': return chooseBuilder341(p,a.race);
+    case 'changeBuilder': return changeBuilder341(p);
+    case 'rerollProphet': return rerollProphet341(p);
     case 'buy': return buyFighter(p,a.uid,a.col,a.row);
     case 'upgrade': return !!f && upgradeFighter(p,f,a.uid);
     case 'sell': return !!f && sellFighter(p,f);
     case 'steroids': return !!f && inject341Steroids(p,f);
     case 'king': return kingUpgrade(p, a.stat);
+    case 'claimKing': return claimKing341(p);
+    case 'royalHeal': return royalHeal341(p);
+    case 'kingCommand': return kingCommand341(p,a);
     case 'farmUpgrade': return farmUpgrade341(p);
-    case 'mineBuy': return buyMine(p,a.mineSlot);
-    case 'mineUpgrade': return upgradeMine(p, a.id);
+    case 'cancelFarm': return cancelFarm341(p);
+    case 'cancelConstruction': return !!f&&cancelConstruction341(p,f);
+    case 'worker': return buyWorker341(p);
+    case 'lumberResearch': return researchLumber341(p);
     case 'merc': return sendMerc(p,G.players[a.target],a.mid);
   }
 }
 function renderRoomLobby(room){
   $('roomCode').textContent=room.code;
-  $('roomMode').textContent='本局模式：'+(room.raceMode==='random'?'随机种族':'自选种族');
+  $('roomMode').textContent='原版 3.41 · AP / HG / GG / MM / CB / x3';
   const mine=room.members.find(m=>m.slot===Net.session.slot);
   $('lobbyRaceChoice').hidden=room.raceMode!=='select'||room.started;
   $('playerRace').disabled=Net.raceBusy||room.started;
   if(!Net.raceBusy)$('playerRace').value=mine?.race||'';
-  $('lobbyRaceHelp').textContent=room.raceMode==='random'?'开局时每人随机获得一个种族，之后整局固定；AI 同样遵守单种族规则。':'每位真人选好种族后才能开始；允许同族，开局后不可更换，AI 空位自动分配。';
-  $('roomSeats').replaceChildren(...[0,1,2,3].map(slot=>{
-    const m=room.members.find(m=>m.slot===slot),item=document.createElement('div');item.className='seat '+(slot<2?'blue':'red');
+  $('lobbyRaceHelp').textContent='4v4 八席 · AP 模式进入地图后选择建造者；空席位不刷怪。';
+  $('roomSeats').replaceChildren(...[0,1,2,3,4,5,6,7].map(slot=>{
+    const m=room.members.find(m=>m.slot===slot),item=document.createElement('div');item.className='seat '+(slot<4?'blue':'red');
     const race=room.races?.[slot]||m?.race;
-    const faction=race?RACES[race].name:room.raceMode==='random'?'开局随机':m?'待选种族':'随机分配';
-    item.textContent=(slot<2?'苍岚':'赤焰')+' · '+(m?m.name+(slot===Net.session.slot?'（你）':'')+(m.connected?' · 已连接':' · 等待重连'):'AI 补位')+' · '+faction;
+    const faction=race?RACES[race].name:m?'进入地图选择':'空席位';
+    item.textContent=(slot<4?'苍岚':'赤焰')+' · '+(m?m.name+(slot===Net.session.slot?'（你）':'')+(m.connected?' · 已连接':' · 等待重连'):'空席 · 不出怪')+' · '+faction;
     return item;
   }));
   $('startOnline').disabled=room.host!==Net.session.slot||room.members.length<2||room.waiting||!room.raceReady||room.started;
@@ -68,11 +80,11 @@ function connectRoom(session) {
     notice(room.waiting ? '玩家掉线 · 对局暂停，60 秒内可重连' : '在线 · 房间 ' + room.code);
     if (!state) return;
     const old = G;
-    G = state;
-    G.selectedShop = UNITS[old?.selectedShop]?.race===localPlayer().race?old.selectedShop:null; G.hover = old?.hover || null;
+    G = hydrateBattleState341(state);
+    G.selectedShop = !localPlayer().race||UNITS[old?.selectedShop]?.race===localPlayer().race?old?.selectedShop:null; G.hover = old?.hover || null;
     G.selectedMine = old?.selectedMine ?? null;
     const selected = old?.selectedFighter;
-    G.selectedFighter = selected ? localPlayer().fighters.find(f => f.col === selected.col && f.row === selected.row) : null;
+    G.selectedFighter = selected ? [...localPlayer().fighters,...localPlayer().towers].find(f => f.col === selected.col && f.row === selected.row) : null;
     $('btnPause').disabled = true; $('btnSpeed').disabled = true;
     $('overlay').style.display = 'none';
     updateUI(true);

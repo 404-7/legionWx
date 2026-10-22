@@ -220,8 +220,8 @@ function hit341(p,f,e,dealt,rawDamage=dealt) {
   if(a.feast&&f.attacks%a.feast.every===0)f.hp=Math.min(f.max,f.hp+a.feast.heal);
 }
 function inject341Steroids(p,f) {
-  if(G.phase!=='prep'||!p.fighters.includes(f)||f.temporary||!f.def.abil.steroids||f.steroids||p.gold<50)return false;
-  p.gold-=50;f.steroids=true;addFloater(f.x,f.y,'下一波强化已准备','#b7da8e');return true;
+  if(G.phase!=='prep'||!p.fighters.includes(f)||f.temporary||!f.def.abil.steroids||f.steroids||p.wood<50)return false;
+  p.wood-=50;f.steroids=true;addFloater(f.x,f.y,'下一波强化已准备','#b7da8e');return true;
 }
 function start341Round(p) {
   for(const source of p.fighters){const a=source.def.abil.guardian;if(!a)continue;

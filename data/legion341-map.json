@@ -199,7 +199,7 @@
       "field": "Cost",
       "sheet": 380,
       "map": 350,
-      "resolution": "spreadsheet wins; map value retained"
+      "resolution": "map wins; spreadsheet retained as sheetStats"
     },
     {
       "row": 72,
@@ -207,7 +207,7 @@
       "field": "Cost",
       "sheet": 130,
       "map": 150,
-      "resolution": "spreadsheet wins; map value retained"
+      "resolution": "map wins; spreadsheet retained as sheetStats"
     },
     {
       "row": 118,
@@ -215,7 +215,7 @@
       "field": "Cost",
       "sheet": 140,
       "map": 160,
-      "resolution": "spreadsheet wins; map value retained"
+      "resolution": "map wins; spreadsheet retained as sheetStats"
     },
     {
       "row": 127,
@@ -223,7 +223,7 @@
       "field": "Cost",
       "sheet": 80,
       "map": 70,
-      "resolution": "spreadsheet wins; map value retained"
+      "resolution": "map wins; spreadsheet retained as sheetStats"
     },
     {
       "row": 136,
@@ -231,7 +231,7 @@
       "field": "Cost",
       "sheet": 265,
       "map": 285,
-      "resolution": "spreadsheet wins; map value retained"
+      "resolution": "map wins; spreadsheet retained as sheetStats"
     },
     {
       "row": 139,
@@ -239,7 +239,7 @@
       "field": "Cost",
       "sheet": 70,
       "map": 50,
-      "resolution": "spreadsheet wins; map value retained"
+      "resolution": "map wins; spreadsheet retained as sheetStats"
     },
     {
       "row": 140,
@@ -247,7 +247,7 @@
       "field": "Cost",
       "sheet": 160,
       "map": 90,
-      "resolution": "spreadsheet wins; map value retained"
+      "resolution": "map wins; spreadsheet retained as sheetStats"
     },
     {
       "row": 171,
@@ -255,7 +255,7 @@
       "field": "Cost",
       "sheet": 100,
       "map": 200,
-      "resolution": "spreadsheet wins; map value retained"
+      "resolution": "map wins; spreadsheet retained as sheetStats"
     },
     {
       "row": 173,
@@ -263,7 +263,7 @@
       "field": "Cost",
       "sheet": 180,
       "map": 200,
-      "resolution": "spreadsheet wins; map value retained"
+      "resolution": "map wins; spreadsheet retained as sheetStats"
     },
     {
       "row": 129,

@@ -22,32 +22,9 @@ const ROAD_SKIN={pattern:null,gateAmount:0,lastTime:null};
 const FOG_SKIN={key:null,canvas:null};
 function visibleWorldPoint(x,y){return pointVisibleToTeam(G,localPlayer().team,x,y);}
 function drawWarFog(c){
-  if(visionOpen(G))return;
-  const team=localPlayer().team,v=publicEnemyVision(G,team),key=[team,v.exit,v.king.x,v.king.y].join(':');
-  if(FOG_SKIN.key!==key){
-    const cv=document.createElement('canvas');cv.width=CFG.W;cv.height=CFG.H;const g=cv.getContext('2d');
-    const left=team===0?0:CFG.W/2,width=CFG.W/2;
-    g.fillStyle='#101b24';g.fillRect(left,0,width,CFG.H);
-    g.save();g.beginPath();g.rect(left,0,width,CFG.H);g.clip();
-    for(let i=0;i<85;i++){
-      const x=left+(i*131+41)%width,y=(i*193+73)%CFG.H,r=65+i%9*12;
-      const cloud=g.createRadialGradient(x,y,0,x,y,r);cloud.addColorStop(0,i%2?'#34455455':'#07101b80');cloud.addColorStop(1,'#101b2400');
-      g.fillStyle=cloud;g.fillRect(x-r,y-r,r*2,r*2);
-    }
-    g.fillStyle='#687c8d';g.textAlign='center';g.font='17px "Microsoft YaHei"';
-    for(const p of G.players.filter(p=>p.team!==team)){
-      g.fillText('◇  敌方防区',p.fx+CFG.FIELD_W/2,p.fy+CFG.FIELD_H/2-8);
-      g.font='12px "Microsoft YaHei"';g.fillStyle='#435b6b';g.fillText('战 争 迷 雾',p.fx+CFG.FIELD_W/2,p.fy+CFG.FIELD_H/2+19);g.font='17px "Microsoft YaHei"';g.fillStyle='#687c8d';
-    }
-    g.restore();g.globalCompositeOperation='destination-out';
-    g.fillStyle='#000';
-    g.fillRect(Math.min(v.exit,v.king.x)-v.r,CFG.ROAD_Y-v.r,Math.abs(v.exit-v.king.x)+v.r*2,v.r*2);
-    g.fillRect(v.king.x-v.r,Math.min(v.king.y,CFG.ROAD_Y)-v.r,v.r*2,Math.abs(v.king.y-CFG.ROAD_Y)+v.r*2);
-    g.beginPath();g.arc(v.king.x,v.king.y,v.kingRadius,0,Math.PI*2);g.fill();
-    g.fillRect(v.bridge.x,v.bridge.y,v.bridge.w,v.bridge.h);
-    FOG_SKIN.key=key;FOG_SKIN.canvas=cv;
-  }
-  c.save();c.globalAlpha=1;c.drawImage(FOG_SKIN.canvas,0,0);c.restore();
+ if(visionOpen(G))return;const me=localPlayer(),area=nativeRect341(me.team===0?'RVision':'LVision');
+ c.save();c.fillStyle='#101b24';c.fillRect(area.x,area.y,area.w,area.h);const arena=nativeRect341('ArenaVision');c.fillRect(arena.x,arena.y,arena.w,arena.h);
+ c.fillStyle='#687c8d';c.textAlign='center';c.font='16px "Microsoft YaHei"';for(const p of G.players.filter(p=>p.team!==me.team))c.fillText('敌方防区 · 战争迷雾',p.fx+CFG.FIELD_W/2,p.fy+CFG.FIELD_H/2);c.restore();
 }
 
 function stonePattern(c){
@@ -124,28 +101,15 @@ function drawBridge(c,t){
   c.fillText(label,x,y+131);c.textAlign='left';
 }
 
-function drawMap(c, t) {
-  const bg = c.createRadialGradient(CFG.W/2,CFG.H/2,50,CFG.W/2,CFG.H/2,CFG.H);
-  bg.addColorStop(0,'#21342f'); bg.addColorStop(1,'#0b181b'); c.fillStyle=bg; c.fillRect(0,0,CFG.W,CFG.H);
-  for (let i=0;i<170;i++) {
-    const x=(i*173+17)%CFG.W,y=(i*97+51)%CFG.H;
-    c.fillStyle=i%3?'#233b32':'#2d4638';
-    c.beginPath(); c.arc(x,y,3+i%7,0,7); c.fill();
-  }
-  drawRiver(c,t);
-  c.lineCap='round'; c.lineJoin='round';
-  const roads=G.kings.flatMap(k=>{const x=G.players.find(p=>p.team===k.team).exitX;return [
-    [[x,20],[x,CFG.H-20]],[[x,CFG.ROAD_Y],[k.x,CFG.ROAD_Y],[k.x,k.y]]
-  ];});
-  drawStoneRoads(c,roads);
-  for (const k of G.kings) {
-    const x=G.players.find(p=>p.team===k.team).exitX,color=TEAM_COLORS[k.team];
-    for(const [y,angle] of [[34,Math.PI/2],[640,Math.PI/2],[CFG.H-34,-Math.PI/2],[800,-Math.PI/2]])mapArrow(c,x,y,angle,color);
-    mapArrow(c,(x+k.x)/2,CFG.ROAD_Y,x<k.x?0:Math.PI,color);
-    mapArrow(c,k.x,(CFG.ROAD_Y+k.y)/2,k.y<CFG.ROAD_Y?-Math.PI/2:Math.PI/2,color);
-  }
-  drawBridge(c,t);
+function drawMap(c,t){
+ c.fillStyle='#162c25';c.fillRect(0,0,CFG.W,CFG.H);
+ const roads=G.players.map(p=>[[p.spawnX,p.spawnY],[p.exitX,p.exitY],[G.kings[p.team].x,p.exitY]]);
+ for(const k of G.kings)roads.push([[k.x,CFG.ROAD_Y],[k.x,k.y]]);drawStoneRoads(c,roads);
+ const arena=nativeRect341('ArenaVision');c.fillStyle='#17201c';c.fillRect(arena.x,arena.y,arena.w,arena.h);
+ c.strokeStyle='#8b805c';c.lineWidth=3;c.strokeRect(arena.x+8,arena.y+8,arena.w-16,arena.h-16);
+ const center=nativeCenter341('ArenaCenter');c.textAlign='center';c.fillStyle='#d5c493';c.font='bold 16px "Microsoft YaHei"';c.fillText('独立竞技场',center.x,center.y-80);c.textAlign='left';
 }
+
 function mapArrow(c,x,y,angle,color='#ff665d') {
   c.save(); c.translate(x,y); c.rotate(angle); c.strokeStyle=color; c.lineWidth=3;c.globalAlpha=.65;
   for(const offset of [-8,3]){c.beginPath();c.moveTo(offset-5,-7);c.lineTo(offset+3,0);c.lineTo(offset-5,7);c.stroke();}c.restore();
@@ -260,6 +224,7 @@ function drawField(p, t) {
 
   // 战士
   for (const f of p.fighters) drawFighter(c, f, p, t);
+  if(G.phase==='combat')for(const f of p.towers.filter(f=>f.pendingBattle||f.constructionRemaining>0))drawFighter(c,f,p,t);
   // 敌人
   for (const e of p.enemies) drawEnemy(c, e, t);
 
@@ -293,38 +258,10 @@ function drawField(p, t) {
   }
 }
 
-function drawMines(c, p, t) {
-  if(!visionOpen(G)&&p.team!==localPlayer().team)return;
-  const zone=mineZone(p);c.fillStyle='#333b3e88';c.strokeStyle='#929ca0';c.lineWidth=2;
-  roundRect(c,zone.x,zone.y,zone.w,zone.h,9);c.fill();c.stroke();
-  c.textAlign = 'center'; c.font = '11px "Microsoft YaHei"';
-  c.fillStyle = p.id === localPlayer().id ? '#e4ca87' : '#8b9d86';
-  c.fillText(`${p.name} · 矿区 ${p.mines.length}/${MINE.LIMIT}`, zone.x+zone.w/2,zone.y+30);
-  for (let i = 0; i < MINE.LIMIT; i++) {
-    const { x, y } = minePosition(p, i), mine = p.mines.find(m=>(m.slot??m.id)===i);
-    const own=p.id===localPlayer().id;
-    const selected = own && MineUI.slot===i;
-    c.fillStyle = mine ? '#354230' : 'rgba(38,55,43,.35)';
-    c.strokeStyle = selected ? '#fff0a6' : mine ? '#a38a4e' : own?'#a09060':'#3a4b3b';
-    c.lineWidth = selected ? 2 : 1;
-    roundRect(c, x - 23, y - 24, 46, 51, 7); c.fill(); c.stroke();
-    if (!mine) { c.fillStyle = own?'#e7cd86':'#536650';c.font='22px "Microsoft YaHei"';c.fillText(own?'＋':'◇',x,y+3);c.font='9px "Microsoft YaHei"';c.fillText(own?'建造 · 100金':'空矿位',x,y+20);c.font='11px "Microsoft YaHei"';continue; }
-    // Rock entrance, timber beam and ore: code-native artwork matching the existing sprites.
-    c.fillStyle = '#657060'; c.beginPath();
-    c.moveTo(x-18,y+7); c.lineTo(x-13,y-9); c.lineTo(x-3,y-18);
-    c.lineTo(x+13,y-11); c.lineTo(x+19,y+7); c.closePath(); c.fill();
-    c.fillStyle = '#111b17'; c.fillRect(x-8,y-8,16,17);
-    c.strokeStyle = '#bb995b'; c.lineWidth = 3;
-    c.beginPath(); c.moveTo(x-10,y+8); c.lineTo(x-10,y-9); c.lineTo(x+10,y-9); c.lineTo(x+10,y+8); c.stroke();
-    c.fillStyle = '#f1d068';
-    for (let j=0;j<3;j++) { c.beginPath(); c.arc(x-10+j*8,y+6-(j%2)*3,3,0,7); c.fill(); }
-    c.fillStyle = '#ecd59a'; c.font = '9px "Microsoft YaHei"';
-    c.fillText(`${i+1} · Lv.${mine.level}`,x,y+20);
-    c.fillStyle = '#1c281e'; c.fillRect(x-18,y+29,36,3);
-    c.fillStyle = '#dab66b'; c.fillRect(x-18,y+29,36*Math.min(1,mine.elapsed/MINE.INTERVAL),3);
-    c.font = '11px "Microsoft YaHei"';
-  }
-  c.textAlign = 'left';
+function drawMines(c,p,t){
+ if(!visibleWorldPoint(p.fx,p.fy))return;const at=townPosition341(p);c.fillStyle='#66744e';c.strokeStyle='#c2ad6b';c.lineWidth=2;
+ roundRect(c,at.x-26,at.y-22,52,44,5);c.fill();c.stroke();c.fillStyle='#edd9a5';c.font='12px "Microsoft YaHei"';c.textAlign='center';c.fillText('城镇',at.x,at.y+4);
+ if(p.workers!==null){c.fillStyle='#9ed69a';c.fillText('伐木工 '+p.workers,at.x,at.y+39);}c.textAlign='left';
 }
 
 function drawFighter(c, f, p, t) {

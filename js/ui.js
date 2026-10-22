@@ -6,6 +6,7 @@ const KingUI={open:false,pending:null,error:''};
 function openKingDialog(){
   if(!G||!['prep','combat'].includes(G.phase))return;
   KingUI.open=true;KingUI.pending=null;KingUI.error='';
+  performAction({type:'claimKing'});
   G.selectedFighter=null;selectShop(null);closeCommandPanel();
   drawPortrait($('kingPortrait'),'king_'+localPlayer().team,96);
   updateKingUI(localPlayer());$('kingDialog').showModal();updateUI(true);
@@ -27,8 +28,8 @@ function updateKingUI(me){
     const stat=button.dataset.kingStat,def=KING_UPGRADES[stat],cost=kingUpgradeCost(k,stat);
     const amount=def.amounts?.[k.upgrades[stat]]??def.amount,maxed=!Number.isFinite(cost);
     const effect=stat==='health'?`生命上限 +${amount}，恢复 ${amount} 生命`:stat==='attack'?`攻击力 +${amount}`:`每秒恢复 +${amount} 生命`;
-    button.innerHTML=`<b>强化${def.name}</b><span>Lv.${k.upgrades[stat]} / ${def.limit}</span><strong>${maxed?'已满级':cost+' 金'}</strong><small>${maxed?'已达到原版强化上限':effect}</small>`;
-    button.disabled=maxed||!!KingUI.pending||me.gold<cost;
+    button.innerHTML=`<b>强化${def.name}</b><span>Lv.${k.upgrades[stat]} / ${def.limit}</span><strong>${maxed?'已满级':cost+' 木'}</strong><small>${maxed?'已达到原版强化上限':effect}</small>`;
+    button.disabled=maxed||!!KingUI.pending||me.wood<cost;
   });
   const skillsMarkup=SOURCE341.king.skills.map(s=>{
     const learned=k.skills.includes(s.id),random=s.wave===4;
@@ -40,7 +41,14 @@ function updateKingUI(me){
     return `<div class="king-skill ${learned?'learned':''}"><b>${s.name}</b><span>${learned?(s.cd?'冷却 '+Math.ceil(k.spellCD[s.id]||0)+' 秒':'已获得'):G.wave>s.wave&&random?'本局未抽中':s.wave+' 波后'+(random?'三选一随机获得':'获得')}</span><p>${text}</p></div>`;
   }).join('');
   if($('kingSkills').innerHTML!==skillsMarkup)$('kingSkills').innerHTML=skillsMarkup;
-  $('kingDialogStatus').textContent=KingUI.error||(KingUI.pending?'正在提交，等待对局同步…':`持有 ${Math.floor(me.gold)} 金 · 当前每波收入 ${me.income}`);
+  $('kingDialogStatus').textContent=KingUI.error||(KingUI.pending?'正在提交，等待对局同步…':`持有 ${Math.floor(me.wood)} 木 · 当前每波收入 ${me.income}`);
+  const controlled=k.controller===me.id,owner=G.players[k.controller];
+  $('kingControlStatus').textContent=`控制者：${owner?.name||'电脑'} · ${k.controlLock>0?'控制锁定 '+k.controlLock+' 秒':'可接管'}`;
+  $('btnRoyalHeal').textContent=me.royalHealUsed?'圣光已使用':'圣光 · 恢复 10000 生命（整局一次）';$('btnRoyalHeal').disabled=me.royalHealUsed||!me.race||k.hp>=k.max||k.hp<=0;
+  $('btnKingClaim').disabled=controlled||k.controlLock>0;$('btnKingAuto').disabled=!controlled;$('btnKingAuto').textContent='自动施法：'+(k.autocast?'开启':'关闭');
+  const target=$('kingAttackTarget');target.disabled=!controlled;
+  if(document.activeElement!==target){target.replaceChildren();const option=document.createElement('option');option.value='';option.textContent='自动选择攻击目标';target.appendChild(option);for(const e of k.leaks.filter(e=>e.hp>0)){const o=document.createElement('option');o.value=e.entityId;o.textContent=(MERCS[e.mercId]?.name||G.waveDef.name)+' · '+Math.ceil(e.hp)+' 生命';target.appendChild(o);}target.value=k.manualTarget??'';}
+  $('kingManualSpells').innerHTML=SOURCE341.king.skills.filter(s=>s.cd&&k.skills.includes(s.id)).map(s=>`<button class="btn" data-king-spell="${s.id}" ${!controlled||k.mana<s.mana||(k.spellCD[s.id]||0)>0?'disabled':''}>${s.name} · ${s.mana} 法力${(k.spellCD[s.id]||0)>0?' · '+Math.ceil(k.spellCD[s.id])+'秒':''}</button>`).join('');
 }
 async function submitKingUpgrade(stat){
   if(!KingUI.open||KingUI.pending||!Object.hasOwn(KING_UPGRADES,stat))return;
@@ -53,7 +61,7 @@ async function submitKingUpgrade(stat){
 const MercUI={mid:null};
 function sendMercUI(mid,index){
   if(!G||!['prep','combat'].includes(G.phase))return;
-  const target=G.players.filter(p=>p.team!==localPlayer().team)[index];
+  const target=G.players.filter(p=>p.active&&p.team!==localPlayer().team)[index];
   if(target)performAction({type:'merc',target:target.id,mid});
   updateUI(true);
 }
@@ -61,25 +69,25 @@ function openMercDetails(mid){
   const m=MERCS[mid];if(!m||!G||!['prep','combat'].includes(G.phase))return;MercUI.mid=mid;
   $('mercDetailName').textContent=m.name;$('mercDetailEnglish').textContent=m.english;
   drawPortrait($('mercDetailPortrait'),'m_'+mid,128);
-  $('mercDetailIntro').textContent=`${m.description} 派往指定敌军防线，随下一波怪物来袭。花费 ${m.cost} 金，永久增加 ${m.income} 点每波收入。`;
+  $('mercDetailIntro').textContent=`${m.description} 派往敌方防线（按原版轮转分配），随下一波怪物来袭。花费 ${m.cost} 木，永久增加 ${m.income} 点每波收入。`;
   const stats=[['生命',m.hp],['攻击',`${m.min}–${m.max} · ${m.atk}`],['攻击间隔',m.aspd+' 秒'],['攻击距离',m.rawRange],['护甲',m.armor+' · '+m.armorPoints],['移动速度',m.rawSpeed],['生命恢复',m.regenFlat+' / 秒'],['法力 / 回蓝',m.manaMax+' / '+m.manaRegen+' 每秒']];
   $('mercDetailStats').innerHTML=stats.map(([label,value])=>`<div><small>${label}</small><b>${value}</b></div>`).join('');
   $('mercDetailSkills').innerHTML=m.skills.length?m.skills.map(s=>`<article><b>${escape341(s.name)}</b><p>${escape341(s.description)}</p></article>`).join(''):'<p class="merc-no-skill">无主动或光环技能，依靠普通攻击作战。</p>';
   updateMercUI(localPlayer());$('mercDialog').showModal();
 }
 function updateMercUI(me){
-  const active=['prep','combat'].includes(G.phase),targets=G.players.filter(p=>p.team!==me.team);
+  const active=['prep','combat'].includes(G.phase),targets=G.players.filter(p=>p.active&&p.team!==me.team);
   for(const row of document.querySelectorAll('[data-merc-id]')){
     const m=MERCS[row.dataset.mercId],locked=G.wave<m.unlockWave;
     row.classList.toggle('merc-locked',locked);
     row.querySelector('.merc-unlock').textContent=locked?`第 ${m.unlockWave} 波解锁`:'点击查看属性与技能';
-    row.querySelectorAll('[data-merc-send]').forEach(b=>{b.disabled=!active||locked||me.gold<m.cost||!targets[+b.dataset.mercSend]||targets[+b.dataset.mercSend].mercQueue.length>=40;});
+    row.querySelectorAll('[data-merc-send]').forEach(b=>{b.disabled=!active||locked||me.wood<m.cost||!targets[+b.dataset.mercSend];});
   }
   const m=MERCS[MercUI.mid];if(!m)return;
   if(!active){if($('mercDialog').open)$('mercDialog').close();return;}
   const locked=G.wave<m.unlockWave;
-  $('mercDetailStatus').textContent=locked?`第 ${m.unlockWave} 波解锁 · 当前第 ${G.wave} 波`:me.gold<m.cost?`金币不足，还需 ${Math.ceil(m.cost-me.gold)} 金`:`${m.cost} 金 / 次 · 收入 +${m.income} · 当前 ${Math.floor(me.gold)} 金`;
-  document.querySelectorAll('[data-merc-detail-send]').forEach(b=>{const target=targets[+b.dataset.mercDetailSend];b.disabled=locked||me.gold<m.cost||!target||target.mercQueue.length>=40;b.textContent=target?`派遣 → ${target.name} (${target.mercQueue.length}/40)`:'无目标';});
+  $('mercDetailStatus').textContent=locked?`第 ${m.unlockWave} 波解锁 · 当前第 ${G.wave} 波`:me.wood<m.cost?`木材不足，还需 ${Math.ceil(m.cost-me.wood)} 木`:`${m.cost} 木 / 次 · 收入 +${m.income} · 当前 ${Math.floor(me.wood)} 木`;
+  document.querySelectorAll('[data-merc-detail-send]').forEach(b=>{const target=targets[+b.dataset.mercDetailSend];b.disabled=locked||me.wood<m.cost||!target;b.textContent=target?'派遣 · 原版轮转分配':'无敌方玩家';});
 }
 function mineAtSlot(p,slot){return p.mines.find(m=>(m.slot??m.id)===slot);}
 function openMineDialog(slot){
@@ -105,17 +113,17 @@ let shopRace = SHOP_ORDER[0], shopCatalog=false;
 const escape341 = text=>String(text??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function source341Details(def) {
   const text=(def.abil.sources||[]).map(id=>{const a=ABILITIES341[id];return '<p><b>'+escape341(skillValue(a,'anam',id))+'</b> '+escape341(skillText(a))+(def.abil.pending.includes(id)?' <em>触发效果待移植</em>':'')+'</p>';}).join('');
-  return '<details class="source-details"><summary>原版属性与技能</summary><div>'+(def.abil.refund?'当前出售统一按累计投入的 30% 向下取整，覆盖原版退款技能。<br>':'')+escape341(def.english)+' · 原表第 '+(def.sourceRow??'地图')+' 行<br>攻击 '+def.min+'–'+def.max+' / '+def.aspd+' 秒 · 表列 DPS '+Number(def.sourceDps).toFixed(2)+'<br>生命 '+def.hp+' · 护甲值 '+def.armorPoints+' · 原始射程 '+def.rawRange+' · 人口 '+(def.food??'—')+'<br>法力 '+def.manaStart+'/'+def.manaMax+' · 回蓝 '+def.manaRegen+'/秒<br>本级费用 '+(def.purchaseCost??'召唤物')+' · 表列总价 '+def.cost+text+'</div></details>';
+  return '<details class="source-details"><summary>原版属性与技能</summary><div>'+(def.abil.refund?'原版特殊退款 90%；本轮新建且未参战单位全额返还。<br>':'')+escape341(def.english)+' · 原表第 '+(def.sourceRow??'地图')+' 行<br>攻击 '+def.min+'–'+def.max+' / '+def.aspd+' 秒 · 物编 DPS '+Number(def.sourceDps).toFixed(2)+'<br>生命 '+def.hp+' · 护甲值 '+def.armorPoints+' · 原始射程 '+def.rawRange+' · 人口 '+(def.food??'—')+'<br>法力 '+def.manaStart+'/'+def.manaMax+' · 回蓝 '+def.manaRegen+'/秒<br>本级费用 '+(def.purchaseCost??'召唤物')+' · 地图战力 '+def.cost+text+'</div></details>';
 }
 
 function buildShop() {
   const root = $('shop');
-  const locked=G?.online?localPlayer().race:null,races=locked?[locked]:SHOP_ORDER;
+  const locked=G?localPlayer().race:null,races=locked?[locked]:G&&localPlayer().builderChoices?localPlayer().builderChoices:SHOP_ORDER;
   if(!races.includes(shopRace))shopRace=races[0];
-  root.dataset.raceScope=locked||'all';
+  root.dataset.raceScope=locked==='prophet'?'prophet:'+localPlayer().prophetDeck.join(','):locked||'all';
   root.classList.toggle('catalog-view',shopCatalog);
   root.innerHTML = '';
-  if(locked){const info=document.createElement('p');info.className='race-lock';info.textContent=(G.raceMode==='random'?'随机种族':'自选种族')+' · 本局锁定 '+RACES[locked].name+'军团';root.appendChild(info);}
+  if(locked){const info=document.createElement('p');info.className='race-lock';info.textContent='当前建造者 · '+RACES[locked].name+'（CB 可更换；已有军团保留）';root.appendChild(info);}
   const tabs = document.createElement('div'); tabs.className = 'race-tabs';
   tabs.setAttribute('role','group'); tabs.setAttribute('aria-label','兵种种族');
   for (const id of races) {
@@ -125,6 +133,7 @@ function buildShop() {
     button.addEventListener('click',()=>{shopRace=id;if(G)selectShop(null);buildShop();if(G)updateUI(true);});tabs.appendChild(button);
   }
   root.appendChild(tabs);
+  if(G&&!locked){const pick=document.createElement('button');pick.id='btnChooseBuilder';pick.className='btn';pick.textContent='选择建造者 · '+RACES[shopRace].name;pick.onclick=()=>{performAction({type:'chooseBuilder',race:shopRace});buildShop();updateUI(true);};root.appendChild(pick);}
   const catalog=document.createElement('button');catalog.className='btn catalog-toggle';
   catalog.textContent=shopCatalog?'← 返回可建造基础兵种':'查看本族完整图鉴 · 含进阶与召唤物';
   catalog.addEventListener('click',()=>{shopCatalog=!shopCatalog;buildShop();if(G)updateUI(true);});root.appendChild(catalog);
@@ -136,7 +145,7 @@ function buildShop() {
     const grid = document.createElement('div');
     grid.className = 'unit-grid';
     for (const [uid, def] of Object.entries(UNITS)) {
-      if (def.race !== race || (!shopCatalog && !isBaseUnit(uid)) || !def.sourceRow) continue;
+      if ((race==='prophet'?!G?.players[Net.session?.slot??0].prophetDeck.includes(uid):def.race!==race) || (!shopCatalog && !isBaseUnit(uid)) || !def.sourceRow) continue;
       const card = document.createElement('div');
       card.className = 'ucard';
       card.dataset.uid = uid;
@@ -153,7 +162,7 @@ function buildShop() {
       body.innerHTML = `
         <div class="uName"><span>${def.name}</span><span class="cost">${def.cost}</span></div>
         <div class="uEnglish">${def.english}</div>
-        <div class="uRole">${def.role} · T${def.tier}${def.summonOnly?' · 召唤物':def.elite?' · 进阶':''}</div><div class="uStats">❤${def.hp} ⚔${def.min}–${def.max} ${def.range > 50 ? '远程' : '近战'}</div>
+        <div class="uRole">${def.role} · T${def.tier}${def.summonOnly?' · 召唤物':def.elite?' · 进阶':''}</div><div class="uStats">${def.hybridTier!==undefined?'建造完成后随机获得本阶兵种':'❤'+def.hp+' ⚔'+def.min+'–'+def.max+' '+(def.range>50?'远程':'近战')}</div>
         <div class="uTags">
           <span class="chip atk">${def.atk}</span><span class="chip armor">${def.armor}</span>
           ${abilDesc(def) ? `<span class="chip abil">${abilDesc(def)}</span>` : ''}${def.upgrades.map(id=>`<span class="upgrade-path">→ ${UNITS[id].name} · 升级 ${UNITS[id].purchaseCost} 金</span>`).join('')}
@@ -193,14 +202,14 @@ function buildMercs() {
     detail.appendChild(portrait);
     const info = document.createElement('div');
     info.className = 'mname';
-    info.innerHTML = `<b>${m.name}</b><span class="merc-prices"><span class="mcost">${m.cost}金</span> <span class="minc">+${m.income}收入</span></span><small>${m.air?'空中':m.rawRange<=180?'近战':'远程'} · ${m.atk} / ${m.armor}</small><small>生命 ${m.hp} · 攻击 ${m.min}–${m.max}</small><span class="merc-unlock"></span>`;
+    info.innerHTML = `<b>${m.name}</b><span class="merc-prices"><span class="mcost">${m.cost}木</span> <span class="minc">+${m.income}收入</span></span><small>${m.air?'空中':m.rawRange<=180?'近战':'远程'} · ${m.atk} / ${m.armor}</small><small>生命 ${m.hp} · 攻击 ${m.min}–${m.max}</small><span class="merc-unlock"></span>`;
     detail.appendChild(info);detail.addEventListener('click',()=>openMercDetails(mid));row.appendChild(detail);
     const actions=document.createElement('div');actions.className='merc-card-actions';
     const b1 = document.createElement('button');
-    b1.className = 'btn'; b1.textContent = '敌军 Ⅰ'; b1.dataset.mercSend = '0';
+    b1.className = 'btn'; b1.textContent = '派遣 · 轮转分配'; b1.dataset.mercSend = '0';
     const b2 = document.createElement('button');
     b2.className = 'btn'; b2.textContent = '敌军 Ⅱ'; b2.dataset.mercSend = '1';
-    [b1, b2].forEach(btn => {
+    [b1].forEach(btn => {
       btn.addEventListener('click', () => {
         sendMercUI(mid,+btn.dataset.mercSend);
       });
@@ -247,7 +256,7 @@ function updateIncomeBoard(me){
   for(const team of publicIncome?[me.team,1-me.team]:[me.team]){
     const group=document.createElement('div');group.className='income-team '+(team===me.team?'allied':'opposing');
     const label=document.createElement('small');label.textContent=team===me.team?'我方收入':G.battleMode==='arena'?'敌方收入 · PK公开':'敌方收入';group.append(label);
-    for(const p of G.players.filter(p=>p.team===team)){
+    for(const p of G.players.filter(p=>p.active&&p.team===team)){
       const chip=document.createElement('span');chip.className='income-player';chip.dataset.player=String(p.id);
       const name=document.createElement('span');name.className='income-name';name.textContent=p.id===me.id?'你':p.name;name.title=p.name;
       const value=document.createElement('b');value.textContent=incomeVisibleToTeam(G,me.team,p)&&Number.isFinite(p.income)?String(p.income):'未知';
@@ -260,14 +269,16 @@ function updateIncomeBoard(me){
 function updateUI(force) {
   if (!G) return;
   const me = localPlayer();
-  if($('shop').dataset.raceScope!==(G.online?me.race:'all'))buildShop();
+  if($('shop').dataset.raceScope!==(me.race==='prophet'?'prophet:'+me.prophetDeck.join(','):me.race||'all'))buildShop();
   updateMines(me);
   $('stGold').textContent = Math.floor(me.gold);
-  $('stIncome').textContent = me.income;
+  $('stIncome').textContent = me.income;$('stWood').textContent=Math.floor(me.wood);updateTown341(me);
   const food=armyFood341(me),capacity=foodCapacity341(me),farm=SOURCE341.rules.population.farms[me.farmLevel+1];
   $('populationInfo').textContent=`人口 ${food} / ${capacity}`;
-  $('btnFarmUpgrade').textContent=farm&&capacity<200?`农场 +${Math.min(200,7+farm.supply)-capacity} 人口 · ${farm.cost} 金`:'农场已满级';
-  $('btnFarmUpgrade').disabled=!farm||capacity>=200||me.gold<farm.cost||!canManageArmy();
+  $('btnFarmUpgrade').textContent=farm&&capacity<200?`农场 +${Math.min(200,7+farm.supply)-capacity} 人口 · ${farm.gold} 金 + ${farm.wood} 木`:'农场已满级';
+  if(me.farmPending)$('btnFarmUpgrade').textContent=`农场升级中 · ${Math.ceil(me.farmPending.time)} 秒`;
+  $('btnFarmUpgrade').disabled=!!me.farmPending||!farm||capacity>=200||me.gold<farm.gold||me.wood<farm.wood||!['prep','combat'].includes(G.phase);
+  $('btnFarmCancel').hidden=!me.farmPending;
   updateIncomeBoard(me);
   $('stValue').textContent = playerValue(me);
   $('stWave').textContent = (G.battleMode==='arena'?`第 ${G.wave} 波后 · 阵营 PK`:G.wave > CFG.TOTAL_WAVES ? `加时赛 第${G.wave}波` : `第 ${G.wave} / ${CFG.TOTAL_WAVES} 波`) +
@@ -301,7 +312,7 @@ function updateUI(force) {
 
   // 商店可用性
   document.querySelectorAll('.ucard').forEach(card => {
-    card.classList.toggle('poor', me.gold < UNITS[card.dataset.uid].cost||food+(UNITS[card.dataset.uid].food||0)>capacity);
+    card.classList.toggle('poor', me.gold < UNITS[card.dataset.uid].purchaseCost||me.wood<UNITS[card.dataset.uid].woodCost||!me.race||food+(UNITS[card.dataset.uid].food||0)>capacity);
     card.classList.toggle('sel', G.selectedShop === card.dataset.uid);
   });
 
@@ -309,21 +320,28 @@ function updateUI(force) {
   if(f&&me.fighters.includes(f)&&!f.temporary) {
     sb.style.display='';const def=f.def,signature=[f.uid,f.col,f.row,f.spent].join('|');
     if(sb.dataset.signature!==signature){sb.dataset.signature=signature;
-      $('selInfo').innerHTML=`<div class="selHead"><canvas id="selPortrait" width="64" height="64"></canvas><div><div class="sName">${def.name}</div><small>${def.english} · ${RACES[def.race].name}</small><div class="sStats" id="selLiveStats"></div><div>${def.atk} · ${def.armor}（${def.armorPoints}）</div></div></div><div class="sStats">${abilDesc(def)||'无特殊能力'}<br>已投入 ${f.spent} 金 · 阵亡后下波复活</div>${source341Details(def)}<div class="upgrade-options">${def.upgrades.map(id=>`<button class="btn" data-upgrade-uid="${id}">升级 → ${UNITS[id].name} · ${UNITS[id].purchaseCost} 金<small>❤${UNITS[id].hp} · ⚔${UNITS[id].min}–${UNITS[id].max}</small></button>`).join('')}${def.stances.map(id=>`<button class="btn" data-upgrade-uid="${id}">切换 → ${UNITS[id].name} · 免费</button>`).join('')}<button class="btn" id="btnSell">卖出 · 3折返还 +${fighterSellValue(f)}金</button></div>`;
+      $('selInfo').innerHTML=`<div class="selHead"><canvas id="selPortrait" width="64" height="64"></canvas><div><div class="sName">${def.name}</div><small>${def.english} · ${RACES[def.race].name}</small><div class="sStats" id="selLiveStats"></div><div>${def.atk} · ${def.armor}（${def.armorPoints}）</div></div></div><div class="sStats">${abilDesc(def)||'无特殊能力'}<br>已投入 ${f.spent} 金 · 阵亡后下波复活</div>${source341Details(def)}<div class="upgrade-options">${def.upgrades.map(id=>`<button class="btn" data-upgrade-uid="${id}">升级 → ${UNITS[id].name} · ${UNITS[id].purchaseCost} 金<small>❤${UNITS[id].hp} · ⚔${UNITS[id].min}–${UNITS[id].max}</small></button>`).join('')}${def.stances.map(id=>`<button class="btn" data-upgrade-uid="${id}">切换 → ${UNITS[id].name} · 免费</button>`).join('')}<button class="btn" id="btnSell">卖出 · 原版返还 +${fighterSellValue(f)}金</button></div>`;
       drawPortrait($('selPortrait'),f.uid,64);
       sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>button.addEventListener('click',()=>{performAction({type:'upgrade',col:f.col,row:f.row,uid:button.dataset.upgradeUid});updateUI(true);}));
       $('btnSell').addEventListener('click',()=>{requestUnitSale(f);});
     }
     const behavior={guard:'待命',advance:'前移接敌',chase:'追击',attack:'交战',cast:'施法支援',return:'回阵'};
     $('selLiveStats').textContent=`❤${Math.max(0,Math.ceil(f.hp))}/${def.hp} · 法力 ${Math.floor(f.mana||0)}/${def.manaMax} · ${f.hp>0?behavior[f.brain?.state]||'在场':G.bonus?'已阵亡':'等待下波复活'} · 移速 ${Math.round(fighterSpeed341(me,f))}`;
-    sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>{const id=button.dataset.upgradeUid;button.disabled=!canManageArmy()||me.gold<(def.stances.includes(id)?0:UNITS[id].purchaseCost)||armyFood341(me)-(def.food||0)+(UNITS[id].food||0)>foodCapacity341(me);});
-    $('btnSell').disabled=!canManageArmy();
-    const refund=fighterSellValue(f);$('btnSell').textContent=`卖出 · 3折返还 +${refund}金`;
-    $('btnSell').disabled=!canManageArmy();
+    sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>{const id=button.dataset.upgradeUid,stance=def.stances.includes(id);button.disabled=!canManageArmy()||!me.towers.includes(f)||f.constructionRemaining>0||G.phase==='combat'&&!f.pendingBattle||me.gold<(stance?0:UNITS[id].purchaseCost)||me.wood<(stance?0:UNITS[id].woodCost)||armyFood341(me)-(def.food||0)+(UNITS[id].food||0)>foodCapacity341(me);});
+    $('btnSell').disabled=G.phase!=='prep'||f.constructionRemaining>0;
+    const refund=fighterSellValue(f);$('btnSell').textContent=`卖出 · 原版返还 +${refund}金`;
+    $('btnSell').disabled=G.phase!=='prep'||f.constructionRemaining>0;
     let steroid=$('btnSteroids');
     if(def.abil.steroids&&!steroid){steroid=document.createElement('button');steroid.id='btnSteroids';steroid.className='btn';sb.querySelector('.upgrade-options').prepend(steroid);
       steroid.addEventListener('click',()=>{performAction({type:'steroids',col:f.col,row:f.row});updateUI(true);});}
-    if(steroid){steroid.textContent=f.steroids?'下一波强化已准备':'注射强化 · 50金 · 下一波生命+20%、攻击+25%';steroid.disabled=G.phase!=='prep'||f.steroids||me.gold<50;}
+    if(steroid){steroid.textContent=f.steroids?'下一波强化已准备':'注射强化 · 50木 · 下一波生命+20%、攻击+25%';steroid.disabled=G.phase!=='prep'||f.steroids||me.wood<50;}
+    let cancel=$('btnCancelConstruction');
+    if(f.constructionRemaining>0){
+      if(!cancel){cancel=document.createElement('button');cancel.id='btnCancelConstruction';cancel.className='btn';cancel.onclick=()=>{performAction({type:'cancelConstruction',col:f.col,row:f.row});updateUI(true);};sb.querySelector('.upgrade-options').prepend(cancel);}
+      cancel.hidden=false;cancel.textContent=`取消${f.upgradePending?'升级':'建造'} · 剩余 ${Math.ceil(f.constructionRemaining)} 秒 · 全额退还`;
+      $('selLiveStats').textContent+=` · ${f.upgradePending?'升级':'建造'}中 ${Math.ceil(f.constructionRemaining)} 秒`;
+      sb.querySelectorAll('[data-upgrade-uid]').forEach(button=>button.disabled=true);
+    }else if(cancel)cancel.hidden=true;
   }else{sb.style.display='none';delete sb.dataset.signature;}
 
   updateKingUI(me);
@@ -341,21 +359,20 @@ function updateUI(force) {
   syncCommandUI();
 }
 
-function updateMines(me) {
-  if(MineUI.slot===null)return;
-  if(!['prep','combat'].includes(G.phase)){if($('mineDialog').open)$('mineDialog').close();return;}
-  const mine=mineAtSlot(me,MineUI.slot),def=mine?MINE.LEVELS[mine.level-1]:null;
-  const next=MINE.LEVELS[mine?.level??0],cost=mine?def.upgrade:MINE.COST;
-  if(MineUI.pending&&mine?.level>=MineUI.pending.level)MineUI.pending=null;
-  G.selectedMine=mine?.id??null;
-  const total=me.mines.reduce((sum,m)=>sum+MINE.LEVELS[m.level-1].gold,0);
-  $('mineDialogTitle').textContent=`${MineUI.slot+1} 号${mine?'金矿 · Lv.'+mine.level:'矿位'}`;
-  $('mineDialogSummary').textContent=mine?'升级保留产金倒计时，下次结算使用新等级收益。':'在这处空矿位建造金矿，每 5 秒自动获得金币。';
-  $('mineDialogStats').innerHTML=`<div><small>当前收益</small><b>${def?.gold??0} 金 / 5 秒</b></div><div><small>${mine?'升级后收益':'建成后收益'}</small><b>${next?next.gold+' 金 / 5 秒':'已达最高等级'}</b></div><div><small>持有金币 / 已建矿井</small><b>${Math.floor(me.gold)} 金 · ${me.mines.length}/${MINE.LIMIT}</b></div><div><small>矿区总收益</small><b>${total} 金 / 5 秒</b></div>`;
-  const allowed=['prep','combat'].includes(G.phase),insufficient=cost!==null&&me.gold<cost;
-  $('mineDialogStatus').textContent=MineUI.error||(MineUI.pending?'正在提交，等待对局同步…':insufficient?`还需 ${Math.ceil(cost-me.gold)} 金` :mine?`下次产金：${Math.max(0,Math.ceil(MINE.INTERVAL-mine.elapsed))} 秒`:'金矿独立产金，不占用战士格子');
-  $('btnMineAction').textContent=MineUI.pending?'正在处理…':!next?'已满级':`${mine?'升级金矿':'建造金矿'} · ${cost} 金`;
-  $('btnMineAction').disabled=!!MineUI.pending||!allowed||!next||insufficient||(!mine&&me.mines.length>=MINE.LIMIT);
+function updateMines(){if($('mineDialog').open)$('mineDialog').close();}
+function updateTown341(me){
+ const r=SOURCE341.rules.native.workers,next=r.upgrades[me.lumberLevel];
+ $('townInfo').textContent=`伐木工 ${me.workers}/${r.limit} · 每 ${r.cycle} 秒采 ${me.workers*(r.amount+me.lumberLevel)} 木 · 伐木 Lv.${me.lumberLevel}`;
+ $('btnWorker').textContent=me.workerQueue.length?`训练中 ${Math.ceil(me.workerQueue[0].time)} 秒（队列 ${me.workerQueue.length}）`:'训练伐木工 · 50 金 / 30 秒';
+ $('btnWorker').disabled=me.workers+me.workerQueue.length>=r.limit||me.gold<r.gold||playerValue(me)<r.requireValue;
+ $('btnLumberResearch').textContent=me.lumberResearch?`研究中 ${Math.ceil(me.lumberResearch.time)} 秒`:next?`伐木研究 · ${next.gold} 金 + ${next.wood} 木`:'伐木研究已满';
+ $('btnLumberResearch').disabled=!next||!!me.lumberResearch||me.gold<next.gold||me.wood<next.wood||playerValue(me)<[600,1300,2000][Math.min(me.lumberLevel,2)];
+  const cb=SOURCE341.rules.native.changeBuilder,n=me.builderChanges,cg=cb.gold+n*cb.goldStep,cw=cb.wood+n*cb.woodStep;
+  $('btnBuilderChange').textContent=`CB 更换建造者 ${n}/${cb.limit} · ${cg} 金 + ${cw} 木`;
+  $('btnBuilderChange').disabled=!['prep','combat'].includes(G.phase)||!me.race||n>=cb.limit||me.gold<cg||me.wood<cw;
+  const pr=SOURCE341.rules.native.prophetReroll,pn=me.prophetRerolls;
+  $('btnProphetReroll').hidden=me.race!=='prophet';$('btnProphetReroll').textContent=`重抽兵种 ${pn}/${pr.limit} · ${pr.gold+pn*pr.goldStep} 金 + ${pr.wood+pn*pr.woodStep} 木`;
+  $('btnProphetReroll').disabled=!['prep','combat'].includes(G.phase)||pn>=pr.limit||me.gold<pr.gold+pn*pr.goldStep||me.wood<pr.wood+pn*pr.woodStep;
 }
 
 /* ---------- 弹窗 ---------- */
@@ -406,7 +423,7 @@ function bindEvents() {
     const cell = fieldCellAt(me, pos.x, pos.y);
     if (!cell) { G.hover = null; return; }
     const def = G.selectedShop ? UNITS[G.selectedShop] : null;
-    cell.valid = def ? me.gold >= def.cost && cellFree(me, cell.col, cell.row) : false;
+    cell.valid = def ? me.gold >= def.purchaseCost && me.wood>=def.woodCost && !!me.race && cellFree(me, cell.col, cell.row) : false;
     G.hover = cell;
   });
 
@@ -422,10 +439,10 @@ function bindEvents() {
     const king=G.kings[me.team];
     if(Math.hypot(pos.x-king.x,pos.y-king.y)<=Math.max(45,22/getMapProjection().scale)){openKingDialog();return;}
     const mineSlot=Array.from({length:MINE.LIMIT},(_,i)=>i).find(i=>{const at=minePosition(me,i);return Math.abs(pos.x-at.x)<=Math.min(47,radius)&&Math.abs(pos.y-at.y)<=Math.max(27,radius);});
-    if(mineSlot!==undefined){openMineDialog(mineSlot);return;}
+    if(Math.hypot(pos.x-townPosition341(me).x,pos.y-townPosition341(me).y)<40){openCommandPanel('shop');$('townPanel').scrollIntoView({block:'nearest'});return;}
     if (G.selectedShop) {
       if (cell && performAction({ type:'buy', uid:G.selectedShop, col:cell.col, row:cell.row })) {
-        if (me.gold < UNITS[G.selectedShop].cost) selectShop(null);
+        if (me.gold < UNITS[G.selectedShop].purchaseCost) selectShop(null);
       }
       updateUI(true);
       return;
@@ -433,7 +450,8 @@ function bindEvents() {
     // 选中己方战士
     const moving=G.phase==='combat';
     if (cell||moving) {
-      const f = moving?me.fighters.filter(f=>!f.temporary&&f.deadT<=0&&f.hp>0&&Math.hypot(f.x-pos.x,f.y-pos.y)<=32).sort((a,b)=>Math.hypot(a.x-pos.x,a.y-pos.y)-Math.hypot(b.x-pos.x,b.y-pos.y))[0]:me.fighters.find(f => !f.temporary && f.col === cell.col && f.row === cell.row && f.deadT <= 0);
+      const selectable=moving?[...me.fighters,...me.towers.filter(f=>f.pendingBattle||f.constructionRemaining>0)]:me.towers;
+      const f = moving?selectable.filter(f=>!f.temporary&&f.deadT<=0&&f.hp>0&&Math.hypot(f.x-pos.x,f.y-pos.y)<=32).sort((a,b)=>Math.hypot(a.x-pos.x,a.y-pos.y)-Math.hypot(b.x-pos.x,b.y-pos.y))[0]:me.towers.find(f => f.col === cell.col && f.row === cell.row);
       G.selectedFighter = f || null;
       if(f)openCommandPanel('inspect');
       updateUI(true);
