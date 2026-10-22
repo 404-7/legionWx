@@ -2,9 +2,9 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const raceKeys=Object.freeze(Array.from(vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../js/config.js'),'utf8')+';Object.keys(RACES)')));
 const source = ['source341', 'config', 'skills341', 'data', 'behavior','engine','combat341','ai'].map(name =>
   fs.readFileSync(path.join(__dirname, '..', 'js', name + '.js'), 'utf8')).join('\n');
+const raceKeys=Object.freeze(Array.from(vm.runInNewContext(source+';Object.keys(RACES)')));
 
 module.exports = function createGame(humans,{raceMode='random'}={}) {
   if(!['random','select'].includes(raceMode))throw new Error('无效种族模式');

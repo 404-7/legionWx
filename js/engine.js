@@ -38,6 +38,8 @@ function newGame(diffKey) {
     team: t, x: t === 0 ? CFG.GATE_RIGHT : CFG.GATE_LEFT, y: t===0?1260:180,
     hp: CFG.KING_HP, max: CFG.KING_HP, lvl: 0, cd: 0, flash: 0, leaks: [],
     dmg: CFG.KING_DMG, aspd: CFG.KING_ASPD, regen: CFG.KING_REGEN,
+    min:SOURCE341.king.min,maxDamage:SOURCE341.king.max,armorPoints:SOURCE341.king.armorPoints,
+    mana:SOURCE341.king.mana,manaMax:SOURCE341.king.mana,skills:[],spellCD:{},autoLevel:0,growthWave:0,windup:null,
     upgrades: { health: 0, attack: 0, regen: 0 },
   }));
   aiSetupAll();
@@ -89,8 +91,9 @@ function startCombat() {
 }
 
 function endWave() {
+  for(const k of G.kings)growKing341(k,G.wave);
   for (const k of G.kings) {
-    k.leaks = [];
+    k.leaks = [];k.windup=null;
   }
   for (const p of G.players) {
     p.gold += Math.round((G.waveDef.bonus || 0) * gainMult(p));
@@ -142,7 +145,12 @@ function simStep(dt) {
     G.floaters = G.floaters.filter(f => { f.t -= dt; f.y -= 20 * dt; return f.t > 0; });
     G.fx = G.fx.filter(f => (f.t -= dt) > 0);
     for (const p of G.players) mineStep(p, dt);
-    for (const k of G.kings) if (k.hp > 0) k.hp = Math.min(k.max, k.hp + k.regen * dt);
+    for (const k of G.kings) if (k.hp > 0) {
+      k.hp = Math.min(k.max, k.hp + k.regen * dt);
+      k.mana=Math.min(k.manaMax,k.mana+SOURCE341.king.manaRegen*dt);
+      if(G.phase==='prep')k.cd=Math.max(0,k.cd-dt);
+      for(const id in k.spellCD)k.spellCD[id]=Math.max(0,k.spellCD[id]-dt);
+    }
   }
   if (G.phase === 'prep') {
     G.timer -= dt;
@@ -315,7 +323,7 @@ function fighterAct(p, f, dt) {
   const reach=R+(tgt.r||10)+12,d=Math.hypot(tgt.x-f.x,tgt.y-f.y);
   if(d>reach+COMBAT_AI.RANGE_EPS){
     b.windup=null;b.state='chase';
-    moveCombatUnit(p,f,tgt,f.def.speed*(f.slowF??1),dt,reach);b.chase+=dt;
+    moveCombatUnit(p,f,tgt,f.def.speed*(f.slowF??1)*(1+kingAura341(p.team,f).move),dt,reach);b.chase+=dt;
     return;
   }
   b.state='attack';b.chase=0;
@@ -394,7 +402,7 @@ function projStep(pr, dt) {
   const step = pr.sp * dt;
   if (d <= step + t.r) {
     const dealt=dmgEnemy(t,pr.dmg,pr.atk,pr.source);
-    if(pr.source)hit341(pr.p,pr.source,t,dealt);
+    if(pr.source?.def)hit341(pr.p,pr.source,t,dealt);
     afterHits(pr.p, t, pr.dmg, pr.atk, pr.ab);
     return false;
   }
@@ -403,6 +411,45 @@ function projStep(pr, dt) {
 }
 
 /* ---------- 漏怪与国王 ---------- */
+function kingAura341(team,unit){
+  const k=G.kings[team],out={damage:0,armor:0,haste:0,move:0};
+  if(!k||k.hp<=0||G.battleMode==='arena')return out;
+  const d=Math.hypot(unit.x-k.x,unit.y-k.y);
+  for(const s of SOURCE341.king.skills)if(k.skills.includes(s.id)&&s.wave>4&&d<=s.radius)
+    for(const key of Object.keys(out))out[key]=Math.max(out[key],s[key]||0);
+  return out;
+}
+function growKing341(k,wave){
+  if(wave<=k.growthWave)return;
+  k.growthWave=wave;
+  const auto=SOURCE341.king.auto;
+  k.autoLevel=Math.min(auto.limit,Math.floor(wave/auto.every)*auto.levels);
+  k.armorPoints=SOURCE341.king.armorPoints+k.autoLevel*auto.armorPerLevel;
+  if(wave===4){const choices=SOURCE341.king.skills.filter(s=>s.wave===4);k.skills.push(choices[Math.floor(Math.random()*choices.length)].id);}
+  for(const s of SOURCE341.king.skills)if(s.wave===wave&&wave>4)k.skills.push(s.id);
+}
+function kingInterval341(k){return k.aspd/(1+k.autoLevel*SOURCE341.king.auto.hastePerLevel+kingAura341(k.team,k).haste);}
+function kingMagic341(k,e,damage){if(!e.magicImmune)dmgEnemy(e,damage,'法术');}
+function kingSpell341(k,target){
+  for(const s of SOURCE341.king.skills){
+    if(!k.skills.includes(s.id)||!s.cd||(k.spellCD[s.id]||0)>0||k.mana<s.mana)continue;
+    const dx=target.x-k.x,dy=target.y-k.y,d=Math.hypot(dx,dy);
+    if(s.id==='A022'&&d>50)continue; // Original autocast condition: 200 Warcraft units.
+    k.mana-=s.mana;k.spellCD[s.id]=s.cd;k.slamT=.35;
+    for(const e of k.leaks){
+      if(e.hp<=0)continue;
+      if(s.id==='A022'){
+        if(Math.hypot(e.x-k.x,e.y-k.y)<=s.radius+e.r){kingMagic341(k,e,s.damage);add341Status(e,'kingStomp',{time:s.stun,stun:true});}
+      }else{
+        const ux=d?dx/d:0,uy=d?dy/d:(k.team===0?-1:1),ex=e.x-k.x,ey=e.y-k.y;
+        const along=ex*ux+ey*uy,across=Math.abs(ex*uy-ey*ux);
+        if(!e.air&&along>=0&&along<=s.length&&across<=s.radius+e.r)kingMagic341(k,e,s.damage);
+      }
+    }
+    addFloater(k.x,k.y-30,s.name,'#b0d9ff');
+    return;
+  }
+}
 function leak(p, e) {
   const i = p.enemies.indexOf(e);
   if (i >= 0) p.enemies.splice(i, 1);
@@ -421,6 +468,8 @@ function kingStep(k, dt) {
   k.cd -= dt;
   if (k.flash > 0) k.flash -= dt;
   separateKingUnits(k,dt);
+  const burn=SOURCE341.king.skills.find(s=>s.id==='A01T');
+  if(k.skills.includes(burn.id))for(const e of k.leaks)if(!e.air&&e.hp>0&&Math.hypot(e.x-k.x,e.y-k.y)<=burn.radius+e.r)kingMagic341(k,e,burn.dps*dt);
   for (const e of k.leaks) {
     if(e.hp<=0)continue;
     const owner=G.players[e.ownerId],defenders=G.players.filter(p=>p.team===k.team).flatMap(p=>p.fighters);
@@ -434,8 +483,8 @@ function kingStep(k, dt) {
     if (d <= reach) {
       if (e.cd <= 0) {
         e.cd = e.aspd/((1+(e.mercHaste||0))*Math.max(.05,1-(e.attackSlow||0)));
-        let m = (ATK_ARMOR[e.atk] && ATK_ARMOR[e.atk]['无甲']) || 1; // 国王视为无甲
-        k.hp -= e.dmg * (1+(e.mercDamage||0)) * (1-(e.damageWeak||0)) * m * (MERCS[e.mercId]?.abil.kingMult||1);
+        const m=e.atk==='混乱'||e.atk==='英雄'?1:.5;
+        k.hp -= e.dmg * (1+(e.mercDamage||0)) * (1-(e.damageWeak||0)) * m * armorFactor(k.armorPoints+kingAura341(k.team,k).armor) * (MERCS[e.mercId]?.abil.kingMult||1);
         e.flash = 0.12; k.flash = 0.15;
         if (k.hp <= 0) { k.hp = 0; gameOver(1 - k.team); return; }
       }
@@ -444,20 +493,28 @@ function kingStep(k, dt) {
       e.x += dx / d * sp * dt; e.y += dy / d * sp * dt;
     }
   }
-  // 国王反击（范围溅射）
-  if (k.cd <= 0 && k.leaks.length) {
+  // Single-target hero missile; AoE comes only from learned spells.
+  if(k.windup){
+    k.windup.time-=dt;
+    const target=k.leaks.find(e=>e.entityId===k.windup.targetId&&e.hp>0);
+    if(!target||Math.hypot(target.x-k.x,target.y-k.y)>CFG.KING_RANGE+target.r)k.windup=null;
+    else if(k.windup.time<=1e-9){
+      G.projectiles.push({x:k.x,y:k.y,px:k.x,py:k.y,tgt:target,sp:SOURCE341.king.projectileSpeed,
+        dmg:(k.min+Math.floor(Math.random()*(k.maxDamage-k.min+1)))*(1+kingAura341(k.team,k).damage),atk:'英雄',ab:{},t:3});
+      k.windup=null;k.flash=.2;
+    }
+  }
+  if (k.cd <= 0 && !k.windup && k.leaks.length) {
     let tgt = null, td = 1e9;
     for (const e of k.leaks) {
+      if(e.hp<=0)continue;
       const d = Math.hypot(e.x - k.x, e.y - k.y);
       if (d < td) { td = d; tgt = e; }
     }
     if (tgt && td <= CFG.KING_RANGE + tgt.r) {
-      k.cd = k.aspd;
-      k.slamT = .35;
-      for (const e of k.leaks) {
-        if (Math.hypot(e.x - tgt.x, e.y - tgt.y) <= CFG.KING_SPLASH) dmgEnemy(e, k.dmg, '普通');
-      }
-      k.flash = 0.2;
+      kingSpell341(k,tgt);
+      k.cd = kingInterval341(k);
+      k.windup={targetId:tgt.entityId,time:SOURCE341.king.windup*k.cd/k.aspd};
     }
   }
   for (const e of k.leaks) if (e.hp <= 0) {rewardEnemy(G.players[e.ownerId],e);addPuff(e.x, e.y, '#ff8a80', 6 + e.r);}
@@ -563,7 +620,7 @@ function sellFighter(p, f) {
 }
 
 function recalcAuras(p) {
-  for(const f of p.fighters){let amp=0;
+  for(const f of p.fighters){let amp=kingAura341(p.team,f).damage;
     for(const src of p.fighters){const a=src.def.abil.aura;
       if(a&&src.hp>0&&(!a.rangedOnly||!f.def.melee)&&Math.hypot(f.x-src.x,f.y-src.y)<=a.r)amp=Math.max(amp,a.p);
     }
@@ -573,24 +630,25 @@ function recalcAuras(p) {
 
 function kingUpgradeCost(k, stat = 'health') {
   if (!Object.hasOwn(KING_UPGRADES, stat)) return Infinity;
-  return CFG.KING_UP_BASE + CFG.KING_UP_GROW * k.upgrades[stat];
+  const def=KING_UPGRADES[stat];
+  return k.upgrades[stat]>=def.limit?Infinity:def.cost;
 }
 
 function kingUpgrade(p, stat = 'health') {
   if (!Object.hasOwn(KING_UPGRADES, stat) || !['prep', 'combat'].includes(G.phase)) return false;
   const k = G.kings[p.team];
   const cost = kingUpgradeCost(k, stat);
-  if (p.gold < cost) return false;
+  if (!Number.isFinite(cost)||p.gold < cost) return false;
   p.gold -= cost;
   k.lvl++;
   k.upgrades[stat]++;
-  const amount = KING_UPGRADES[stat].amount;
+  const def=KING_UPGRADES[stat],amount = def.amounts?.[k.upgrades[stat]-1]??def.amount;
   if (stat === 'health') { k.max += amount; k.hp = Math.min(k.max, k.hp + amount); }
-  if (stat === 'attack') k.dmg += amount;
+  if (stat === 'attack') {k.dmg += amount;k.min+=amount;k.maxDamage+=amount;}
   if (stat === 'regen') k.regen += amount;
-  p.income += 2;
+  p.income += def.income;
   addFloater(k.x, k.y - 30, `${KING_UPGRADES[stat].name}强化!`, '#f5c542');
-  addLog(`${p.name} 强化国王${KING_UPGRADES[stat].name}（Lv.${k.upgrades[stat]}），收入 +2`, 'l-blue');
+  addLog(`${p.name} 强化国王${KING_UPGRADES[stat].name}（Lv.${k.upgrades[stat]}），收入 +${def.income}`, 'l-blue');
   return true;
 }
 

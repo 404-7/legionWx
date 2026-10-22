@@ -21,12 +21,25 @@ function updateKingUI(me){
   const k=G.kings[me.team],pending=KingUI.pending;
   if(pending&&k.upgrades[pending.stat]>=pending.level)KingUI.pending=null;
   $('kingDialogTitle').textContent=(me.team===0?'苍岚':'赤焰')+'国王 · Lv.'+k.lvl;
-  $('kingInfo').innerHTML=`<div class="hpbarWrap"><div class="hpbarFill ${k.hp/k.max<.35?'low':''}" style="width:${Math.max(0,k.hp/k.max*100)}%"></div></div><div class="king-live-stats"><b>生命 ${Math.ceil(k.hp)}/${k.max}</b><span>攻击 ${k.dmg} · 恢复 ${k.regen}/秒</span></div>`;
+  const royal=kingAura341(me.team,k);
+  $('kingInfo').innerHTML=`<div class="hpbarWrap"><div class="hpbarFill ${k.hp/k.max<.35?'low':''}" style="width:${Math.max(0,k.hp/k.max*100)}%"></div></div><div class="king-live-stats"><b>生命 ${Math.ceil(k.hp)}/${k.max}</b><span>攻击 ${k.min}–${k.maxDamage}${royal.damage?'（+15%）':''} · 恢复 ${k.regen}/秒</span><span>英雄攻击 / 英雄甲 ${k.armorPoints+royal.armor} · 间隔 ${kingInterval341(k).toFixed(2)} 秒</span><span>射程 715 · 法力 ${Math.floor(k.mana)}/${k.manaMax}（+3/秒）</span></div>`;
   document.querySelectorAll('[data-king-stat]').forEach(button=>{
     const stat=button.dataset.kingStat,def=KING_UPGRADES[stat],cost=kingUpgradeCost(k,stat);
-    button.innerHTML=`<b>强化${def.name}</b><span>Lv.${k.upgrades[stat]} → ${k.upgrades[stat]+1}</span><strong>${cost} 金</strong><small>${def.effect}</small>`;
-    button.disabled=!!KingUI.pending||me.gold<cost;
+    const amount=def.amounts?.[k.upgrades[stat]]??def.amount,maxed=!Number.isFinite(cost);
+    const effect=stat==='health'?`生命上限 +${amount}，恢复 ${amount} 生命`:stat==='attack'?`攻击力 +${amount}`:`每秒恢复 +${amount} 生命`;
+    button.innerHTML=`<b>强化${def.name}</b><span>Lv.${k.upgrades[stat]} / ${def.limit}</span><strong>${maxed?'已满级':cost+' 金'}</strong><small>${maxed?'已达到原版强化上限':effect}</small>`;
+    button.disabled=maxed||!!KingUI.pending||me.gold<cost;
   });
+  const skillsMarkup=SOURCE341.king.skills.map(s=>{
+    const learned=k.skills.includes(s.id),random=s.wave===4;
+    const text=s.id==='A022'?`范围 350，伤害 45，眩晕 1.25 秒；250 法力 / 9 秒冷却。`:
+      s.id==='A01T'?'范围 350，每秒对地面敌军造成 12 法术伤害。':
+      s.id==='A021'?'直线范围伤害 90；200 法力 / 22 秒冷却。':
+      s.id==='A01W'?'范围 1400，友军和自身攻击伤害 +15%。':
+      s.id==='A01U'?'范围 1400，友军和自身护甲 +5。':'范围 1400，友军和自身攻速 +10%、移速 +15%。';
+    return `<div class="king-skill ${learned?'learned':''}"><b>${s.name}</b><span>${learned?(s.cd?'冷却 '+Math.ceil(k.spellCD[s.id]||0)+' 秒':'已获得'):G.wave>s.wave&&random?'本局未抽中':s.wave+' 波后'+(random?'三选一随机获得':'获得')}</span><p>${text}</p></div>`;
+  }).join('');
+  if($('kingSkills').innerHTML!==skillsMarkup)$('kingSkills').innerHTML=skillsMarkup;
   $('kingDialogStatus').textContent=KingUI.error||(KingUI.pending?'正在提交，等待对局同步…':`持有 ${Math.floor(me.gold)} 金 · 当前每波收入 ${me.income}`);
 }
 async function submitKingUpgrade(stat){

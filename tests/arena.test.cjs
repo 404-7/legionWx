@@ -10,6 +10,8 @@ test('expanded grid accepts its far corner and server allows more than 36 perman
  const game=require('../server/game.cjs')([0,1,2,3].map(slot=>({slot,name:'P'+slot,race:'beast'})),{raceMode:'select'});
  // Earn the larger army's budget through the same mine actions as a real online player.
  for(let i=0;i<3;i++)assert.equal(game.action(0,{type:'mineBuy'}),true);
+ // The source king needs support while one player invests the entire budget in mines.
+ for(const slot of [1,2,3])for(const stat of ['health','regen','attack'])assert.equal(game.action(slot,{type:'king',stat}),true);
  for(let i=0;i<2000;i++)game.step(.05);
  for(let i=0;i<40;i++)assert.equal(game.action(0,{type:'buy',uid:'gnoll_warrior',col:i%12,row:Math.floor(i/12)}),true);
  assert.equal(game.snapshot().players[0].fighters.length,40);

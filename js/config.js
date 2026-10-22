@@ -57,9 +57,8 @@ const CFG = {
   WAVE_DMG0: 9, WAVE_DMG_G: 1.085,
   OVERTIME_GROW: 1.33,      // 30 波后加时赛每波递增
 
-  KING_HP: 4200, KING_REGEN: 2, KING_DMG: 60,
-  KING_ASPD: 1.15, KING_RANGE: 125, KING_SPLASH: 90,
-  KING_UP_BASE: 80, KING_UP_GROW: 40,   // 升级费用 = BASE + GROW*lvl
+  KING_HP: SOURCE341.king.hp, KING_REGEN: SOURCE341.king.regen, KING_DMG: (SOURCE341.king.min+SOURCE341.king.max)/2,
+  KING_ASPD: SOURCE341.king.interval, KING_RANGE: SOURCE341.king.range,
 
   AGGRO: 150,               // 敌人索敌半径
   PROJ_SPEED: 340,
@@ -77,9 +76,9 @@ const COMBAT_AI={SCAN:.2,LOCK:.65,LOST:1.25,CHASE:8,BLOCKED:1.25,RANGE_EPS:.1,LE
   REACQUIRE:.9,IGNORE:2,THREAT_LIFE:4,SWITCH_RATIO:1.45,ADVANCE:120,RETURN_EPS:6};
 
 const KING_UPGRADES = {
-  health: { name: '生命', effect: '生命上限 +150，恢复 150 生命', amount: 150 },
-  attack: { name: '攻击', effect: '攻击力 +9', amount: 9 },
-  regen: { name: '生命恢复', effect: '每秒恢复 +1 生命', amount: 1 },
+  health: { name: '生命', ...SOURCE341.king.upgrades.health },
+  attack: { name: '攻击', ...SOURCE341.king.upgrades.attack },
+  regen: { name: '生命恢复', ...SOURCE341.king.upgrades.regen },
 };
 
 const MINE = {
@@ -98,6 +97,7 @@ const ARMOR_TYPES = ['无甲', '轻甲', '中甲', '重甲', '城甲'];
 
 /* 攻击 × 护甲 伤害倍率（>1 克制 / <1 被抵抗） */
 const ATK_ARMOR = {
+  '英雄': { '无甲':1,'轻甲':1,'中甲':1,'重甲':1,'城甲':.5,'英雄甲':1 },
   '普通': { '无甲': 1, '轻甲': 1, '中甲': 1.5, '重甲': 1, '城甲': .7 },
   '穿刺': { '无甲': 1.5, '轻甲': 2, '中甲': .75, '重甲': 1, '城甲': .35 },
   '魔法': { '无甲': 1, '轻甲': 1.25, '中甲': .75, '重甲': 2, '城甲': .35 },

@@ -191,6 +191,10 @@ function draw(now) {
     c.fillStyle = PROJ_COLORS[pr.atk] || '#ffe9a8';
     c.globalAlpha = .45;
     c.beginPath(); c.arc(pr.x, pr.y, 5.5, 0, 7); c.fill();
+    if(pr.atk==='英雄'){
+      c.strokeStyle='#a9dfff';c.lineWidth=2;c.globalAlpha=.95;
+      c.beginPath();c.moveTo(pr.px,pr.py);c.lineTo((pr.x+pr.px)/2+4, (pr.y+pr.py)/2-4);c.lineTo(pr.x,pr.y);c.stroke();
+    }
     c.globalAlpha = 1;
   }
   // 死亡烟雾 / 特效

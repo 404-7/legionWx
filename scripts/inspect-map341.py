@@ -12,10 +12,10 @@ binary = source.read_bytes()
 offset = binary.find(b'MPQ\x1a')
 if offset < 0: raise ValueError('MPQ header not found')
 archive = mpyq.MPQArchive(io.BytesIO(binary[offset:]), listfile=False)
-names = ['war3map.j','war3map.w3u','war3map.w3a','war3map.wts']
+names = ['war3map.j','war3map.w3u','war3map.w3a','war3map.w3q','war3map.wts']
 print('Archive entries:', len(names))
 print('\n'.join(n for n in names if n.lower().endswith(('.w3u','.w3a','.j','.wts','.slk','.txt'))))
-for name in ['war3map.j','war3map.w3u','war3map.w3a','war3map.wts']:
+for name in names:
     data = archive.read_file(name)
     if data:
         (out / name).write_bytes(data)
@@ -52,7 +52,7 @@ def objects(data, extended=False):
     if pos!=len(data): raise ValueError(f'unparsed bytes {len(data)-pos}, version={version}')
     return result
 
-for name,extended in [('war3map.w3u',False),('war3map.w3a',True)]:
+for name,extended in [('war3map.w3u',False),('war3map.w3a',True),('war3map.w3q',True)]:
     data=(out/name).read_bytes()
     parsed=objects(data,extended)
     (out/(name+'.json')).write_text(json.dumps(parsed,ensure_ascii=False,indent=2),encoding='utf-8')

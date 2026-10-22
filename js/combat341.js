@@ -111,7 +111,8 @@ function tick341(p,dt) {
     if(f.def.abil.berserk){const ratio=f.hp/f.max;haste+=ratio<.2?.8:ratio<.4?.6:ratio<.6?.4:0;}
     f.hp=Math.max(1,Math.min(f.max,f.hp+(healing+amp)*dt));
     f.mana=Math.min(f.def.manaMax||0,f.mana+manaRegen*dt);
-    f.effArmor=(f.def.armorPoints||0)+armor;f.effHaste=haste;f.effVamp=vamp;
+    const royal=kingAura341(p.team,f);
+    f.effArmor=(f.def.armorPoints||0)+Math.max(armor,royal.armor);f.effHaste=Math.max(haste,royal.haste);f.effVamp=vamp;
     f.damageTaken=(f.illusionTaken||1)*(f.guardianFactor||1);
     if(f.stunT>0||f.deadT>0||(p.arenaView&&!f.arenaReady))continue;
     for(const c of f.def.abil.casts||[])cast341(p,f,c);

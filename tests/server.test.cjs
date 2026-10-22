@@ -65,8 +65,8 @@ test('two independent clients join, share authoritative purchases, reconnect and
   await reconnected.next(v=>!v.room.waiting);
   assert.equal((await post('action',{type:'king',stat:'regen'},b)).status,200);
   const upgraded = await sa.next(v=>v.state?.kings[1].upgrades.regen===1);
-  assert.equal(upgraded.state.kings[1].regen,3);
-  assert.equal(upgraded.state.kings[0].regen,2);
+  assert.equal(upgraded.state.kings[1].regen,8);
+  assert.equal(upgraded.state.kings[0].regen,3);
   assert.equal((await post('action',{type:'king',stat:'invalid'},b)).status,400);
   assert.equal((await fetch(base+'/server/index.cjs')).status,404);
   const art=await fetch(base+'/assets/unit-art/classic/human-units-animations-footman.png');

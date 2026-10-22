@@ -114,7 +114,7 @@ function idleGuard(p,f,dt){
   if(Math.hypot(goal.x-f.x,goal.y-f.y)<=COMBAT_AI.RETURN_EPS+.05){
     if(goal===home){f.x=home.x;f.y=home.y;b.returning=false;b.state='guard';}return;
   }
-  moveCombatUnit(p,f,goal,f.def.speed*(f.slowF??1),dt,COMBAT_AI.RETURN_EPS);
+  moveCombatUnit(p,f,goal,f.def.speed*(f.slowF??1)*(1+kingAura341(p.team,f).move),dt,COMBAT_AI.RETURN_EPS);
 }
 function separateDefenseUnits(p,dt){
   separateCombatCrowd([...p.fighters,...p.enemies],p,dt);
