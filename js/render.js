@@ -221,11 +221,17 @@ function draw(now) {
     if(!visibleWorldPoint(f.x,f.y))continue;
     c.globalAlpha = Math.min(1, f.t);
     c.fillStyle = f.color;
-    c.font = 'bold 13px "Microsoft YaHei"';
+    c.font = `bold ${f.kind==='gold'?15:13}px "Microsoft YaHei"`;
+    c.strokeStyle='#07100e';c.lineWidth=3;c.lineJoin='round';
+    c.strokeText(f.txt, f.x, f.y);
     c.fillText(f.txt, f.x, f.y);
     c.globalAlpha = 1;
   }
   c.textAlign = 'left';
+  // Draw health after every sprite, projectile, effect and floater. Allies go last.
+  const ownTeam=localPlayer().team;
+  for(const allied of [false,true])for(const p of G.players)if((p.team===ownTeam)===allied)
+    for(const f of p.fighters)drawFighterHealth(c,f,p,view.scale);
   drawWarFog(c);
   c.restore();
 }
@@ -368,12 +374,22 @@ function drawFighter(c, f, p, t) {
     c.beginPath(); c.arc(f.x, f.y + 4, 13, 0, 7); c.fill();
     c.globalAlpha = 1;
   }
-  // 血条
-  const bw = 26, ratio = Math.max(0, f.hp / f.max);
-  c.fillStyle = 'rgba(0,0,0,.7)';
-  c.fillRect(f.x - bw / 2 - 1, f.y - 26 + bob, bw + 2, 5);
-  c.fillStyle = ratio > 0.4 ? '#6fdc7c' : '#ff6a5e';
-  c.fillRect(f.x - bw / 2, f.y - 25 + bob, bw * ratio, 3);
+}
+
+function drawFighterHealth(c,f,p,scale){
+  if(f.hp<=0||f.deadT>0||!visibleWorldPoint(f.x,f.y))return;
+  const ratio=Math.min(1,Math.max(0,f.hp/f.max)),bw=Math.max(28,24/scale),bh=Math.max(4,3/scale),y=f.y-27;
+  c.save();c.globalAlpha=1;
+  c.fillStyle='#06110f';c.fillRect(f.x-bw/2-1,y-1,bw+2,bh+2);
+  c.fillStyle='#26382e';c.fillRect(f.x-bw/2,y,bw,bh);
+  c.fillStyle=ratio>.4?'#6fdc7c':'#ff6a5e';c.fillRect(f.x-bw/2,y,bw*ratio,bh);
+  if(p.team===localPlayer().team&&(scale>=.5||f===G.selectedFighter)){
+    c.font=`bold ${Math.max(10,9/scale)}px "Microsoft YaHei"`;c.textAlign='center';c.textBaseline='bottom';
+    c.strokeStyle='#06110f';c.lineWidth=3/scale;c.lineJoin='round';c.fillStyle='#e4f5e5';
+    const label=`${Math.ceil(f.hp)}/${Math.ceil(f.max)}`;
+    c.strokeText(label,f.x,y-2);c.fillText(label,f.x,y-2);
+  }
+  c.restore();
 }
 
 function drawEnemy(c, e, t) {

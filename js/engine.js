@@ -567,7 +567,12 @@ function payClear(p) {
   p.paid=true;
   if(p.isHuman)addLog(p.leakCount ? `第 ${G.wave} 波漏怪 ${p.leakCount} 个` : `第 ${G.wave} 波防守成功`,p.leakCount?'l-red':'l-gold',p.team);
 }
-function rewardEnemy(p,e){if(p&&!e.rewarded){p.gold+=Math.round((e.bounty||0)*gainMult(p));e.rewarded=true;}}
+function rewardEnemy(p,e){
+  if(!p||e.rewarded)return;
+  const gold=Math.round((e.bounty||0)*gainMult(p));
+  p.gold+=gold;e.rewarded=true;
+  if(gold>0)addFloater(e.x,e.y-e.r-18,`+${gold} 金`,'#f5cf65','gold');
+}
 
 function cellFree(p, col, row) {
   return !p.fighters.some(f => !f.temporary && f.col === col && f.row === row);
@@ -668,7 +673,7 @@ function addPuff(x, y, color, size) {
   G.fx.push({ x, y, color, size: size || 10, t: .5, max: .5 });
   if (G.fx.length > 90) G.fx.shift();
 }
-function addFloater(x, y, txt, color) { G.floaters.push({ x, y, txt, color, t: 1.3 }); }
+function addFloater(x, y, txt, color, kind='text') { G.floaters.push({ x, y, txt, color,kind, t:kind==='gold'?1.7:1.3 }); }
 function addLog(txt, cls,team=null) {
   G.logLines.push({ txt, cls: cls || '',team });
   if (G.logLines.length > 60) G.logLines.shift();

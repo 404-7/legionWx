@@ -64,3 +64,16 @@ test('teammate income is always shared; PK reveals opposing income only until de
   assert.equal(run('G.players.every(p=>p.income===10+p.id*7)'),true);
  }
 });
+
+test('kill gold floaters pay and appear exactly once, including king-road kills, respecting fog',()=>{
+ const run=engine();run("const p=G.players[0];spawnEnemy(p,{type:'wave'});const e=p.enemies[0],before=p.gold;rewardEnemy(p,e);rewardEnemy(p,e)");
+ assert.equal(run('p.gold-before'),run('e.bounty'));
+ assert.equal(run('G.floaters.filter(f=>f.kind==="gold").length'),1);
+ assert.equal(run('G.floaters[0].txt'),run('`+${e.bounty} 金`'));
+ run("spawnEnemy(p,{type:'wave'});const road=p.enemies.at(-1);leak(p,road);road.x=G.kings[0].x;road.y=G.kings[0].y;road.hp=0;kingStep(G.kings[0],.01);kingStep(G.kings[0],.01)");
+ assert.equal(run('G.floaters.filter(f=>f.kind==="gold").length'),2);
+ run("const red=G.players[2];spawnEnemy(red,{type:'wave'});const hidden=red.enemies[0];rewardEnemy(red,hidden);rewardEnemy(red,{x:600,y:720,r:10,bounty:9});const view=scopeBattleSnapshot(JSON.parse(JSON.stringify(G)),0)");
+ assert.equal(run('view.floaters.some(f=>f.kind==="gold"&&f.x===hidden.x&&f.y===hidden.y-hidden.r-18)'),false);
+ assert.equal(run('view.floaters.some(f=>f.kind==="gold"&&f.txt==="+9 金")'),true);
+ run("const n=G.floaters.length;rewardEnemy(p,{x:100,y:100,r:10,bounty:0})");assert.equal(run('G.floaters.length'),run('n'));
+});
