@@ -32,8 +32,8 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
    const race=await guest.evaluate(()=>localPlayer().race),uid=await guest.evaluate(()=>Object.values(UNITS).find(d=>d.race===localPlayer().race&&!d.elite&&!d.summonOnly&&d.purchaseCost<=300).id);
    await guest.locator('#tab-shop').tap();await guest.locator(`[data-uid="${uid}"] .uName`).tap();await guest.locator('#side').waitFor({state:'hidden'});
    const point=await guest.evaluate(()=>{const p=localPlayer(),v=getMapProjection(),r=$('cv').getBoundingClientRect();return {x:r.left+v.tx+(p.gx+5.5*CFG.CELL)*v.scale,y:r.top+v.ty+(p.gy+7.5*CFG.CELL)*v.scale};});
-   await guest.touchscreen.tap(point.x,point.y);await host.waitForFunction(()=>G.players[2].fighters.length===1);
-   assert.equal(await host.evaluate(()=>G.players[2].fighters[0].def.race),race);
+   await guest.touchscreen.tap(point.x,point.y);await guest.waitForFunction(()=>localPlayer().fighters.length===1);assert.equal(await host.evaluate(()=>G.players[2].fighters.length),0);
+   assert.equal(await guest.evaluate(()=>localPlayer().fighters[0].def.race),race);
    await guest.reload();await guest.waitForFunction(()=>G?.online&&!!localPlayer().race);
    assert.equal(await guest.evaluate(()=>localPlayer().race),race);assert.equal(await guest.locator('.race-tab').count(),1);
    if(output){await guest.locator('#tab-shop').tap();await guest.waitForFunction(()=>getComputedStyle($('side')).transform==='matrix(1, 0, 0, 1, 0, 0)');await guest.screenshot({path:path.join(output,`race-${mode}-shop-phone.png`)});}

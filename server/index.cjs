@@ -19,11 +19,16 @@ function publicRoom(room) {
     waiting: room.members.some(m => !m.streams.size) };
 }
 function broadcast(room) {
-  const payload = JSON.stringify({ room: publicRoom(room), state: room.game?.snapshot() || null });
-  for (const m of room.members) for (const res of m.streams) {
-    if (res.destroyed || res.writableEnded) { m.streams.delete(res); continue; }
-    if (res.writableLength > 1024 * 1024) { res.destroy(); continue; }
-    res.write(`data: ${payload}\n\n`);
+  const info=publicRoom(room),views=new Map();
+  for (const m of room.members) {
+    const team=m.slot<2?0:1;
+    if(!views.has(team))views.set(team,JSON.stringify({room:info,state:room.game?.snapshot(m.slot)||null}));
+    const payload=views.get(team);
+    for (const res of m.streams) {
+      if (res.destroyed || res.writableEnded) { m.streams.delete(res); continue; }
+      if (res.writableLength > 1024 * 1024) { res.destroy(); continue; }
+      res.write(`data: ${payload}\n\n`);
+    }
   }
 }
 async function body(req) {

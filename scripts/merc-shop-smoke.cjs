@@ -44,7 +44,7 @@ const output=process.argv[3]&&path.resolve(process.argv[3]);
   await guest.locator('#tab-attack').tap();await guest.locator('[data-merc-id="hermit"] .merc-info').tap();await guest.locator('[data-merc-detail-send="0"]').tap();
   await host.waitForFunction(()=>localPlayer().mercQueue.includes('hermit'));
   const slot=await guest.evaluate(()=>Net.session.slot);
-  await host.waitForFunction(slot=>G.players[slot].income===10,slot);
+  await guest.waitForFunction(()=>localPlayer().income===10);assert.equal(await host.evaluate(slot=>G.players[slot].income,slot),null);
   assert.equal(await guest.evaluate(()=>localPlayer().income),10);
   const rejected=await guest.evaluate(()=>api('action',{type:'merc',mid:'demon',target:0}).then(()=>false).catch(()=>true));assert.equal(rejected,true);
   console.log('Online phone dispatch, income synchronization and unlock rejection passed');await hc.close();await gc.close();

@@ -16,7 +16,7 @@ const {chromium}=require(process.argv[2]||'playwright'),{server}=require('../ser
   await guest.touchscreen.tap(point.x,point.y);await guest.locator('#btnSell').tap();
   assert.match(await guest.locator('#sellMessage').textContent(),/115 金的 30% 向下取整，返还 34 金/);
   await guest.locator('#btnConfirmSell').tap();await guest.waitForFunction(()=>localPlayer().fighters.length===0&&localPlayer().gold===219);
-  await host.waitForFunction(slot=>G.players[slot].fighters.length===0&&G.players[slot].gold===219,slot);
+  assert.equal(await host.evaluate(slot=>G.players[slot].gold,slot),null);
   assert.equal(await host.evaluate(()=>localPlayer().gold),300);
   console.log('Phone sale dialog shows floor(115 * 30%) = 34; both clients agree on the authoritative refund');
   await hc.close();await gc.close();

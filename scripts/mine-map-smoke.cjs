@@ -43,9 +43,9 @@ const clickMine=require('./mine-map-helper.cjs'),output=process.argv[3]&&path.re
   await guest.locator('#btnMineAction').tap();assert.equal(await guest.locator('#btnMineAction').isDisabled(),true);
   await guest.waitForFunction(()=>localPlayer().mines[0]?.slot===4&&!MineUI.pending);
   const slot=await guest.evaluate(()=>Net.session.slot);
-  await host.waitForFunction(slot=>G.players[slot].mines[0]?.slot===4,slot);
+  assert.equal(await host.evaluate(slot=>G.players[slot].mines.length,slot),0);
   await guest.locator('#btnMineAction').tap();await guest.waitForFunction(()=>localPlayer().mines[0]?.level===2&&!MineUI.pending);
-  await host.waitForFunction(slot=>G.players[slot].mines[0]?.level===2,slot);
+  assert.equal(await host.evaluate(slot=>G.players[slot].gold,slot),null);
   assert.equal(await host.evaluate(()=>localPlayer().mines.length),0);
   if(output)await guest.screenshot({path:path.join(output,'mines-online-phone.png')});
   console.log('Online touch purchase, pending lock and upgrade synchronization passed');await hc.close();await gc.close();

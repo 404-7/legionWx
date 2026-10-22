@@ -19,6 +19,36 @@ function roundRect(c, x, y, w, h, r) {
 
 const PROJ_COLORS = { '普通': '#ffd27e', '穿刺': '#ffab91', '魔法': '#b388ff', '攻城': '#ffb74d' };
 const ROAD_SKIN={pattern:null,gateAmount:0,lastTime:null};
+const FOG_SKIN={key:null,canvas:null};
+function visibleWorldPoint(x,y){return pointVisibleToTeam(G,localPlayer().team,x,y);}
+function drawWarFog(c){
+  if(visionOpen(G))return;
+  const team=localPlayer().team,v=publicEnemyVision(G,team),key=[team,v.exit,v.king.x,v.king.y].join(':');
+  if(FOG_SKIN.key!==key){
+    const cv=document.createElement('canvas');cv.width=CFG.W;cv.height=CFG.H;const g=cv.getContext('2d');
+    const left=team===0?0:CFG.W/2,width=CFG.W/2;
+    g.fillStyle='#101b24';g.fillRect(left,0,width,CFG.H);
+    g.save();g.beginPath();g.rect(left,0,width,CFG.H);g.clip();
+    for(let i=0;i<85;i++){
+      const x=left+(i*131+41)%width,y=(i*193+73)%CFG.H,r=65+i%9*12;
+      const cloud=g.createRadialGradient(x,y,0,x,y,r);cloud.addColorStop(0,i%2?'#34455455':'#07101b80');cloud.addColorStop(1,'#101b2400');
+      g.fillStyle=cloud;g.fillRect(x-r,y-r,r*2,r*2);
+    }
+    g.fillStyle='#687c8d';g.textAlign='center';g.font='17px "Microsoft YaHei"';
+    for(const p of G.players.filter(p=>p.team!==team)){
+      g.fillText('◇  敌方防区',p.fx+CFG.FIELD_W/2,p.fy+CFG.FIELD_H/2-8);
+      g.font='12px "Microsoft YaHei"';g.fillStyle='#435b6b';g.fillText('战 争 迷 雾',p.fx+CFG.FIELD_W/2,p.fy+CFG.FIELD_H/2+19);g.font='17px "Microsoft YaHei"';g.fillStyle='#687c8d';
+    }
+    g.restore();g.globalCompositeOperation='destination-out';
+    g.fillStyle='#000';
+    g.fillRect(Math.min(v.exit,v.king.x)-v.r,CFG.ROAD_Y-v.r,Math.abs(v.exit-v.king.x)+v.r*2,v.r*2);
+    g.fillRect(v.king.x-v.r,Math.min(v.king.y,CFG.ROAD_Y)-v.r,v.r*2,Math.abs(v.king.y-CFG.ROAD_Y)+v.r*2);
+    g.beginPath();g.arc(v.king.x,v.king.y,v.kingRadius,0,Math.PI*2);g.fill();
+    g.fillRect(v.bridge.x,v.bridge.y,v.bridge.w,v.bridge.h);
+    FOG_SKIN.key=key;FOG_SKIN.canvas=cv;
+  }
+  c.save();c.globalAlpha=1;c.drawImage(FOG_SKIN.canvas,0,0);c.restore();
+}
 
 function stonePattern(c){
   if(ROAD_SKIN.pattern)return ROAD_SKIN.pattern;
@@ -90,7 +120,7 @@ function drawBridge(c,t){
   c.textAlign='center';c.font='bold 14px "Microsoft YaHei"';c.fillStyle='#e0d2ad';c.fillText('王 庭 石 桥',x,y-122);
   c.fillStyle='#0b1c17d9';roundRect(c,x-123,y+111,246,31,9);c.fill();c.font='12px "Microsoft YaHei"';
   c.fillStyle=open?'#a4d7ad':'#bebc9b';
-  const label=G.battleMode==='arena'?G.phase==='prep'?`${Math.ceil(G.timer)} 秒后开门 · 准备 PK`:G.arena.stage==='result'?'PK 已结算 · 即将继续守关':`苍岚 ${G.arena.counts[0]}   ⚔   赤焰 ${G.arena.counts[1]}`:'关隘封闭 · 第 10 / 20 波后开启';
+  const label=G.battleMode==='arena'?G.phase==='prep'?`${Math.ceil(G.timer)} 秒后开门 · 准备 PK`:G.arena.stage==='result'?'PK 已结算 · 即将继续守关':`苍岚 ${arenaCountText(G.arena.counts[0])}   ⚔   赤焰 ${arenaCountText(G.arena.counts[1])}`:'关隘封闭 · 第 10 / 20 波后开启';
   c.fillText(label,x,y+131);c.textAlign='left';
 }
 
@@ -151,6 +181,7 @@ function draw(now) {
 
   // 弹道（拖尾）
   for (const pr of G.projectiles) {
+    if(!visibleWorldPoint(pr.x,pr.y)||!visibleWorldPoint(pr.px,pr.py))continue;
     c.strokeStyle = PROJ_COLORS[pr.atk] || '#ffe9a8';
     c.globalAlpha = .55; c.lineWidth = 3; c.lineCap = 'round';
     c.beginPath(); c.moveTo(pr.px, pr.py); c.lineTo(pr.x, pr.y); c.stroke();
@@ -164,6 +195,7 @@ function draw(now) {
   }
   // 死亡烟雾 / 特效
   for (const f of G.fx) {
+    if(!visibleWorldPoint(f.x,f.y))continue;
     const k = 1 - f.t / f.max;
     c.globalAlpha = (1 - k) * .7;
     c.strokeStyle = f.color;
@@ -182,6 +214,7 @@ function draw(now) {
   // 漂浮文字
   c.textAlign = 'center';
   for (const f of G.floaters) {
+    if(!visibleWorldPoint(f.x,f.y))continue;
     c.globalAlpha = Math.min(1, f.t);
     c.fillStyle = f.color;
     c.font = 'bold 13px "Microsoft YaHei"';
@@ -189,6 +222,7 @@ function draw(now) {
     c.globalAlpha = 1;
   }
   c.textAlign = 'left';
+  drawWarFog(c);
   c.restore();
 }
 
@@ -206,7 +240,7 @@ function drawField(p, t) {
   c.font = 'bold 13px "Microsoft YaHei"'; c.fillStyle = isMine ? '#9ee5d3' : teamCol;
   c.fillText((isMine ? '◆ 你的防区 · ' : '') + p.name, p.fx+14, p.fy+23);
   c.textAlign = 'right'; c.fillStyle = '#93a89e'; c.font = '11px "Microsoft YaHei"';
-  c.fillText('战力 '+playerValue(p),p.fx+CFG.FIELD_W-14,p.fy+23); c.textAlign = 'left';
+  c.fillText(!visionOpen(G)&&p.team!==localPlayer().team?'战力 未知':'战力 '+playerValue(p),p.fx+CFG.FIELD_W-14,p.fy+23); c.textAlign = 'left';
 
   // 战士
   for (const f of p.fighters) drawFighter(c, f, p, t);
@@ -244,6 +278,7 @@ function drawField(p, t) {
 }
 
 function drawMines(c, p, t) {
+  if(!visionOpen(G)&&p.team!==localPlayer().team)return;
   const zone=mineZone(p);c.fillStyle='#333b3e88';c.strokeStyle='#929ca0';c.lineWidth=2;
   roundRect(c,zone.x,zone.y,zone.w,zone.h,9);c.fill();c.stroke();
   c.textAlign = 'center'; c.font = '11px "Microsoft YaHei"';
@@ -277,6 +312,7 @@ function drawMines(c, p, t) {
 }
 
 function drawFighter(c, f, p, t) {
+  if(!visibleWorldPoint(f.x,f.y))return;
   if(f.hp<=0&&f.deadT<=0)return;
   if (f.deadT > 0) {   // 复活倒计时幽灵
     c.globalAlpha = 0.35;
@@ -337,6 +373,7 @@ function drawFighter(c, f, p, t) {
 }
 
 function drawEnemy(c, e, t) {
+  if(!visibleWorldPoint(e.x,e.y))return;
   const sid = enemySpriteId(e);
   const wob = Math.sin(t * 6 + hsh('' + e.x)) * 2;
   const scale = e.boss ? 1.7 : 1;

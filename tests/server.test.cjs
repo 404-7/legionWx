@@ -43,13 +43,13 @@ test('two independent clients join, share authoritative purchases, reconnect and
   assert.equal((await post('race',{race:'mech'},a)).status,400);
   assert.equal((await post('action',{type:'buy',uid:'infantry',col:0,row:0,race:'mech'},a)).status,400);
   assert.equal((await post('action',{type:'buy',uid:'ent',col:1,row:1,slot:2,gold:99999},a)).status,200);
-  const [va,vb]=await Promise.all([sa.next(v=>v.state?.players[0].fighters.length===1),sb.next(v=>v.state?.players[0].fighters.length===1)]);
+  const [va,vb]=await Promise.all([sa.next(v=>v.state?.players[0].fighters.length===1),sb.next(v=>v.state?.vision?.team===1)]);
   assert.equal(va.state.players[0].gold,280);
-  assert.equal(vb.state.players[0].gold,280);
+  assert.equal(vb.state.players[0].gold,null);assert.equal(vb.state.players[0].fighters.length,0);
   assert.equal(vb.state.players[2].fighters.length,0);
   assert.equal((await post('action',{type:'mineBuy',slot:2,gold:99999},a)).status,200);
-  const [ma,mb]=await Promise.all([sa.next(v=>v.state?.players[0].mines.length===1),sb.next(v=>v.state?.players[0].mines.length===1)]);
-  assert.equal(ma.state.players[0].gold,180); assert.equal(mb.state.players[0].gold,180);
+  const [ma,mb]=await Promise.all([sa.next(v=>v.state?.players[0].mines.length===1),sb.next(v=>v.state?.vision?.team===1)]);
+  assert.equal(ma.state.players[0].gold,180); assert.equal(mb.state.players[0].gold,null);assert.equal(mb.state.players[0].mines.length,0);
   assert.equal(mb.state.players[2].mines.length,0);
   assert.equal((await post('action',{type:'mineUpgrade',id:0},b)).status,400);
   assert.equal((await post('action',{type:'mineUpgrade',id:99},a)).status,400);

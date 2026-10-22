@@ -61,7 +61,7 @@ function startPrep() {
     p.gold += inc;
     p.paid = true;
     p.enemies = []; p.spawnList = [];p.mercSpawnList=[];p.mercSpawnT=0;
-    if (p.isHuman && G.wave > 1) addLog(`${p.name} 收入结算 +${inc} 金`, 'l-gold');
+    if (p.isHuman && G.wave > 1) addLog(`${p.name} 收入结算 +${inc} 金`, 'l-gold',p.team);
   }
   G.timerMax = G.wave === 1 ? CFG.FIRST_PREP : CFG.PREP_TIME;
   G.timer = G.timerMax;
@@ -413,7 +413,7 @@ function leak(p, e) {
   e.route=[{x:p.exitX+lane,y:CFG.ROAD_Y+lane},{x:k.x+lane,y:CFG.ROAD_Y+lane},{x:k.x+lane,y:k.y}];e.routeIndex=0;
   k.leaks.push(e);
   addFloater(p.exitX - 20, e.y, '漏怪!', '#ff6a5e');
-  if (p.isHuman) addLog(`${p.name} 第 ${G.wave} 波漏怪！国王受到威胁`, 'l-red');
+  if (p.isHuman) addLog(`${p.name} 第 ${G.wave} 波漏怪！国王受到威胁`, 'l-red',p.team);
 }
 
 function kingStep(k, dt) {
@@ -478,7 +478,7 @@ function buyMine(p, mineSlot) {
   if (!Number.isInteger(mineSlot) || mineSlot < 0 || mineSlot >= MINE.LIMIT || occupied(mineSlot)) return false;
   p.gold -= MINE.COST;
   p.mines.push({ id: p.mines.length, slot:mineSlot, level: 1, elapsed: 0 });
-  addLog(`${p.name} 建造金矿（${p.mines.length}/${MINE.LIMIT}）`, 'l-gold');
+  addLog(`${p.name} 建造金矿（${p.mines.length}/${MINE.LIMIT}）`, 'l-gold',p.team);
   return true;
 }
 
@@ -489,7 +489,7 @@ function upgradeMine(p, id) {
   const cost = MINE.LEVELS[mine.level - 1].upgrade;
   if (p.gold < cost) return false;
   p.gold -= cost; mine.level++;
-  addLog(`${p.name} 的 ${(mine.slot ?? id) + 1} 号金矿升至 Lv.${mine.level}`, 'l-gold');
+  addLog(`${p.name} 的 ${(mine.slot ?? id) + 1} 号金矿升至 Lv.${mine.level}`, 'l-gold',p.team);
   return true;
 }
 
@@ -508,7 +508,7 @@ function mineStep(p, dt) {
 
 function payClear(p) {
   p.paid=true;
-  if(p.isHuman)addLog(p.leakCount ? `第 ${G.wave} 波漏怪 ${p.leakCount} 个` : `第 ${G.wave} 波防守成功`,p.leakCount?'l-red':'l-gold');
+  if(p.isHuman)addLog(p.leakCount ? `第 ${G.wave} 波漏怪 ${p.leakCount} 个` : `第 ${G.wave} 波防守成功`,p.leakCount?'l-red':'l-gold',p.team);
 }
 function rewardEnemy(p,e){if(p&&!e.rewarded){p.gold+=Math.round((e.bounty||0)*gainMult(p));e.rewarded=true;}}
 
@@ -611,8 +611,8 @@ function addPuff(x, y, color, size) {
   if (G.fx.length > 90) G.fx.shift();
 }
 function addFloater(x, y, txt, color) { G.floaters.push({ x, y, txt, color, t: 1.3 }); }
-function addLog(txt, cls) {
-  G.logLines.push({ txt, cls: cls || '' });
+function addLog(txt, cls,team=null) {
+  G.logLines.push({ txt, cls: cls || '',team });
   if (G.logLines.length > 60) G.logLines.shift();
 }
 function playerValue(p) { return p.fighters.reduce((s, f) => s + f.spent, 0); }

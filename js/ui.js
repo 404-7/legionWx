@@ -245,7 +245,7 @@ function updateUI(force) {
     const traitTxt = d.trait ? `<span class="chip trait">${TRAIT_INFO[d.trait].n}</span>` : '';
     const incoming = me.mercQueue.length
       ? `<div class="mercWarn">⚠ 敌方已向你雇佣 ${me.mercQueue.length} 个单位（随下一波来袭）</div>` : '';
-    wi.innerHTML = G.battleMode==='arena'?`<div class="wrow"><span class="wnum">阵营 PK</span><span class="wtime">${G.phase==='prep'?Math.ceil(G.timer)+'s 后开门':G.arena.stage==='result'?'已结算 · 即将继续守关':'中央路口已开放'}</span></div><div class="race-tip">${G.phase==='prep'?'可调整阵容，开战后暂时锁定买兵、升级与出售。':'苍岚 '+G.arena.counts[0]+' 单位 / 赤焰 '+G.arena.counts[1]+' 单位'}<br>胜方每人 +${G.wave*10} 金 · 平局每人 +${G.wave*5} 金<br>国王不参战，PK 后恢复原阵型继续守关。</div>`:`
+    wi.innerHTML = G.battleMode==='arena'?`<div class="wrow"><span class="wnum">阵营 PK</span><span class="wtime">${G.phase==='prep'?Math.ceil(G.timer)+'s 后开门':G.arena.stage==='result'?'已结算 · 即将继续守关':'中央路口已开放'}</span></div><div class="race-tip">${G.phase==='prep'?'可调整阵容，开战后暂时锁定买兵、升级与出售。':'苍岚 '+arenaCountText(G.arena.counts[0])+' 单位 / 赤焰 '+arenaCountText(G.arena.counts[1])+' 单位'}<br>胜方每人 +${G.wave*10} 金 · 平局每人 +${G.wave*5} 金<br>国王不参战，PK 后恢复原阵型继续守关。</div>`:`
       <div class="wrow">
         <span class="wnum">${G.wave > CFG.TOTAL_WAVES ? '加时 ' : ''}第 ${G.wave} 波</span>
         <span class="wtime">${G.phase === 'prep' ? Math.ceil(G.timer) + 's 后来袭' : '⚔ 战斗中'}</span>
@@ -296,7 +296,7 @@ function updateUI(force) {
 
   // 日志
   const lg = $('log');
-  const lines = G.logLines.slice(-5);
+  const lines = visibleGameLogs(G,me.team).slice(-5);
   if (lg.dataset.sig !== lines.map(l => l.txt).join('|')) {
     lg.dataset.sig = lines.map(l => l.txt).join('|');
     lg.innerHTML = lines.map(l => `<div class="${l.cls}">${l.txt}</div>`).join('');

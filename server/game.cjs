@@ -47,12 +47,13 @@ module.exports = function createGame(humans,{raceMode='random'}={}) {
           default: return false;
         }
       },
-      snapshot() {
-        return JSON.parse(JSON.stringify(G, (key, value) => {
+      snapshot(viewerSlot) {
+        const state=JSON.parse(JSON.stringify(G, (key, value) => {
           if (['selectedFighter','selectedShop','hover','ai','diff'].includes(key)) return undefined;
           if (key === 'projectiles') return value.map(pr => ({ x:pr.x, y:pr.y, px:pr.px, py:pr.py, atk:pr.atk }));
           return value;
         }));
+        return viewerSlot===undefined?state:scopeBattleSnapshot(state,viewerSlot);
       }
     };
   `, ctx);

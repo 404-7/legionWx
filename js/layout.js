@@ -127,13 +127,13 @@ function syncCommandUI() {
   if(def)$('placementHint').textContent=me.gold>=def.purchaseCost?'点击己方空格放置 · 可连续建造':'金币不足，可取消或等待金矿产出';
   $('mapHint').hidden=!!def;
   const mode=MapCamera.mode||(CommandUI.mobile?'local':'overview'),focused=mode==='local';
-  $('mapHint').textContent=mode==='mines'?'点击＋矿位建造 · 点击金矿升级 · 单指拖动查看':mode==='arena'?'王庭石桥 · 一方军团全灭即结算回合':mode==='field'?`${CFG.COLS}×${CFG.ROWS} 格完整防区 · 放大后精确布阵`:focused?CommandUI.mobile?'大防区 · 单指拖动，双指缩放':'你的防区 · 拖动查看战场，滚轮缩放':'全图视角 · 红蓝阵营路标 / 粉色王城 / 中央石桥关隘';
+  $('mapHint').textContent=mode==='mines'?'点击＋矿位建造 · 点击金矿升级 · 单指拖动查看':mode==='arena'?'王庭石桥 · 一方军团全灭即结算回合':mode==='field'?`${CFG.COLS}×${CFG.ROWS} 格完整防区 · 放大后精确布阵`:focused?CommandUI.mobile?'大防区 · 单指拖动，双指缩放':'你的防区 · 拖动查看战场，滚轮缩放':'全图视角 · 敌区迷雾 / 对方王城道路可见 / 中央石桥';
   const pk=G.battleMode==='arena';
   $('btnMapHome').textContent=pk&&G.phase==='combat'?'⚔ PK 战场':'⌖ 我的防区';
   $('blueKingStatus').textContent='♛ 苍岚 '+Math.max(0,Math.ceil(G.kings[0].hp))+'/'+G.kings[0].max;
   $('redKingStatus').textContent='♛ 赤焰 '+Math.max(0,Math.ceil(G.kings[1].hp))+'/'+G.kings[1].max;
-  $('battleStatus').textContent=G.paused?'已暂停':pk?G.phase==='prep'?`阵营 PK · ${Math.ceil(G.timer)}s 后开放`:`阵营 PK · 苍岚 ${G.arena.counts[0]} : 赤焰 ${G.arena.counts[1]}`:G.phase==='prep'?`第 ${G.wave} 波 · ${Math.ceil(G.timer)}s 准备`:G.phase==='combat'?`第 ${G.wave} 波 · 交战中`:'对战结束';
-  $('latestReport').textContent=G.logLines.at(-1)?.txt||'等待军团集结';
+  $('battleStatus').textContent=G.paused?'已暂停':pk?G.phase==='prep'?`阵营 PK · ${Math.ceil(G.timer)}s 后开放`:`阵营 PK · 苍岚 ${arenaCountText(G.arena.counts[0])} : 赤焰 ${arenaCountText(G.arena.counts[1])}`:G.phase==='prep'?`第 ${G.wave} 波 · ${Math.ceil(G.timer)}s 准备`:G.phase==='combat'?`第 ${G.wave} 波 · 交战中`:'对战结束';
+  $('latestReport').textContent=visibleGameLogs(G,me.team).at(-1)?.txt||'等待军团集结';
   document.querySelectorAll('[data-delegate]').forEach(button=>{const target=$(button.dataset.delegate);button.textContent=target.textContent;button.disabled=target.disabled;});
 }
 function requestUnitSale(f) {

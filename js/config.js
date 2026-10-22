@@ -1,4 +1,42 @@
 'use strict';
+// Shared fixed battle vision. Public king approaches are an L-shaped corridor.
+function visionOpen(state){return state.phase==='over'||state.phase==='menu';}
+function publicEnemyVision(state,team){
+  const king=state.kings[1-team],exit=state.players.find(p=>p.team!==team).exitX;
+  return {king,exit,r:56,kingRadius:82,bridge:{x:CFG.W/2-120,y:CFG.ROAD_Y-110,w:240,h:220}};
+}
+function pointVisibleToTeam(state,team,x,y){
+  if(!Number.isFinite(x)||!Number.isFinite(y))return false;
+  if(visionOpen(state)||(team===0?x>=CFG.W/2:x<=CFG.W/2))return true;
+  const {king,exit,r,kingRadius,bridge}=publicEnemyVision(state,team);
+  return Math.hypot(x-king.x,y-king.y)<=kingRadius||
+    (x>=bridge.x&&x<=bridge.x+bridge.w&&y>=bridge.y&&y<=bridge.y+bridge.h)||
+    (Math.abs(y-CFG.ROAD_Y)<=r&&x>=Math.min(exit,king.x)-r&&x<=Math.max(exit,king.x)+r)||
+    (Math.abs(x-king.x)<=r&&y>=Math.min(king.y,CFG.ROAD_Y)-r&&y<=Math.max(king.y,CFG.ROAD_Y)+r);
+}
+function visibleGameLogs(state,team){return state.logLines.filter(l=>l.team==null||l.team===team);}
+function arenaCountText(count){return count==null?'未知':count;}
+function scopeBattleSnapshot(state,slot){
+  const viewer=state.players[slot];if(!viewer)throw Error('无效视角');
+  const team=viewer.team;state.vision={team,fog:!visionOpen(state)};
+  if(visionOpen(state))return state;
+  delete state.entitySerial;
+  const visible=u=>pointVisibleToTeam(state,team,u.x,u.y);
+  const hiddenArmy=state.players.filter(p=>p.team!==team).some(p=>p.fighters.some(f=>(f.hp>0||f.deadT>0)&&!visible(f)));
+  const publicUnit=u=>Object.fromEntries(Object.entries(u).filter(([key])=>!['col','row','spent','homeX','homeY','brain','route','routeIndex','laneX'].includes(key)));
+  for(const p of state.players)if(p.team!==team){
+    p.fighters=p.fighters.filter(visible).map(publicUnit);p.enemies=p.enemies.filter(visible).map(publicUnit);
+    p.mines=[];p.gold=null;p.income=null;p.paid=null;p.leakCount=null;p.aiT=null;
+    p.spawnList=[];p.mercSpawnList=[];p.mercSpawnT=null;p.spawnT=null;
+    p.mercQueue=p.mercQueue.map(()=>null);
+  }
+  for(const k of state.kings)if(k.team!==team)k.leaks=k.leaks.filter(visible).map(publicUnit);
+  if(state.arena&&hiddenArmy)state.arena.counts[1-team]=null;
+  state.projectiles=state.projectiles.filter(pr=>visible(pr)&&pointVisibleToTeam(state,team,pr.px,pr.py));
+  state.fx=state.fx.filter(visible);state.floaters=state.floaters.filter(visible);
+  state.logLines=visibleGameLogs(state,team);
+  return state;
+}
 /* ===== 全局配置：地图布局、经济、国王、平衡常数 ===== */
 const CFG = {
   W: 1800, H: 1440,
