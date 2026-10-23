@@ -222,7 +222,7 @@ function buildMercs() {
 function selectShop(uid) {
   if (!G) return;
   if(uid&&!canManageArmy())return;
-  if(uid&&G.online&&UNITS[uid]?.race!==localPlayer().race)return;
+  if(uid&&G.online){const me=localPlayer();if(me.race==='prophet'?!me.prophetDeck.includes(uid):UNITS[uid]?.race!==me.race)return;}
   G.selectedShop = (G.selectedShop === uid) ? null : uid;
   G.selectedFighter = null;
   if(G.selectedShop&&CommandUI.mobile){closeCommandPanel();setMapView('local');}

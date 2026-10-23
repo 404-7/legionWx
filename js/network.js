@@ -1,7 +1,7 @@
 'use strict';
-const Net = { session: null, stream: null, ended: false, busy: false,room:null,raceBusy:false };
+const Net = { session: null, stream: null, ended: false, busy: false,room:null,raceBusy:false,sync:null };
 function hydrateBattleState341(state){
-  for(const p of state.players)for(const list of [p.fighters,p.towers])for(const f of list||[])if(typeof f.def==='string')f.def=UNITS[f.def];
+  for(const p of state.players){const entities=new Map();for(const key of ['towers','fighters'])p[key]=(p[key]||[]).map(f=>{if(typeof f.def==='string')f.def=UNITS[f.def];if(entities.has(f.entityId))return entities.get(f.entityId);entities.set(f.entityId,f);return f;});}
   return state;
 }
 function localPlayer() { return G.players[Net.session?.slot ?? 0]; }
@@ -64,7 +64,7 @@ function renderRoomLobby(room){
   $('startOnline').textContent=room.host!==Net.session.slot?'等待房主开始':!room.raceReady?'等待玩家选择种族':'开始对战';
 }
 function connectRoom(session) {
-  Net.session = session; Net.ended = false;
+  Net.session = session; Net.ended = false;Net.sync=null;
   $('btnRestart').textContent = '离开对局';
   sessionStorage.setItem('legion-session',JSON.stringify(session));
   Net.stream?.close();
@@ -72,16 +72,20 @@ function connectRoom(session) {
   $('onlineOptions').hidden = true;
   $('menuPanel').classList.add('in-lobby');
   document.querySelector('.mode-tabs').hidden = true;
-  const query = new URLSearchParams({ room:session.code,token:session.token });
+  const query = new URLSearchParams({ room:session.code,token:session.token,sync:'1' });
   Net.stream = new EventSource('/api/events?' + query);
   Net.stream.onmessage = event => {
-    const { room, state } = JSON.parse(event.data);
+    let payload;
+    try{Net.sync=Sync341.decode(Net.sync,JSON.parse(event.data));payload=structuredClone(Net.sync.value);}
+    catch{Net.stream.close();notice('同步状态丢失 · 正在重新获取');setTimeout(()=>{if(Net.session===session&&!Net.ended)connectRoom(session);},250);return;}
+    const { room, state } = payload;
     Net.room=room;renderRoomLobby(room);
     notice(room.waiting ? '玩家掉线 · 对局暂停，60 秒内可重连' : '在线 · 房间 ' + room.code);
     if (!state) return;
     const old = G;
     G = hydrateBattleState341(state);
-    G.selectedShop = !localPlayer().race||UNITS[old?.selectedShop]?.race===localPlayer().race?old?.selectedShop:null; G.hover = old?.hover || null;
+    const me=localPlayer(),shop=old?.selectedShop,allowed=!me.race||(me.race==='prophet'?me.prophetDeck.includes(shop):UNITS[shop]?.race===me.race);
+    G.selectedShop=allowed?shop:null;G.hover=old?.hover||null;
     G.selectedMine = old?.selectedMine ?? null;
     const selected = old?.selectedFighter;
     G.selectedFighter = selected ? [...localPlayer().fighters,...localPlayer().towers].find(f => f.col === selected.col && f.row === selected.row) : null;

@@ -4,6 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { randomBytes } = require('node:crypto');
 const createGame = require('./game.cjs');
+const Sync341=require('../js/sync341.js');
+const {createGzip,constants:ZLIB}=require('node:zlib');
 const root = path.resolve(__dirname, '..');
 const rooms = new Map(), limits = new Map();
 const id = n => randomBytes(n).toString('hex');
@@ -22,12 +24,20 @@ function broadcast(room) {
   const info=publicRoom(room),views=new Map();
   for (const m of room.members) {
     const team=m.slot<4?0:1;
-    if(!views.has(team))views.set(team,JSON.stringify({room:info,state:room.game?.snapshot(m.slot)||null}));
-    const payload=views.get(team);
+    if(!m.streams.size)continue;
+    if(!views.has(team)){
+      const state=room.game?.snapshot(m.slot)||null,value={room:info,state:Sync341.project(state)};
+      room.syncChannels??=new Map();if(!room.syncChannels.has(team))room.syncChannels.set(team,Sync341.encoder());
+      const channel=room.syncChannels.get(team);views.set(team,{legacy:{room:info,state},channel,frame:channel.next(value)});
+    }
+    const view=views.get(team);
     for (const res of m.streams) {
       if (res.destroyed || res.writableEnded) { m.streams.delete(res); continue; }
-      if (res.writableLength > 1024 * 1024) { res.destroy(); continue; }
-      res.write(`data: ${payload}\n\n`);
+      if (res.writableLength+(res.syncGzip?.writableLength||0) > 1024 * 1024) { res.destroy(); continue; }
+      const kind=res.syncProtocol?(res.syncSeq===view.frame.base?'delta':'full'):'legacy';view.text??={};
+      const frame=view.text[kind]??=( `data: ${JSON.stringify(kind==='legacy'?view.legacy:kind==='delta'?view.frame:view.channel.full())}\n\n`);
+      if(res.syncGzip){res.syncGzip.write(frame);res.syncGzip.flush(ZLIB.Z_SYNC_FLUSH);}else res.write(frame);
+      res.syncSeq=view.frame.seq;
     }
   }
 }
@@ -75,7 +85,11 @@ const server = http.createServer(async (req, res) => {
       if (!member) throw fail('房间凭证失效，请重新加入', 401);
       room.touched = now;
       if (req.method === 'GET' && url.pathname === '/api/events') {
-        res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
+        const gzip=String(req.headers['accept-encoding']||'').split(',').some(v=>{const [encoding,...params]=v.split(';'),quality=params.find(p=>/^\s*q\s*=/i.test(p));return encoding.trim().toLowerCase()==='gzip'&&(quality===undefined||Number(quality.split('=')[1])>0);});
+        res.syncProtocol=url.searchParams.get('sync')==='1';res.syncSeq=null;
+        res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive', 'X-Accel-Buffering': 'no',Vary:'Accept-Encoding',...(gzip?{'Content-Encoding':'gzip'}:{}) });
+        req.socket.setNoDelay(true);
+        if(gzip){res.syncGzip=createGzip({level:3});res.syncGzip.on('error',()=>res.destroy());res.syncGzip.pipe(res);res.on('close',()=>res.syncGzip.destroy());}
         // One active connection per seat. Reloads replace the old stream.
         for (const old of member.streams) old.end();
         member.streams.add(res); member.lastSeen = now;

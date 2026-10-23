@@ -1,0 +1,12 @@
+'use strict';
+// Identical simulation snapshots feed the legacy transport and the new delta/gzip transport.
+const engine=require('../tests/helpers/native-engine.cjs'),Sync=require('../js/sync341.js'),{createGzip,constants}=require('node:zlib'),{performance}=require('node:perf_hooks');
+const snapshot=slot=>`JSON.stringify(scopeBattleSnapshot(JSON.parse(JSON.stringify(G,(key,value)=>key==='def'?value.id:['selectedFighter','selectedShop','hover','ai','diff'].includes(key)?undefined:key==='projectiles'?value.map(pr=>({x:pr.x,y:pr.y,px:pr.px,py:pr.py,atk:pr.atk})):key==='skillWaves'?value.map(w=>({x:w.x,y:w.y,px:w.px,py:w.py,radius:w.radius,kind:w.kind})):value)),${slot}))`;
+(async()=>{for(const [players,count,wave] of [[2,15,15],[4,15,15],[8,15,15],[8,30,29]]){
+ const run=engine();run(`const active=[0,4,1,5,2,6,3,7].slice(0,${players});for(const p of G.players){p.active=active.includes(p.id);if(!p.active)continue;p.gold=p.wood=1e8;p.farmLevel=SOURCE341.rules.population.farms.length-1;chooseBuilder341(p,'nature');for(let i=0;i<${count};i++)buyReady341(p,'ent',i%CFG.COLS,Math.floor(i/CFG.COLS)+8);}G.wave=${wave};G.waveDef=waveDefFor(G.wave);startCombat();`);
+ const channels=[0,4].map(slot=>{const gzip=createGzip({level:3}),c={slot,encoder:Sync.encoder(),gzip,wire:0,old:0,delta:0};gzip.on('data',chunk=>c.wire+=chunk.length);return c;});let encodeMs=0;
+ for(let frame=0;frame<240;frame++){run('simStep(.05)');if(frame%2)continue;for(const c of channels){const raw=JSON.parse(run(snapshot(c.slot))),room={code:'BENCH',members:Array.from({length:players},(_,id)=>({slot:id,connected:true}))};c.old+=Buffer.byteLength('data: '+JSON.stringify({room,state:raw})+'\n\n');const start=performance.now(),next=c.encoder.next({room,state:Sync.project(raw)}),text='data: '+JSON.stringify(next)+'\n\n';encodeMs+=performance.now()-start;c.delta+=Buffer.byteLength(text);c.gzip.write(text);c.gzip.flush(constants.Z_SYNC_FLUSH);}}
+ await Promise.all(channels.map(c=>new Promise((resolve,reject)=>{c.gzip.on('end',resolve);c.gzip.on('error',reject);c.gzip.end();})));
+ const total=key=>channels.reduce((n,c)=>n+c[key]*(players/2),0),mbps=bytes=>+(bytes*8/12/1e6).toFixed(2);
+ console.log(JSON.stringify({players,unitsPerPlayer:count,wave,simulationSeconds:12,legacyMbps:mbps(total('old')),deltaMbps:mbps(total('delta')),deltaGzipMbps:mbps(total('wire')),reductionPercent:+((1-total('wire')/total('old'))*100).toFixed(1),encodeMsPerTeamFrame:+(encodeMs/240).toFixed(2)}));
+}})().catch(e=>{console.error(e);process.exitCode=1;});
