@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict'),{chromium}=require(process.argv[2]||'playwright'),{server}=require('../server/index.cjs');
+(async()=>{await require('./test-server.cjs')(server);const browser=await chromium.launch({headless:true});try{
+ for(const viewport of [{width:1560,height:980},{width:933,height:430}]){
+  const mobile=viewport.width<1000,page=await browser.newPage({viewport,isMobile:mobile,hasTouch:mobile}),errors=[];page.on('pageerror',e=>errors.push(e.message));const press=s=>mobile?page.locator(s).tap():page.locator(s).click();await page.goto('http://127.0.0.1:'+server.address().port);await press('.diff[data-diff="normal"]');await page.evaluate(()=>{G.paused=true;updateUI(true)});if(mobile)await press('#tab-shop');
+  await press('#btnWorker');assert.match(await page.locator('#townActionHint').textContent(),/当前 0，需要 350/);assert.equal(await page.locator('#townActionHint').isVisible(),true);
+  await press('#btnLumberResearch');assert.match(await page.locator('#townActionHint').textContent(),/当前 0，需要 600/);assert.equal(await page.evaluate(()=>localPlayer().gold),300);assert.equal(await page.evaluate(()=>localPlayer().wood),97);
+  await page.evaluate(()=>{const p=localPlayer();p.gold=10000;chooseBuilder341(p,'nature');buyFighter(p,'ent',0,0);stepConstruction341(p,5);p.towers[0].def={...p.towers[0].def,pointValue:600};p.gold=0;updateUI(true)});
+  await press('#btnWorker');assert.match(await page.locator('#townActionHint').textContent(),/金币不足/);
+  await press('#btnLumberResearch');assert.match(await page.locator('#townActionHint').textContent(),/资源不足/);
+  await page.evaluate(()=>{const p=localPlayer();p.gold=100;p.wood=100;updateUI(true)});await press('#btnWorker');assert.equal(await page.evaluate(()=>localPlayer().workerQueue.length),1);assert.equal(await page.evaluate(()=>localPlayer().gold),50);assert.equal(await page.locator('#townActionHint').isHidden(),true);
+  await press('#btnLumberResearch');assert.match(await page.locator('#townActionHint').textContent(),/训练队列/);await page.evaluate(()=>{lumberStep341(localPlayer(),30);localPlayer().gold=100;updateUI(true)});await press('#btnLumberResearch');assert.equal(await page.evaluate(()=>!!localPlayer().lumberResearch),true);assert.equal(await page.evaluate(()=>localPlayer().gold),40);await press('#btnWorker');assert.match(await page.locator('#townActionHint').textContent(),/正在研究/);assert.deepEqual(errors,[]);console.log('Clickable town requirements, resource failures and valid training/research passed',viewport);await page.close();
+ }
+}finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}})().catch(e=>{console.error(e);server.close();process.exitCode=1});

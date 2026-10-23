@@ -1,5 +1,6 @@
 /* Command panels and camera viewport share one DOM across desktop and touch layouts. */
 :root{--command-width:clamp(300px,30vw,388px);--nav-height:66px}
+#townPanel .requirement-missing{color:#bcb99e;border-style:dashed}#townActionHint{white-space:normal;overflow-wrap:anywhere;color:#f0c58d;background:#49351d55;border-left:3px solid #ca9e61;border-radius:4px;padding:8px 10px;font-size:12px;line-height:1.7}
 #populationPanel{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 12px;padding:8px;border:1px solid #65764d66;border-radius:8px;font-size:12px;color:#dbd29e}#btnFarmUpgrade{min-height:44px;font-size:11px}
 #orientationHint,.orientation-copy{display:none}
 #orientationHint:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 12px;background:#2d3d2a;border-bottom:1px solid #586442;color:#e1c98d;font-size:11px;flex-shrink:0}

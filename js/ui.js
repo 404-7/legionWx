@@ -360,13 +360,37 @@ function updateUI(force) {
 }
 
 function updateMines(){if($('mineDialog').open)$('mineDialog').close();}
+function townActionProblem341(type,me){
+ if(!['prep','combat'].includes(G.phase))return '当前阶段不能操作城镇。';
+ const r=SOURCE341.rules.native.workers,value=playerValue(me),required=type==='worker'?r.requireValue:[600,1300,2000][Math.min(me.lumberLevel,2)];
+ if(type==='lumberResearch'&&!r.upgrades[me.lumberLevel])return '伐木研究已达到最高等级。';
+ if(value<required)return `军团战力不足：当前 ${value}，需要 ${required}。请先建造或升级兵种。`;
+ if(me.lumberResearch)return '城镇正在研究伐木，请等待研究完成。';
+ if(type==='worker'){
+  if(me.workers+me.workerQueue.length>=r.limit)return `伐木工已达到 ${r.limit} 名上限（含训练队列）。`;
+  if(me.gold<r.gold)return `金币不足：当前 ${Math.floor(me.gold)}，需要 ${r.gold}。`;
+ }else{
+  if(me.workerQueue.length)return '城镇正在训练伐木工，请等待训练队列完成。';
+  const next=r.upgrades[me.lumberLevel];
+  if(me.gold<next.gold||me.wood<next.wood)return `资源不足：需要 ${next.gold} 金币、${next.wood} 木材；当前 ${Math.floor(me.gold)} 金币、${Math.floor(me.wood)} 木材。`;
+ }
+ return '';
+}
+function submitTownAction341(type){
+ const hint=$('townActionHint'),problem=townActionProblem341(type,localPlayer());
+ hint.dataset.action=problem?type:'';hint.textContent=problem;hint.hidden=!problem;
+ if(problem){hint.scrollIntoView({block:'nearest'});return false;}
+ performAction({type});updateUI(true);return true;
+}
 function updateTown341(me){
  const r=SOURCE341.rules.native.workers,next=r.upgrades[me.lumberLevel];
  $('townInfo').textContent=`伐木工 ${me.workers}/${r.limit} · 每 ${r.cycle} 秒采 ${me.workers*(r.amount+me.lumberLevel)} 木 · 伐木 Lv.${me.lumberLevel}`;
- $('btnWorker').textContent=me.workerQueue.length?`训练中 ${Math.ceil(me.workerQueue[0].time)} 秒（队列 ${me.workerQueue.length}）`:'训练伐木工 · 50 金 / 30 秒';
- $('btnWorker').disabled=me.workers+me.workerQueue.length>=r.limit||me.gold<r.gold||playerValue(me)<r.requireValue;
- $('btnLumberResearch').textContent=me.lumberResearch?`研究中 ${Math.ceil(me.lumberResearch.time)} 秒`:next?`伐木研究 · ${next.gold} 金 + ${next.wood} 木`:'伐木研究已满';
- $('btnLumberResearch').disabled=!next||!!me.lumberResearch||me.gold<next.gold||me.wood<next.wood||playerValue(me)<[600,1300,2000][Math.min(me.lumberLevel,2)];
+ $('btnWorker').textContent=me.workerQueue.length?`训练中 ${Math.ceil(me.workerQueue[0].time)} 秒（队列 ${me.workerQueue.length}）`:`训练伐木工 · 50 金 / 30 秒 · 战力≥${r.requireValue}`;
+ $('btnLumberResearch').textContent=me.lumberResearch?`研究中 ${Math.ceil(me.lumberResearch.time)} 秒`:next?`伐木研究 · ${next.gold} 金 + ${next.wood} 木 · 战力≥${[600,1300,2000][Math.min(me.lumberLevel,2)]}`:'伐木研究已满';
+ for(const [id,type] of [['btnWorker','worker'],['btnLumberResearch','lumberResearch']]){
+  const button=$(id),problem=townActionProblem341(type,me);button.disabled=false;button.classList.toggle('requirement-missing',!!problem);button.title=problem;
+ }
+ const hint=$('townActionHint');if(hint.dataset.action){const problem=townActionProblem341(hint.dataset.action,me);hint.textContent=problem;hint.hidden=!problem;if(!problem)hint.dataset.action='';}
   const cb=SOURCE341.rules.native.changeBuilder,n=me.builderChanges,cg=cb.gold+n*cb.goldStep,cw=cb.wood+n*cb.woodStep;
   $('btnBuilderChange').textContent=`CB 更换建造者 ${n}/${cb.limit} · ${cg} 金 + ${cw} 木`;
   $('btnBuilderChange').disabled=!['prep','combat'].includes(G.phase)||!me.race||n>=cb.limit||me.gold<cg||me.wood<cw;

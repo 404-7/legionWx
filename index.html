@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>军团战争 · Legion Arena</title>
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/responsive.css?v=43">
+<link rel="stylesheet" href="css/responsive.css?v=44">
 </head>
 <body>
 <div id="app">
@@ -58,7 +58,7 @@
       </section>
       <section class="box" id="shopBox">
         <h3>⚔ 种族兵营 <span class="hint">AP 选择建造者 · 本族兵种与原图升级树</span></h3>
-        <div id="townPanel"><p id="townInfo"></p><button id="btnWorker" class="btn" onclick="performAction({type:'worker'});updateUI(true)">训练伐木工</button><button id="btnLumberResearch" class="btn" onclick="performAction({type:'lumberResearch'});updateUI(true)">研究伐木</button></div><button id="btnBuilderChange" class="btn" onclick="selectShop(null);performAction({type:'changeBuilder'});buildShop();updateUI(true)">更换建造者</button><button id="btnProphetReroll" class="btn" hidden onclick="selectShop(null);performAction({type:'rerollProphet'});buildShop();updateUI(true)">重抽兵种</button><div id="populationPanel"><span id="populationInfo">人口 0 / 15</span><button id="btnFarmUpgrade" class="btn" type="button" onclick="performAction({type:'farmUpgrade'});updateUI(true)">升级农场</button></div>
+        <div id="townPanel"><p id="townInfo"></p><button id="btnWorker" class="btn" type="button" aria-describedby="townActionHint" onclick="submitTownAction341('worker')">训练伐木工</button><button id="btnLumberResearch" class="btn" type="button" aria-describedby="townActionHint" onclick="submitTownAction341('lumberResearch')">研究伐木</button><p id="townActionHint" role="status" aria-live="polite" hidden></p></div><button id="btnBuilderChange" class="btn" onclick="selectShop(null);performAction({type:'changeBuilder'});buildShop();updateUI(true)">更换建造者</button><button id="btnProphetReroll" class="btn" hidden onclick="selectShop(null);performAction({type:'rerollProphet'});buildShop();updateUI(true)">重抽兵种</button><div id="populationPanel"><span id="populationInfo">人口 0 / 15</span><button id="btnFarmUpgrade" class="btn" type="button" onclick="performAction({type:'farmUpgrade'});updateUI(true)">升级农场</button></div>
         <button id="btnFarmCancel" class="btn" hidden onclick="performAction({type:'cancelFarm'});updateUI(true)">取消农场升级 · 全额退还</button><div id="shop"></div>
       </section>
       </div>
@@ -157,7 +157,7 @@
 <script src="js/combat341.js?v=43"></script>
 <script src="js/ai.js?v=43"></script>
 <script src="js/render.js?v=43"></script>
-<script src="js/ui.js?v=43"></script>
+<script src="js/ui.js?v=44"></script>
 <script src="js/network.js?v=43"></script>
 <script src="js/layout.js?v=43"></script>
 <script src="js/main.js?v=22"></script>
