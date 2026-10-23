@@ -23,7 +23,10 @@ const FOG_SKIN={key:null,canvas:null};
 function visibleWorldPoint(x,y){return pointVisibleToTeam(G,localPlayer().team,x,y);}
 function drawWarFog(c){
  if(visionOpen(G))return;const me=localPlayer(),area=nativeRect341(me.team===0?'RVision':'LVision');
- c.save();c.fillStyle='#101b24';c.fillRect(area.x,area.y,area.w,area.h);const arena=nativeRect341('ArenaVision');c.fillRect(arena.x,arena.y,arena.w,arena.h);
+ const royal=publicEnemyVision(G,me.team);
+ c.save();c.fillStyle='#101b24';
+ c.save();c.beginPath();c.rect(area.x,area.y,area.w,area.h);c.rect(royal.x,royal.y,royal.w,royal.h);c.clip('evenodd');c.fillRect(area.x,area.y,area.w,area.h);c.restore();
+ const arena=nativeRect341('ArenaVision');c.fillRect(arena.x,arena.y,arena.w,arena.h);
  c.fillStyle='#687c8d';c.textAlign='center';c.font='16px "Microsoft YaHei"';for(const p of G.players.filter(p=>p.team!==me.team))c.fillText('敌方防区 · 战争迷雾',p.fx+CFG.FIELD_W/2,p.fy+CFG.FIELD_H/2);c.restore();
 }
 

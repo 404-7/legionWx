@@ -23,9 +23,16 @@ test('dense leaks from all four allied lanes continue moving and attack each kin
  const run=engine();run("G.phase='combat';for(const k of G.kings){k.hp=k.max=1e9;k.cd=1e9;}for(const p of G.players)for(let i=0;i<12;i++){spawnEnemy(p,{type:'wave'});const e=p.enemies.at(-1);e.x=p.exitX;e.y=p.exitY;e.hp=e.max=10000;e.speed=400;leak(p,e);}for(let i=0;i<250;i++){for(const k of G.kings)kingStep(k,.1);stepProjectiles341(.1)}");
  assert.equal(run('G.kings.every(k=>k.hp<k.max)'),true);assert.equal(run('G.kings.every(k=>k.leaks.every(e=>Number.isFinite(e.x)&&Number.isFinite(e.y)))'),true);
 });
-test('MM masks the entire opposing region including its king approach; PK/final survival reveals the battlefield',()=>{
- const run=engine();assert.equal(run('pointVisibleToTeam(G,0,G.kings[1].x,G.kings[1].y)'),false);assert.equal(run('pointVisibleToTeam(G,0,G.players[4].gx,G.players[4].gy)'),false);assert.equal(run('pointVisibleToTeam(G,0,p.gx,p.gy)'),true);
+test('fog hides both opposing defense regions while revealing each enemy king and the nearby approach',()=>{
+ const run=engine();assert.equal(run('[0,1].every(team=>{const k=G.kings[1-team],r=publicEnemyVision(G,team);return pointVisibleToTeam(G,team,k.x,k.y)&&pointVisibleToTeam(G,team,k.x,k.y-350)&&!pointVisibleToTeam(G,team,k.x,r.y-1)&&!pointVisibleToTeam(G,team,r.x-1,k.y)&&G.players.filter(p=>p.team!==team).every(p=>!pointVisibleToTeam(G,team,p.gx+CFG.GRID_W/2,p.gy+CFG.GRID_H/2))})'),true);assert.equal(run('pointVisibleToTeam(G,0,p.gx,p.gy)'),true);
  run("G.battleMode='arena'");assert.equal(run('pointVisibleToTeam(G,0,G.players[4].gx,G.players[4].gy)'),true);run("G.battleMode='defense';G.bonus={}");assert.equal(run('visionOpen(G)'),true);
+});
+
+test('scoped views include enemy royal combat and effects but keep approaching leaks and army economy hidden',()=>{
+ const run=engine();run(`globalThis.enemy=G.players[4];chooseBuilder341(enemy,'nature');buyReady341(enemy,'ent',0,0);const king=G.kings[1];enemy.fighters=[{...enemy.towers[0],x:king.x+70,y:king.y}];for(let i=0;i<2;i++){spawnEnemy(enemy,{type:'wave'});const e=enemy.enemies[0];leak(enemy,e);e.x=king.x;e.y=i?CFG.ROAD_Y+150:king.y-100;}
+ const shown={x:king.x,y:king.y,px:king.x+10,py:king.y},hidden={x:enemy.gx,y:enemy.gy,px:enemy.gx+10,py:enemy.gy};G.projectiles=[shown,hidden];G.skillWaves=[shown,hidden];G.fx=[shown,hidden];G.floaters=[shown,hidden];globalThis.before=JSON.stringify(G);globalThis.view=scopeBattleSnapshot(JSON.parse(JSON.stringify(G)),0);`);
+ assert.equal(run('view.kings[1].hp'),2600);assert.equal(run('view.kings[1].leaks.length'),1);assert.equal(run('view.players[4].fighters.length'),1);assert.equal(run('view.players[4].towers.length'),0);assert.equal(run('view.players[4].income'),null);assert.equal(run('view.players[4].wood'),null);
+ for(const key of ['projectiles','skillWaves','fx','floaters'])assert.equal(run(`view.${key}.length`),1);assert.equal(run('JSON.stringify(G)===before'),true);
 });
 test('scoped state removes hidden enemy buildings, wood, workers, research, armies and effects without mutating authority',()=>{
  const run=engine();run("chooseBuilder341(G.players[4],'nature');buyReady341(G.players[4],'ent',0,0);globalThis.before=JSON.stringify(G);globalThis.view=scopeBattleSnapshot(JSON.parse(JSON.stringify(G)),0)");

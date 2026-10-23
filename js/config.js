@@ -1,13 +1,15 @@
 'use strict';
-// Shared fixed battle vision. Public king approaches are an L-shaped corridor.
+// The enemy defense areas stay hidden; a shared window reveals the enemy king and nearby combat.
 function visionOpen(state){return state.phase==='over'||state.phase==='menu'||state.battleMode==='arena'||!!state.bonus;}
 function publicEnemyVision(state,team){
-  const king=state.kings[1-team],exit=state.players.find(p=>p.team!==team).exitX;
-  return {king,exit,r:56,kingRadius:82,bridge:{x:CFG.W/2-120,y:CFG.ROAD_Y-110,w:240,h:220}};
+  const king=state.kings[1-team];
+  return {x:king.x-280,y:king.y-420,w:560,h:700};
 }
 function pointVisibleToTeam(state,team,x,y){
  if(!Number.isFinite(x)||!Number.isFinite(y))return false;
  if(visionOpen(state))return true;
+ const royal=publicEnemyVision(state,team);
+ if(x>=royal.x&&x<=royal.x+royal.w&&y>=royal.y&&y<=royal.y+royal.h)return true;
  const r=SOURCE341.rules.native.map.rects[team===0?'LVision':'RVision'],m=SOURCE341.rules.native.map;
  return x>=(r[0]-m.minX)*m.scale&&x<=(r[2]-m.minX)*m.scale&&y>=(m.maxY-r[3])*m.scale&&y<=(m.maxY-r[1])*m.scale;
 }
