@@ -155,5 +155,5 @@ setInterval(() => {
   }
   if (tick++ % 1200 === 0) for (const [ip, r] of limits) if (now - r.at > 60000) limits.delete(ip);
 }, 50).unref();
-if (require.main === module) server.listen(Number(process.env.PORT || 3000), process.env.HOST || '0.0.0.0', () => console.log(`Legion Arena listening on ${server.address().port}`));
+if (require.main === module) server.listen(Number(process.env.PORT || 47831), process.env.HOST || '0.0.0.0', () => console.log(`Legion Arena listening on ${server.address().port}`));
 module.exports = { server, rooms };

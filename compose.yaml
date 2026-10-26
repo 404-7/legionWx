@@ -2,7 +2,7 @@ services:
   legion:
     build: .
     ports:
-      - "3000:3000"
+      - "47831:47831"
     restart: unless-stopped
     init: true
     mem_limit: 512m

@@ -14,11 +14,11 @@
 
 ```powershell
 $env:HOST='0.0.0.0'
-$env:PORT='3001'
+$env:PORT='47831'
 npm start
 ```
 
-电脑打开 http://localhost:3001，手机在同一局域网打开电脑局域网 IP 的 3001 端口。联机最多八名实际玩家，西/东两队各四席；AP 在进入地图后选择建造者，CB 允许按规则研究更换，已有军团保留。
+默认端口为 47831，也可通过 `PORT` 环境变量覆盖。电脑打开 http://localhost:47831，手机在同一局域网打开电脑局域网 IP 的 47831 端口。联机最多八名实际玩家，西/东两队各四席；AP 在进入地图后选择建造者，CB 允许按规则研究更换，已有军团保留。
 
 ## 当前规则
 
@@ -44,4 +44,4 @@ node scripts/audit-weapons341.cjs
 
 数据重建需要已提取的 .cache/source341/ 原始地图文件。游戏运行只需要仓库里生成的 js/source341.js，不依赖 Python、Excel 或 Warcraft 客户端。
 
-Docker 可用仓库内 Dockerfile 与 compose.yaml 部署。当前仅本地 Git 管理，未推送远程仓库。历史自定义规则测试在 tests/legacy-custom/ 留档，当前验收以根目录原版测试为准。
+Docker 可用仓库内 Dockerfile 与 compose.yaml 部署。代码通过 Git 管理。历史自定义规则测试在 tests/legacy-custom/ 留档，当前验收以根目录原版测试为准。
