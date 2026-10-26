@@ -25,8 +25,8 @@ async function boot() {
   setupCanvas();
   const readyButtons=[...document.querySelectorAll('#overlay button')].filter(button=>!button.disabled);
   readyButtons.forEach(button=>button.disabled=true);
-  await loadUnitArt();
-  readyButtons.forEach(button=>button.disabled=false);
+  const loading=LoadingUI.begin('正在加载游戏资源…');
+  await loadUnitArt((done,total)=>{const label=`正在加载游戏资源 ${done}/${total}`;$('bootStatus').textContent=label;LoadingUI.update(loading,label);});
   buildSprites();
   buildShop();
   buildMercs();
@@ -44,7 +44,9 @@ async function boot() {
   });
 
   bindLobby();
+  readyButtons.forEach(button=>button.disabled=false);if(Net.room)renderRoomLobby(Net.room);LoadingUI.enforce();
+  $('bootStatus').hidden=true;LoadingUI.end(loading);
   requestAnimationFrame(t => { lastT = t; requestAnimationFrame(frame); });
 }
 
-boot();
+boot().catch(()=>{const hint=$('bootStatus');hint.hidden=false;hint.textContent='游戏加载失败，请刷新页面重试。';$('loadingStatus').hidden=true;});

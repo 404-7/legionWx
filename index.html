@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>军团战争 · Legion Arena</title>
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/responsive.css?v=44">
+<link rel="stylesheet" href="css/responsive.css?v=47">
 </head>
 <body>
 <div id="app">
@@ -100,26 +100,22 @@
 
 <div id="overlay">
   <div class="panel" id="menuPanel">
-    <div class="eyebrow">LEGION ARENA / SEASON 01</div>
-    <h1>集结军团<span class="title-accent">守住你的王城。</span></h1>
-    <p class="tagline">布阵、进化、派遣。八路战场汇于双王之间，每一枚金币都能改变战局。</p>
+    <h1>军团战争</h1>
+    <p id="bootStatus" role="status" aria-live="polite">正在加载游戏资源…</p>
     <p class="orientation-copy">↻ 建议将手机横过来游玩，战场视野更开阔</p>
-    <div class="map-preview"><span class="preview-lane">↓<br>→</span><span class="preview-king">♛</span><span class="preview-vs">VS</span><span class="preview-king">♛</span><span class="preview-lane">↓<br>←</span></div>
-    <div class="mode-tabs"><button id="modeSolo" class="btn active">单机征战 <small>SOLO</small></button><button id="modeOnline" class="btn">在线对决 <small>ONLINE PK</small></button></div>
+    <div class="mode-tabs"><button id="modeSolo" class="btn active">单机模式</button><button id="modeOnline" class="btn">在线对战</button></div>
     <div id="soloOptions">
-      <p class="choose">选择征战难度 <span>你与 AI 队友，对抗敌方军团</span></p>
       <div class="diffRow">
 
-        <button class="btn diff" data-diff="normal">进入原版 3.41 <small>AP / HG / GG / MM / CB / x3</small></button>
+        <button class="btn diff primary" data-diff="normal">开始游戏</button>
 
       </div>
     </div>
     <div id="onlineOptions" hidden>
       <div class="online-fields"><label>指挥官名称<input id="playerName" maxlength="16" placeholder="指挥官" autocomplete="nickname"></label><label>房间码<input id="joinCode" maxlength="6" placeholder="6 位房间码" autocomplete="off"></label></div>
       <select id="roomRaceMode" hidden><option value="ap">原版默认模式</option></select>
-      <p class="race-mode-help">原图默认 AP / HG / GG / MM / CB / x3；进入地图后选择建造者。</p>
       <div class="diffRow"><button id="createRoom" class="btn primary">创建房间</button><button id="joinRoom" class="btn">加入对战</button></div>
-      <p class="foot">2–8 名真人 · 4v4 两队对抗 · 空席位不刷怪 · 服务端同步战斗</p>
+      <p class="foot">支持 2–8 人对战</p>
     </div>
     <div id="lobby" hidden>
       <div class="room-title">战备大厅 <strong id="roomCode"></strong></div>
@@ -130,8 +126,6 @@
       <div class="diffRow"><button id="startOnline" class="btn primary" disabled>等待玩家</button><button id="copyInvite" class="btn">复制邀请</button><button id="leaveRoom" class="btn">离开</button></div>
     </div>
     <p id="netMessage" role="status" aria-live="polite"></p>
-    <div class="menu-guide"><span>01 选择兵种并点击防区布阵</span><span>02 防守每一波，守护国王</span><span>03 派遣雇佣兵压制对手</span></div>
-    <p class="foot">原图八防区与双王城 · 第 10 / 20 波后传送独立竞技场</p>
   </div>
 </div>
 
@@ -145,22 +139,24 @@
   </div>
 </div>
 
+<div id="loadingStatus" role="status" aria-live="polite" hidden></div>
+<script src="js/loading.js?v=47"></script>
 <script src="js/source341.js?v=43"></script>
 <script src="js/config.js?v=45"></script>
 <script src="js/skills341.js?v=43"></script>
 <script src="js/data.js?v=43"></script>
 <script src="js/art-manifest.js?v=29"></script>
-<script src="js/unit-art.js?v=23"></script>
+<script src="js/unit-art.js?v=47"></script>
 <script src="js/sprites.js?v=29"></script>
 <script src="js/behavior.js?v=43"></script>
 <script src="js/engine.js?v=43"></script>
 <script src="js/combat341.js?v=43"></script>
 <script src="js/ai.js?v=43"></script>
 <script src="js/render.js?v=45"></script>
-<script src="js/ui.js?v=46"></script>
+<script src="js/ui.js?v=47"></script>
 <script src="js/sync341.js?v=46"></script>
-<script src="js/network.js?v=46"></script>
+<script src="js/network.js?v=47"></script>
 <script src="js/layout.js?v=43"></script>
-<script src="js/main.js?v=22"></script>
+<script src="js/main.js?v=47"></script>
 </body>
 </html>

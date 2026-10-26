@@ -1,13 +1,14 @@
 'use strict';
 // Local classic Warcraft unit renders. Gameplay remains independent of asset loading.
 const UNIT_ART={images:{},status:'loading',failures:[],frames:CLASSIC_ART_FRAMES};
-async function loadUnitArt(){
+async function loadUnitArt(onProgress=()=>{}){
  const files=[...new Set(Object.values(UNIT_ART.frames).map(frame=>frame.file).filter(Boolean))];
- let cursor=0;
+ let cursor=0,complete=0;const deadline=Date.now()+20000;onProgress(0,files.length);
  await Promise.all(Array.from({length:8},async()=>{
   while(cursor<files.length){const file=files[cursor++];await new Promise(resolve=>{
-   const image=new Image();image.onload=()=>{UNIT_ART.images[file]=image;resolve();};
-   image.onerror=()=>{UNIT_ART.failures.push(file);resolve();};image.src='assets/unit-art/classic/'+file;
+   const image=new Image();let settled=false;const finish=ok=>{if(settled)return;settled=true;clearTimeout(timer);if(ok)UNIT_ART.images[file]=image;else UNIT_ART.failures.push(file);onProgress(++complete,files.length);resolve();};
+   const timer=setTimeout(()=>{finish(false);image.src='';},Math.max(1,Math.min(12000,deadline-Date.now())));image.onload=()=>finish(true);
+   image.onerror=()=>finish(false);image.src='assets/unit-art/classic/'+file;
   });}
  }));
  UNIT_ART.status=UNIT_ART.failures.length?'fallback':'ready';

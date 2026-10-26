@@ -357,6 +357,7 @@ function updateUI(force) {
     lg.innerHTML = lines.map(l => `<div class="${l.cls}">${l.txt}</div>`).join('');
   }
   syncCommandUI();
+  LoadingUI.enforce();
 }
 
 function updateMines(){if($('mineDialog').open)$('mineDialog').close();}
